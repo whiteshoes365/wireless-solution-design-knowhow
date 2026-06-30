@@ -189,6 +189,31 @@ mark { background: var(--warn); color: #000; padding: 0 2px; border-radius: 3px;
 .fig-sub { fill: var(--text-dim); font-size: 11.5px; }
 .fig-line { stroke: var(--text-dim); }
 
+/* ---- diagram animation system (used inside fig SVGs) ---- */
+/* Motion only when the user hasn't requested reduced motion.        */
+/* Each diagram must still read correctly when static (first frame). */
+@media (prefers-reduced-motion: no-preference) {
+  .kb-flow { stroke-dasharray: 7 7; animation: kbFlow 1.1s linear infinite; }
+  @keyframes kbFlow { to { stroke-dashoffset: -14; } }
+  .kb-flow-rev { stroke-dasharray: 7 7; animation: kbFlowR 1.1s linear infinite; }
+  @keyframes kbFlowR { to { stroke-dashoffset: 14; } }
+  .kb-flow-slow { stroke-dasharray: 5 9; animation: kbFlow 2.2s linear infinite; }
+  .kb-pulse { animation: kbPulse 1.9s ease-in-out infinite; }
+  @keyframes kbPulse { 0%,100% { opacity: .3; } 50% { opacity: 1; } }
+  .kb-grow { transform-box: fill-box; transform-origin: center;
+    animation: kbGrow 2.2s ease-in-out infinite; }
+  @keyframes kbGrow { 0%,100% { transform: scale(.55); opacity: .35; }
+    50% { transform: scale(1.1); opacity: .9; } }
+  .kb-blink { animation: kbBlink 2.4s steps(1) infinite; }
+  @keyframes kbBlink { 0%,33% { opacity: 1; } 34%,100% { opacity: .18; } }
+}
+/* delay helpers for sequencing */
+.kb-d1 { animation-delay: .25s; } .kb-d2 { animation-delay: .5s; }
+.kb-d3 { animation-delay: .75s; } .kb-d4 { animation-delay: 1s; }
+.kb-d5 { animation-delay: 1.25s; } .kb-d6 { animation-delay: 1.5s; }
+.kb-d7 { animation-delay: 1.75s; }
+@media print { .kb-flow,.kb-flow-rev,.kb-flow-slow,.kb-pulse,.kb-grow,.kb-blink { animation: none !important; } }
+
 /* master auto-checklist */
 .autocheck .ac-total { font-size: 13px; color: var(--text-dim); margin-bottom: 16px;
   padding: 8px 12px; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 9px; }

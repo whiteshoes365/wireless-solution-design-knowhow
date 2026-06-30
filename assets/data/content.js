@@ -76,11 +76,11 @@ window.KB_CONTENT = {
                         +'</a>';
                       if(col<perRow-1 && k<steps.length-1){
                         var ax=x+bw, ay=y+bh/2;
-                        out+='<line x1="'+ax+'" y1="'+ay+'" x2="'+(ax+gapx)+'" y2="'+ay+'" stroke="#4aa3ff" stroke-width="2" marker-end="url(#flw)"/>';
+                        out+='<line class="kb-flow" x1="'+ax+'" y1="'+ay+'" x2="'+(ax+gapx)+'" y2="'+ay+'" stroke="#4aa3ff" stroke-width="2" marker-end="url(#flw)"/>';
                       }
                     });
                     var rx=sx+(perRow-1)*(bw+gapx)+bw/2, ry1=sy+bh, ry2=sy+bh+gapy;
-                    out+='<path d="M'+rx+','+ry1+' C '+rx+','+(ry1+18)+' '+(sx+bw/2)+','+(ry2-18)+' '+(sx+bw/2)+','+ry2+'" fill="none" stroke="#4aa3ff" stroke-width="2" stroke-dasharray="4 3" marker-end="url(#flw)"/>';
+                    out+='<path class="kb-flow" d="M'+rx+','+ry1+' C '+rx+','+(ry1+18)+' '+(sx+bw/2)+','+(ry2-18)+' '+(sx+bw/2)+','+ry2+'" fill="none" stroke="#4aa3ff" stroke-width="2" marker-end="url(#flw)"/>';
                     out+='<text x="310" y="240" text-anchor="middle" class="fig-sub">각 단계는 게이트 리뷰로 누락을 점검 (EVT → DVT → PVT)</text>';
                     return out;
                   })()
@@ -116,6 +116,25 @@ window.KB_CONTENT = {
           title: "꼭 알아야 할 RF 기본 개념",
           blocks: [
             { t: "note", kind: "info", title: "비유로 먼저", html: "RF 신호 전송은 <b>수도 배관</b>과 같습니다. 송신기(펌프)에서 안테나(분수)까지 물(전력)을 흘리는데, 배관 굵기(임피던스)가 중간에 바뀌면 물이 튕겨 되돌아옵니다(반사). 50Ω은 '표준 배관 굵기' 약속입니다." },
+            { t: "fig",
+              caption: "같은 시간 동안 2.4GHz와 5GHz가 진행하는 모습. 주파수가 높을수록 파장(λ)이 짧다 — 5GHz는 같은 거리에 더 많은 파동이 들어간다. 안테나 크기·라인 손실이 주파수에 따라 달라지는 이유.",
+              svg: '<svg viewBox="0 0 620 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2.4GHz와 5GHz 파장 비교 애니메이션">'
+                + (function(){
+                    function wave(y0,hp,amp,count,x0,cls){
+                      var d='M'+x0+','+y0+' q '+(hp/2)+',-'+amp+' '+hp+',0';
+                      for(var i=1;i<count;i++){ d+=' t '+hp+',0'; }
+                      return '<path class="'+cls+'" d="'+d+'" fill="none" stroke="#4aa3ff" stroke-width="3"/>';
+                    }
+                    var out='';
+                    out+='<text x="40" y="40" class="fig-label" style="fill:#4aa3ff">2.4 GHz — 긴 파장 (λ ≈ 12.5cm)</text>';
+                    out+=wave(72,64,20,9,40,'kb-flow-slow');
+                    out+='<text x="40" y="130" class="fig-label" style="fill:#a371f7">5 GHz — 짧은 파장 (λ ≈ 6cm)</text>';
+                    out+=wave(162,30,20,18,40,'kb-flow-slow').replace('#4aa3ff','#a371f7');
+                    out+='<text x="310" y="198" text-anchor="middle" class="fig-sub">λ = c / f · 주파수↑ → 파장↓ → 안테나 작아짐, 라인 손실↑</text>';
+                    return out;
+                  })()
+                + '</svg>'
+            },
             { t: "kv", rows: [
               ["주파수(f)", "초당 진동 수. 2.4GHz = 초당 24억 번. 높을수록 직진성↑, 회절·투과↓"],
               ["파장(λ)", "λ = c/f. 2.4GHz ≈ 12.5cm, 5GHz ≈ 6cm. 안테나 크기의 기준"],
@@ -147,6 +166,28 @@ window.KB_CONTENT = {
           blocks: [
             { t: "p", html: "RF에서 전력은 <b>임피던스가 일치할 때만 최대로 전달</b>됩니다. 불일치하면 반사되어 ①출력 저하 ②발열 ③칩 손상 ④방사 성능 저하가 발생합니다." },
             { t: "note", kind: "why", title: "왜 하필 50Ω?", html: "전력 전달이 최대인 임피던스(≈30Ω)와 손실이 최소인 임피던스(≈77Ω)의 절충값이 50Ω입니다. 업계 표준이라 칩·커넥터·측정장비가 모두 50Ω 기준으로 만들어집니다." },
+            { t: "fig",
+              caption: "정합(좌): 신호가 부하로 100% 전달되어 반사가 없다. 부정합(우): 임피던스 불일치 지점에서 일부가 되튕겨 돌아온다 → 출력 저하·발열·VSWR↑. 화살표 방향이 전력 흐름이다.",
+              svg: '<svg viewBox="0 0 620 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="임피던스 정합과 부정합에서의 반사 비교">'
+                + '<defs>'
+                + '<marker id="rfF" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2ea043"/></marker>'
+                + '<marker id="rfB" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#e5534b"/></marker>'
+                + '</defs>'
+                + '<text x="155" y="26" text-anchor="middle" class="fig-label">정합 (50Ω = 50Ω)</text>'
+                + '<rect x="40" y="56" width="60" height="44" rx="6" fill="#4aa3ff" fill-opacity="0.15" stroke="#4aa3ff" stroke-opacity="0.6"/><text x="70" y="82" text-anchor="middle" class="fig-sub" fill="#4aa3ff">소스</text>'
+                + '<rect x="210" y="56" width="60" height="44" rx="6" fill="#2ea043" fill-opacity="0.15" stroke="#2ea043" stroke-opacity="0.6"/><text x="240" y="78" text-anchor="middle" class="fig-sub" fill="#2ea043">부하</text><text x="240" y="92" text-anchor="middle" class="fig-sub" fill="#2ea043">50Ω</text>'
+                + '<line class="kb-flow" x1="105" y1="78" x2="205" y2="78" stroke="#2ea043" stroke-width="3" marker-end="url(#rfF)"/>'
+                + '<text x="155" y="128" text-anchor="middle" class="fig-sub" fill="#2ea043">반사 없음 · 전력 100% 전달</text>'
+                + '<line x1="310" y1="30" x2="310" y2="170" stroke="#7a8694" stroke-dasharray="4 4" opacity="0.4"/>'
+                + '<text x="465" y="26" text-anchor="middle" class="fig-label" style="fill:#e5534b">부정합 (50Ω ≠ 부하)</text>'
+                + '<rect x="350" y="56" width="60" height="44" rx="6" fill="#4aa3ff" fill-opacity="0.15" stroke="#4aa3ff" stroke-opacity="0.6"/><text x="380" y="82" text-anchor="middle" class="fig-sub" fill="#4aa3ff">소스</text>'
+                + '<rect x="520" y="56" width="60" height="44" rx="6" fill="#e5534b" fill-opacity="0.15" stroke="#e5534b" stroke-opacity="0.6"/><text x="550" y="82" text-anchor="middle" class="fig-sub" fill="#e5534b">부하 ≠50Ω</text>'
+                + '<line class="kb-flow" x1="415" y1="70" x2="515" y2="70" stroke="#2ea043" stroke-width="3" marker-end="url(#rfF)"/>'
+                + '<line class="kb-flow-rev" x1="515" y1="90" x2="415" y2="90" stroke="#e5534b" stroke-width="2.5" marker-end="url(#rfB)"/>'
+                + '<text x="465" y="128" text-anchor="middle" class="fig-sub" fill="#e5534b">일부 반사 → 출력↓·발열·VSWR↑</text>'
+                + '<text x="310" y="200" text-anchor="middle" class="fig-sub">매칭 = 부하를 50Ω으로 보이게 만들어 반사를 0으로</text>'
+                + '</svg>'
+            },
             { t: "h", text: "어디서 매칭이 필요한가" },
             { t: "list", items: [
               "<b>RF 출력 핀 → 안테나</b>: π/L형 매칭 회로(직렬 L, 병렬 C 등)",
