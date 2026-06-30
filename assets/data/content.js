@@ -1731,6 +1731,22 @@ window.KB_CONTENT = {
           blocks: [
             { t: "p", html: "설계가 좋아도 <b>양산 라인에서 한 대씩 측정·보정</b>하지 못하면 불량이 출하됩니다. 양산 RF 테스트는 ①성능을 빠르게 검증하고 ②칩별 편차를 보정(캘리브레이션)하는 두 축으로 구성됩니다." },
             { t: "note", kind: "info", title: "비유로 먼저", html: "양산 캘리브레이션은 <b>안경 맞춤</b>과 같습니다. 같은 모델 안경테(설계)라도 사람마다 시력(칩 편차)이 달라, <b>한 명씩 도수를 측정해 렌즈를 맞춰야</b> 잘 보입니다. RF도 칩마다 출력·주파수가 조금씩 달라, 개체별로 측정해 보정값을 칩에 써넣습니다." },
+            { t: "fig",
+              caption: "측정 전(좌): 칩마다 출력·주파수가 제각각(산포). 캘리브레이션은 개체를 측정해 보정값을 써넣어, 출하 시(우) 모든 제품이 규격(점선) 부근으로 정렬되게 한다. 안 하면 산포가 그대로 필드 불량.",
+              svg: '<svg viewBox="0 0 620 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="양산 캘리브레이션 산포 정렬">'
+                + '<defs><marker id="caF" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4aa3ff"/></marker></defs>'
+                + '<text x="95" y="28" text-anchor="middle" class="fig-label">측정 전 (산포)</text>'
+                + '<line x1="30" y1="110" x2="180" y2="110" stroke="#7a8694" stroke-dasharray="4 4" opacity="0.5"/>'
+                + '<circle cx="55" cy="78" r="6" fill="#e5534b"/><circle cx="95" cy="138" r="6" fill="#e5534b"/><circle cx="135" cy="92" r="6" fill="#e5534b"/><circle cx="165" cy="128" r="6" fill="#e5534b"/>'
+                + '<rect x="250" y="80" width="120" height="60" rx="8" fill="#a371f7" fill-opacity="0.16" stroke="#a371f7" stroke-opacity="0.6"/><text x="310" y="106" text-anchor="middle" class="fig-label" style="fill:#a371f7">캘리브레이션</text><text x="310" y="124" text-anchor="middle" class="fig-sub" fill="#a371f7">측정→보정값 기입</text>'
+                + '<line class="kb-flow" x1="190" y1="110" x2="248" y2="110" stroke="#4aa3ff" stroke-width="3" marker-end="url(#caF)"/>'
+                + '<line class="kb-flow" x1="372" y1="110" x2="430" y2="110" stroke="#4aa3ff" stroke-width="3" marker-end="url(#caF)"/>'
+                + '<text x="525" y="28" text-anchor="middle" class="fig-label" style="fill:#2ea043">출하 시 (정렬)</text>'
+                + '<line x1="450" y1="110" x2="595" y2="110" stroke="#2ea043" stroke-dasharray="4 4"/><text x="595" y="126" text-anchor="end" class="fig-sub" fill="#2ea043">규격</text>'
+                + '<circle cx="470" cy="108" r="6" fill="#2ea043"/><circle cx="505" cy="112" r="6" fill="#2ea043"/><circle cx="540" cy="108" r="6" fill="#2ea043"/><circle cx="575" cy="111" r="6" fill="#2ea043"/>'
+                + '<text x="310" y="195" text-anchor="middle" class="fig-sub">개체별 측정·보정 → 전 제품 규격 정렬 (수율·품질 확보)</text>'
+                + '</svg>'
+            },
 
             { t: "h", text: "양산 RF 테스트 — 무엇을 재나" },
             { t: "kv", rows: [
