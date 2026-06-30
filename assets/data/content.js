@@ -1415,6 +1415,26 @@ window.KB_CONTENT = {
           title: "배치 — 성능을 좌우하는 핵심",
           blocks: [
             { t: "note", kind: "why", title: "왜 배치가 결정적인가", html: "안테나는 주변 환경(그라운드, 금속, 배터리, 케이스)과 함께 동작하는 부품입니다. 회로/매칭이 완벽해도 배치가 나쁘면 효율이 절반 이하로 떨어집니다." },
+            { t: "fig",
+              caption: "좋은 배치(좌): 가장자리·주변 비움 → 전파가 자유롭게 퍼진다(효율↑). 나쁜 배치(우): 안테나 옆 금속이 공진을 틀고(detune) 전파를 흡수·차단한다(효율↓). 퍼지는 원이 방사.",
+              svg: '<svg viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="안테나 배치에 따른 방사 비교">'
+                + '<text x="155" y="26" text-anchor="middle" class="fig-label">좋은 배치 (클리어런스 확보)</text>'
+                + '<circle cx="120" cy="120" r="8" fill="#2ea043"/>'
+                + '<circle class="kb-grow" cx="120" cy="120" r="30" fill="none" stroke="#2ea043" stroke-width="2"/>'
+                + '<circle class="kb-grow kb-d2" cx="120" cy="120" r="30" fill="none" stroke="#2ea043" stroke-width="2"/>'
+                + '<circle class="kb-grow kb-d4" cx="120" cy="120" r="30" fill="none" stroke="#2ea043" stroke-width="2"/>'
+                + '<text x="155" y="200" text-anchor="middle" class="fig-sub" fill="#2ea043">방사 자유 → 효율↑</text>'
+                + '<line x1="310" y1="20" x2="310" y2="205" stroke="#7a8694" stroke-dasharray="4 4" opacity="0.4"/>'
+                + '<text x="465" y="26" text-anchor="middle" class="fig-label" style="fill:#e5534b">나쁜 배치 (근접 금속)</text>'
+                + '<circle cx="430" cy="120" r="8" fill="#e5534b"/>'
+                + '<circle class="kb-grow" cx="430" cy="120" r="22" fill="none" stroke="#e5534b" stroke-width="2"/>'
+                + '<circle class="kb-grow kb-d3" cx="430" cy="120" r="22" fill="none" stroke="#e5534b" stroke-width="2"/>'
+                + '<rect x="470" y="70" width="26" height="100" rx="3" fill="#9aa7b4" fill-opacity="0.5" stroke="#9aa7b4"/>'
+                + '<text x="505" y="120" class="fig-sub" fill="#9aa7b4">금속</text>'
+                + '<text x="455" y="200" text-anchor="middle" class="fig-sub" fill="#e5534b">detune·흡수 → 효율↓</text>'
+                + '<text x="310" y="222" text-anchor="middle" class="fig-sub">안테나는 \'주변 환경\'과 함께 동작한다</text>'
+                + '</svg>'
+            },
             { t: "check", items: [
               "보드 가장자리/모서리에 배치, 안테나 영역 GND 비움(클리어런스)",
               "금속(배터리, 쉴드캔, 스피커, 카메라)·LCD에서 최대한 이격",
@@ -1445,6 +1465,21 @@ window.KB_CONTENT = {
           blocks: [
             { t: "p", html: "<b>OTA(Over-The-Air) 측정</b>은 안테나가 실제로 공기 중에 <b>얼마나 잘 쏘고(TRP) 얼마나 잘 듣는지(TIS)</b>를 전파 무반사 챔버에서 재는 시험입니다. VNA의 S11이 '반사'만 본다면, OTA는 케이블이 아닌 <b>전체 시스템(칩+매칭+안테나+케이스+손실)</b>의 실제 무선 성능을 봅니다." },
             { t: "note", kind: "why", title: "왜 S11만으로 부족한가", html: "S11이 -20dB로 완벽해도, 전력이 안테나 도체·유전체 손실로 <b>열로 사라지면</b> 공기 중으로 안 나갑니다. S11은 이걸 구분 못 합니다. <b>방사효율 = 방사된 전력 / 입력 전력</b>이며, OTA만이 이 효율과 실제 도달거리를 알려줍니다." },
+            { t: "fig",
+              caption: "무반사 챔버에서 측정 프로브가 제품(DUT) 주위를 돌며 모든 방향의 방사를 잰다. 전 방향을 합치면 TRP(송신)·TIS(수신)·방사 패턴이 나온다. S11과 달리 '실제로 공기 중에 나간 전력'을 본다.",
+              svg: '<svg viewBox="0 0 620 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="OTA 챔버 전 방향 측정">'
+                + '<circle cx="310" cy="120" r="92" fill="none" stroke="#7a8694" stroke-dasharray="5 5" opacity="0.5"/>'
+                + '<text x="310" y="36" text-anchor="middle" class="fig-sub" fill="#7a8694">무반사 챔버</text>'
+                + '<rect x="288" y="100" width="44" height="40" rx="5" fill="#4aa3ff" fill-opacity="0.18" stroke="#4aa3ff"/><text x="310" y="124" text-anchor="middle" class="fig-sub" fill="#4aa3ff">DUT</text>'
+                + '<circle class="kb-grow" cx="310" cy="120" r="40" fill="none" stroke="#4aa3ff" stroke-width="2"/>'
+                + '<circle class="kb-grow kb-d3" cx="310" cy="120" r="40" fill="none" stroke="#4aa3ff" stroke-width="2"/>'
+                + '<g><animateTransform attributeName="transform" type="rotate" from="0 310 120" to="360 310 120" dur="6s" repeatCount="indefinite"/>'
+                + '<line x1="310" y1="120" x2="310" y2="28" stroke="#2ea043" stroke-width="1.5" opacity="0.6"/>'
+                + '<rect x="300" y="14" width="20" height="16" rx="3" fill="#2ea043" fill-opacity="0.25" stroke="#2ea043"/>'
+                + '<text x="332" y="26" class="fig-sub" fill="#2ea043">프로브</text></g>'
+                + '<text x="310" y="238" text-anchor="middle" class="fig-sub">전 방향 측정 → TRP · TIS · 방사 패턴</text>'
+                + '</svg>'
+            },
 
             { t: "h", text: "핵심 지표" },
             { t: "kv", rows: [
