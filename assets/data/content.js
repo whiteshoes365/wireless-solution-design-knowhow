@@ -1691,6 +1691,72 @@ window.KB_CONTENT = {
             { t: "note", kind: "tip", title: "모듈 인증 승계", html: "Pre-certified 모듈을 쓰면 시스템 인증 범위를 줄일 수 있습니다(조건 준수 시). 칩 직접 설계는 전체 인증을 직접 받아야 하므로 일정·비용에 반영하세요." },
             { t: "note", kind: "warn", title: "지역 = 설계 변수", html: "허용 주파수·출력·채널이 지역마다 달라 안테나/매칭/펌웨어 설정이 달라질 수 있습니다. 인증 지역을 1단계(요구사항)에서 확정해야 재작업을 막습니다." },
           ]
+        },
+        {
+          id: "ver-cal",
+          title: "딥다이브 — 규격 취득용 타겟파워 설정·캘리브레이션",
+          blocks: [
+            { t: "p", html: "규격(FCC/CE/KC 등) 취득의 핵심은 <b>송신 출력이 규제 한계를 넘지 않으면서도 목표 성능을 내도록 출력을 '정확히' 맞추는 것</b>입니다. 이를 위해 ①채널·지역별 <b>타겟파워를 지정</b>하고 ②칩을 <b>캘리브레이션</b>해 실제 출력을 타겟에 일치시킵니다. 이 절은 그 전체 과정을 다룹니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "타겟파워 설정은 <b>속도위반 단속 구간에서 크루즈컨트롤 맞추기</b>입니다. 제한속도(규제 한계)가 구간(채널·지역)마다 다르니, 각 구간 속도를 정하고(타겟), 차마다 속도계 오차가 있으니(칩 편차) <b>실제 속도를 재서 보정(캘리브레이션)</b>해 둡니다. 그래야 모든 차가 단속(인증·양산)에서 안 걸립니다." },
+
+            { t: "h", text: "전체 흐름" },
+            { t: "fig",
+              caption: "규제 한계에서 출발해 채널·지역별 타겟파워를 정하고(마진 확보), 칩을 캘리브레이션해 실제 출력을 타겟에 맞춘 뒤, 측정으로 검증하고 인증을 받는다. 화살표는 진행 순서.",
+              svg: '<svg viewBox="0 0 620 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="타겟파워 설정과 캘리브레이션 흐름">'
+                + '<defs><marker id="clF" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4aa3ff"/></marker></defs>'
+                + (function(){
+                    var steps=[['규제 한계','#e5534b','지역·채널별\\n최대 EIRP'],['타겟파워 지정','#e3b341','한계−마진\\n채널별'],['캘리브레이션','#a371f7','파워테이블\\nNVM 기입'],['측정 검증','#4aa3ff','도전+방사\\n전 채널'],['인증','#2ea043','FCC/CE/KC']];
+                    var out='';var x0=40,bw=96,gap=18;
+                    steps.forEach(function(s,i){
+                      var x=x0+i*(bw+gap);
+                      out+='<rect x="'+x+'" y="46" width="'+bw+'" height="64" rx="8" fill="'+s[1]+'" fill-opacity="0.14" stroke="'+s[1]+'" stroke-opacity="0.6"/>';
+                      out+='<text x="'+(x+bw/2)+'" y="72" text-anchor="middle" class="fig-label" style="fill:'+s[1]+';font-size:12px">'+s[0]+'</text>';
+                      var lines=s[2].split('\\n');
+                      lines.forEach(function(ln,k){ out+='<text x="'+(x+bw/2)+'" y="'+(90+k*13)+'" text-anchor="middle" class="fig-sub" style="font-size:9.5px">'+ln+'</text>'; });
+                      if(i<steps.length-1){ out+='<line class="kb-flow" x1="'+(x+bw)+'" y1="78" x2="'+(x+bw+gap)+'" y2="78" stroke="#4aa3ff" stroke-width="2" marker-end="url(#clF)"/>'; }
+                    });
+                    return out;
+                  })()
+                + '<text x="310" y="150" text-anchor="middle" class="fig-sub">타겟은 항상 \'규제 한계 − 마진(온도·산포)\' 안으로</text>'
+                + '</svg>'
+            },
+
+            { t: "h", text: "1) 타겟파워 지정 — 채널·지역별" },
+            { t: "p", html: "규제 한계는 <b>대역·채널·지역마다 다르고, 특히 대역 끝(band edge) 채널은 인접 대역 누설 때문에 더 낮게</b> 잡아야 합니다. 안테나 이득까지 더해 EIRP가 한계를 넘지 않게 도전출력 타겟을 역산합니다." },
+            { t: "check", items: [
+              "지역·대역별 <b>최대 EIRP/출력 한계</b> 확보(인증 규정)",
+              "<b>안테나 이득·매칭 손실</b> 반영해 도전출력 타겟 역산 (EIRP = 도전출력 − 손실 + 이득)",
+              "<b>대역 끝 채널은 타겟을 낮춤</b>(spectral mask·band edge 여유)",
+              "<b>고차 MCS/변조는 back-off</b> 적용한 별도 타겟(EVM·마스크 만족)",
+              "온도·양산 산포를 견디는 <b>마진</b>(보통 1~2dB+)",
+            ]},
+            { t: "note", kind: "warn", title: "Band edge가 가장 잘 떨어진다", html: "대역 맨 끝 채널(예: 2.4G ch1·ch11/13, 5G 서브밴드 경계)은 송신 스펙트럼 꼬리가 인접 대역으로 새어 <b>band edge 규정</b>을 위반하기 쉽습니다. 이 채널들은 타겟파워를 <b>의도적으로 더 낮게</b> 잡습니다. 인증 탈락의 단골 원인입니다." },
+
+            { t: "h", text: "2) 캘리브레이션 — 파워 테이블 만들기" },
+            { t: "note", kind: "why", title: "왜 캘리브레이션이 필요한가", html: "칩은 출력을 '파워 인덱스/레지스터' 값으로 설정하는데, <b>같은 인덱스라도 칩·온도·채널마다 실제 dBm이 다릅니다</b>. 캘리브레이션은 개체를 측정해 <b>'타겟 dBm ↔ 실제 설정값' 대응표(파워 테이블)를 칩 NVM에 기입</b>합니다. 이후 펌웨어가 '17dBm 줘'라고 하면 그 칩에 맞는 설정으로 정확히 17dBm이 나옵니다." },
+            { t: "table",
+              head: ["보정 축", "이유", "처리"],
+              rows: [
+                ["개체(칩) 편차", "공정 산포로 출력 다름", "개체별 측정·기입(양산 라인)"],
+                ["채널/주파수", "대역 내 출력 평탄도 차이", "주요 채널에서 측정·보간"],
+                ["온도", "고온/저온서 출력 변동", "온도 보상 계수(센서 연동)"],
+                ["주파수 오차(클럭)", "ppm 편차", "주파수 캘값 별도 기입"],
+              ]
+            },
+            { t: "note", kind: "tip", title: "도전(導電) 캘리 + 방사 검증", html: "캘리브레이션은 보통 <b>RF 커넥터/프로브로 도전 결합</b>해 빠르게 측정·보정합니다(반복성↑). 단 최종 성능은 안테나·케이스 포함 <b>방사(OTA)</b>로 검증해야 합니다. 도전 타겟 + 안테나 이득 = 실제 EIRP가 규제 안에 드는지 확인. (8장 <a href='#prod-rftest'>양산 RF 테스트</a>)" },
+
+            { t: "h", text: "3) 측정 검증·인증 항목" },
+            { t: "list", items: [
+              "<b>최대 출력 / EIRP</b>: 전 채널이 한계 이하·타겟 부근인가",
+              "<b>스펙트럼 마스크 / 대역 끝(band edge)</b>: 인접 대역 누설 한계",
+              "<b>점유대역폭(OBW)·PSD</b>(전력밀도)",
+              "<b>스퓨리어스·하모닉</b>: 대역 외 방출",
+              "<b>주파수 오차</b>: ppm 한계",
+              "온도·전압 코너에서도 만족하는지(마진 확인)",
+            ]},
+            { t: "note", kind: "warn", title: "인증값 = worst case, 양산 = 전수 보정", html: "인증은 보통 대표 샘플로 받지만, 그 샘플이 <b>worst-case 채널·온도</b>에서 한계 안이어야 합니다. 양산에서는 <b>캘리브레이션으로 전 개체를 타겟에 맞춰</b> 산포가 한계를 넘지 않게 합니다. '인증 통과'와 '양산 전수 합격'은 캘리브레이션으로 연결됩니다." },
+            { t: "note", kind: "info", title: "연결", html: "타겟 개념은 3장 <a href='#proc-targets'>설계 목표값</a>, 출력 분해는 <a href='#proc-targets'>EIRP</a>, 양산 캘리·치구는 8장 <a href='#prod-rftest'>양산 RF 테스트</a>, 측정 장비·교정은 <a href='#ver-measure'>측정 항목</a> 참조." },
+          ]
         }
       ]
     },
