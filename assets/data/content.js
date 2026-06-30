@@ -459,6 +459,26 @@ window.KB_CONTENT = {
               ["EIRP", "도전출력 − 손실 + 안테나이득. <b>규제·링크버짓의 기준</b>"],
               ["Target power", "규제 한계 − 마진 안에서, 전류·발열·EVM을 고려해 정한 설계 목표 출력"],
             ]},
+            { t: "fig",
+              caption: "전력이 칩(도전출력)에서 출발해 매칭·필터 손실로 줄고, 안테나 이득으로 더해져 EIRP가 된다. 이 EIRP가 지역 규제 한계(빨간 선) 아래 마진을 두고 들어와야 한다. 화살표는 전력 흐름.",
+              svg: '<svg viewBox="0 0 620 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="EIRP 분해 — 도전출력에서 EIRP까지">'
+                + '<defs><marker id="eF" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4aa3ff"/></marker></defs>'
+                + '<line x1="40" y1="60" x2="580" y2="60" stroke="#e5534b" stroke-width="2" stroke-dasharray="7 5"/>'
+                + '<text x="580" y="52" text-anchor="end" class="fig-sub" fill="#e5534b">규제 한계 (지역별 최대 EIRP)</text>'
+                + '<rect x="60" y="120" width="90" height="70" rx="6" fill="#4aa3ff" fill-opacity="0.16" stroke="#4aa3ff" stroke-opacity="0.6"/><text x="105" y="150" text-anchor="middle" class="fig-sub" fill="#4aa3ff">도전출력</text><text x="105" y="166" text-anchor="middle" class="fig-sub" fill="#4aa3ff">(PA)</text>'
+                + '<line class="kb-flow" x1="152" y1="155" x2="232" y2="155" stroke="#4aa3ff" stroke-width="3" marker-end="url(#eF)"/>'
+                + '<rect x="235" y="140" width="90" height="50" rx="6" fill="#e5534b" fill-opacity="0.12" stroke="#e5534b" stroke-opacity="0.5"/><text x="280" y="162" text-anchor="middle" class="fig-sub" fill="#e5534b">− 손실</text><text x="280" y="178" text-anchor="middle" class="fig-sub" fill="#e5534b">매칭·필터</text>'
+                + '<line class="kb-flow" x1="327" y1="155" x2="407" y2="120" stroke="#4aa3ff" stroke-width="3" marker-end="url(#eF)"/>'
+                + '<rect x="410" y="92" width="90" height="50" rx="6" fill="#2ea043" fill-opacity="0.14" stroke="#2ea043" stroke-opacity="0.5"/><text x="455" y="114" text-anchor="middle" class="fig-sub" fill="#2ea043">+ 안테나</text><text x="455" y="130" text-anchor="middle" class="fig-sub" fill="#2ea043">이득(dBi)</text>'
+                + '<line class="kb-flow" x1="502" y1="100" x2="540" y2="80" stroke="#4aa3ff" stroke-width="3" marker-end="url(#eF)"/>'
+                + '<rect x="520" y="66" width="60" height="40" rx="6" fill="#4aa3ff" fill-opacity="0.22" stroke="#4aa3ff"/><text x="550" y="90" text-anchor="middle" class="fig-label" style="fill:#4aa3ff">EIRP</text>'
+                + '<line x1="550" y1="62" x2="550" y2="66" stroke="#e3b341" stroke-width="0"/>'
+                + '<path d="M598,62 L598,66" stroke="#e3b341"/>'
+                + '<line x1="600" y1="62" x2="600" y2="86" stroke="#e3b341" stroke-width="2" marker-start="url(#eF)"/>'
+                + '<text x="595" y="120" text-anchor="end" class="fig-sub" fill="#e3b341">마진</text>'
+                + '<text x="310" y="230" text-anchor="middle" class="fig-sub">EIRP = 도전출력 − 손실 + 안테나이득 ≤ 규제 한계 − 마진</text>'
+                + '</svg>'
+            },
 
             { t: "h", text: "지역·규격별 대표 출력 한계 (개략)" },
             { t: "table",
