@@ -625,6 +625,23 @@ window.KB_CONTENT = {
           blocks: [
             { t: "p", html: "<b>PDN(Power Distribution Network, 전원 분배망)</b>은 레귤레이터에서 칩 전원핀까지 전기를 나르는 경로 전체(레일·평면·비아·커패시터)입니다. RF 칩이 순간적으로 전류를 당길 때 <b>전압이 흔들리지 않게(낮은 임피던스)</b> 받쳐주는 것이 PDN 설계의 목표입니다." },
             { t: "note", kind: "info", title: "비유로 먼저", html: "PDN은 <b>도시 상수도</b>입니다. 정수장(레귤레이터)에서 멀리 떨어진 집(칩)이 수도를 확 틀면(Tx 피크 전류), 정수장 물이 도착하기 전 순간엔 <b>동네 물탱크(디커플링 커패시터)</b>가 먼저 물을 댑니다. 물탱크가 작거나 멀면 수압(전압)이 푹 꺼집니다(droop)." },
+            { t: "fig",
+              caption: "위: 송신(Tx) 순간 전류가 확 치솟는다. 아래: 그 순간 VDD가 출렁인다(droop). 디커플링·벌크가 충분하면 dip이 작고(초록), 부족하면 깊게 꺼져(빨강) 재부팅·출력저하가 난다. 세로선이 시간 진행.",
+              svg: '<svg viewBox="0 0 620 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="송신 전류 버스트와 전압 droop">'
+                + '<text x="40" y="26" class="fig-sub" fill="#4aa3ff">Tx 전류</text>'
+                + '<path d="M40,80 L230,80 L230,42 L390,42 L390,80 L580,80" fill="none" stroke="#4aa3ff" stroke-width="2.5"/>'
+                + '<text x="310" y="38" text-anchor="middle" class="fig-sub" fill="#4aa3ff">송신 버스트 (피크 전류)</text>'
+                + '<text x="40" y="138" class="fig-sub">VDD</text>'
+                + '<line x1="40" y1="120" x2="580" y2="120" stroke="#7a8694" stroke-dasharray="3 4" opacity="0.5"/><text x="585" y="124" class="fig-sub" fill="#7a8694">정상</text>'
+                + '<path d="M40,120 L230,120 C260,120 262,150 290,150 C320,150 360,150 390,150 C415,150 418,120 440,120 L580,120" fill="none" stroke="#2ea043" stroke-width="2.5"/>'
+                + '<text x="470" y="146" class="fig-sub" fill="#2ea043">PDN 충분 → 얕은 dip</text>'
+                + '<path d="M40,120 L230,120 C265,120 265,200 300,200 C335,200 360,200 390,200 C420,200 420,120 450,120 L580,120" fill="none" stroke="#e5534b" stroke-width="2.5" stroke-dasharray="5 3"/>'
+                + '<text x="300" y="218" text-anchor="middle" class="fig-sub" fill="#e5534b">PDN 부족 → 깊은 droop → 재부팅</text>'
+                + '<line class="kb-flow" x1="40" y1="232" x2="580" y2="232" stroke="#7a8694" stroke-width="1.5"/>'
+                + '<line x1="230" y1="36" x2="230" y2="210" stroke="#e3b341" stroke-dasharray="2 3" opacity="0.6"/>'
+                + '<text x="230" y="232" text-anchor="middle" class="fig-sub" fill="#e3b341">Tx 시작</text>'
+                + '</svg>'
+            },
 
             { t: "h", text: "핵심 개념 — 목표 임피던스(Target Impedance)" },
             { t: "note", kind: "why", title: "Z_target = ΔV_허용 / ΔI", html: "PDN이 만족해야 할 임피던스는 <b>허용 전압변동 ÷ 과도 전류</b>입니다. 예: 1.8V 레일에서 5% 변동 허용(0.09V), 과도전류 0.5A면 <b>Z_target ≈ 0.18Ω</b>. 관심 주파수 전 대역에서 PDN 임피던스를 이 값 아래로 유지해야 droop이 스펙 안에 듭니다. RF는 빠른 전류변동이 많아 <b>넓은 주파수에서</b> 낮은 임피던스가 필요합니다." },
@@ -701,6 +718,34 @@ window.KB_CONTENT = {
           blocks: [
             { t: "p", html: "<b>발룬(Balun = Balanced–Unbalanced)</b>은 칩의 <b>차동(differential, 균형) 출력</b>을 안테나의 <b>단동(single-ended, 불균형) 신호</b>로 변환하는 부품입니다. 동시에 <b>임피던스 변환</b>과 일부 <b>대역 필터링</b>도 겸할 수 있어 RF 프론트엔드의 길목 역할을 합니다." },
             { t: "note", kind: "info", title: "비유로 먼저", html: "차동 신호는 <b>두 사람이 마주 들고 가는 들것</b>(서로 반대로 움직임)이고, 단동 신호는 <b>한 사람이 어깨에 멘 짐</b>(기준은 땅=GND)입니다. 발룬은 '들것을 어깨짐으로' 바꿔주는 변환기입니다. 변환하면서 무게 비율(임피던스)도 조정할 수 있습니다." },
+            { t: "fig",
+              caption: "왼쪽 칩의 차동 출력(+, − 서로 반대 위상)이 발룬을 거쳐 오른쪽 단동(GND 기준) 신호 하나로 변환된다. 파동이 흐르는 방향이 신호 진행 방향. 동시에 임피던스도 변환된다.",
+              svg: '<svg viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="발룬 차동에서 단동 변환">'
+                + (function(){
+                    function wave(y0,hp,amp,count,x0,cls,col){
+                      var d='M'+x0+','+y0+' q '+(hp/2)+','+(-amp)+' '+hp+',0';
+                      for(var i=1;i<count;i++){ d+=' t '+hp+',0'; }
+                      return '<path class="'+cls+'" d="'+d+'" fill="none" stroke="'+col+'" stroke-width="2.5"/>';
+                    }
+                    var out='';
+                    out+='<text x="70" y="30" text-anchor="middle" class="fig-sub" fill="#4aa3ff">RF SoC (차동)</text>';
+                    out+=wave(60,28,12,4,30,'kb-flow','#4aa3ff');
+                    out+='<text x="22" y="64" class="fig-sub" fill="#4aa3ff">+</text>';
+                    out+='<path class="kb-flow" d="M30,110 q 14,12 28,0 t 28,0 t 28,0 t 28,0" fill="none" stroke="#4aa3ff" stroke-width="2.5"/>';
+                    out+='<text x="22" y="114" class="fig-sub" fill="#4aa3ff">−</text>';
+                    out+='<rect x="250" y="60" width="110" height="60" rx="8" fill="#a371f7" fill-opacity="0.16" stroke="#a371f7" stroke-opacity="0.6"/>';
+                    out+='<text x="305" y="86" text-anchor="middle" class="fig-label" style="fill:#a371f7">발룬</text>';
+                    out+='<text x="305" y="104" text-anchor="middle" class="fig-sub" fill="#a371f7">차동↔단동 + Z변환</text>';
+                    out+='<line class="kb-flow" x1="150" y1="74" x2="248" y2="86" stroke="#4aa3ff" stroke-width="2"/>';
+                    out+='<line class="kb-flow" x1="150" y1="110" x2="248" y2="96" stroke="#4aa3ff" stroke-width="2"/>';
+                    out+=wave(90,30,14,5,400,'kb-flow','#2ea043');
+                    out+='<line class="kb-flow" x1="362" y1="90" x2="400" y2="90" stroke="#2ea043" stroke-width="2"/>';
+                    out+='<text x="500" y="60" text-anchor="middle" class="fig-sub" fill="#2ea043">안테나 (단동, 50Ω·GND기준)</text>';
+                    out+='<text x="310" y="170" text-anchor="middle" class="fig-sub">두 반대 위상 → 하나의 단동 신호로</text>';
+                    return out;
+                  })()
+                + '</svg>'
+            },
 
             { t: "h", text: "왜 차동→단동 변환이 필요한가" },
             { t: "list", items: [
