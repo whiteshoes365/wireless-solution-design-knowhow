@@ -138,7 +138,7 @@ window.KB_CONTENT = {
                 ["+20 dBm", "100 mW", "WiFi 일반 최대 출력 수준"],
               ]
             },
-            { t: "note", kind: "tip", title: "현장 노하우", html: "링크 버짓은 단순 덧셈/뺄셈입니다. <b>Tx출력(dBm) − 케이블/매칭손실(dB) + 안테나이득(dBi) − 경로손실(dB) + Rx안테나이득 − Rx손실 = 수신전력(dBm)</b>. 이 값이 수신 감도(sensitivity)보다 여유(margin)를 두고 커야 통신이 됩니다." },
+            { t: "note", kind: "tip", title: "현장 노하우", html: "링크 버짓은 단순 덧셈/뺄셈입니다. <b>Tx출력(dBm) − 케이블/매칭손실(dB) + 안테나이득(dBi) − 경로손실(dB) + Rx안테나이득 − Rx손실 = 수신전력(dBm)</b>. 이 값이 수신 감도(sensitivity)보다 여유(margin)를 두고 커야 통신이 됩니다. 앞쪽 <b>Tx출력 − 손실 + 안테나이득 = EIRP</b>이며, 규제는 이 EIRP에 한계를 둡니다. (설계 목표값은 3장 <a href='#proc-targets'>Target 정의</a> 참조)" },
           ]
         },
         {
@@ -361,11 +361,69 @@ window.KB_CONTENT = {
               "인증 지역 (KC/FCC/CE/...) — 채널·출력·인증항목 결정",
               "전원 조건 (입력 전압, 배터리 여부, 허용 전류 예산)",
               "통신거리·처리량(throughput) 목표",
+              "<b>RF 설계 목표값</b> — 출력(EIRP/도전), EVM, 수신감도 등 (규격·지역 한계 기반, 다음 섹션)",
               "폼팩터(모듈 크기), 안테나 형태(내장 PCB/칩/외장)",
               "온도·환경 조건 (가전은 고온/습도/EMI 환경)",
               "원가 목표(BOM cost), 생산 수량",
             ]},
             { t: "note", kind: "warn", title: "전류 예산은 '피크'까지", html: "WiFi Tx 순간 피크는 평균의 수 배입니다. 평균 전류만 보고 전원을 설계하면 송신 시 전압 droop으로 재부팅합니다." },
+          ]
+        },
+        {
+          id: "proc-targets",
+          title: "1.5단계 — 무선규격 설계 목표값(Target) 정의",
+          blocks: [
+            { t: "p", html: "요구사항이 정해지면, 다음은 <b>무선규격과 지역 규제가 강제하는 설계 목표값(target)</b>을 확정하는 단계입니다. <b>target power</b>가 대표적이며, 이 목표값들이 이후 칩 선정·PA·필터·안테나·검증을 모두 결정합니다. '얼마나 세게 쏠 수 있는가'와 '얼마나 깨끗하게 쏴야 하는가'가 규격으로 묶여 있습니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "무선규격은 <b>도로 교통법</b>입니다. 차(신호)를 얼마나 빨리 몰 수 있는지(<b>최대 출력</b>)도 정하고, 차선을 넘지 말 것(<b>스펙트럼 마스크</b>), 매연 기준(<b>스퓨리어스·하모닉</b>)도 정합니다. 지역(국가)마다 제한속도가 다르듯 출력 한계도 지역마다 다릅니다." },
+
+            { t: "h", text: "Target Power — 도전 출력 vs EIRP" },
+            { t: "note", kind: "why", title: "EIRP = 도전출력 − 손실 + 안테나이득", html: "규제는 보통 <b>EIRP(등가등방복사전력)</b> 또는 'conducted + 안테나 이득'에 한계를 둡니다.<br><b>EIRP(dBm) = P<sub>conducted</sub>(dBm) − 경로/매칭/필터 손실(dB) + 안테나 이득(dBi)</b><br>즉 안테나 이득이 크면 칩 출력을 낮춰도 같은 EIRP가 나오고, 규제 한계를 넘기지 않으려면 <b>출력·이득·손실을 함께</b> 봐야 합니다. 'target power 정의 = 이 식의 각 항을 배분하는 일'입니다." },
+            { t: "kv", rows: [
+              ["도전 출력(Conducted)", "칩/PA 핀에서의 출력. 데이터시트·양산 테스트 기준"],
+              ["방사 출력(Radiated)", "안테나에서 실제 나간 전력 (효율 반영)"],
+              ["EIRP", "도전출력 − 손실 + 안테나이득. <b>규제·링크버짓의 기준</b>"],
+              ["Target power", "규제 한계 − 마진 안에서, 전류·발열·EVM을 고려해 정한 설계 목표 출력"],
+            ]},
+
+            { t: "h", text: "지역·규격별 대표 출력 한계 (개략)" },
+            { t: "table",
+              head: ["대역/규격", "지역", "대표 한계(개략)", "비고"],
+              rows: [
+                ["2.4G WiFi/BT", "유럽(ETSI)", "20 dBm EIRP (100mW)", "전력밀도 제한 동반"],
+                ["2.4G", "미국(FCC)", "도전 ~30dBm급, EIRP는 안테나이득 따라", "Part 15 규칙"],
+                ["5G UNII", "지역·서브밴드별", "밴드마다 상이(일부 실내전용·DFS)", "UNII-1~4 구분"],
+                ["Sub-G 868", "유럽", "대역별 ~14~27 dBm ERP", "<b>듀티사이클·LBT</b> 제약"],
+                ["Sub-G 902–928", "미국", "FHSS/DTS 규칙별", "확산·호핑 요건"],
+              ]
+            },
+            { t: "note", kind: "warn", title: "정확한 값은 반드시 최신 규정 확인", html: "위 표는 <b>개략값(설계 감 잡기용)</b>입니다. 실제 한계는 대역·변조·안테나이득·측정방식에 따라 달라지고 규정이 개정됩니다. 설계 목표는 <b>FCC Part 15, ETSI EN 300 328/440, KC 고시</b> 등 해당 지역 최신 규정과 인증기관 확인으로 확정하세요. (7장 <a href='#ver-cert'>인증</a>)" },
+
+            { t: "h", text: "규격이 정하는 설계 파라미터 → 어디로 흐르나" },
+            { t: "table",
+              head: ["규격 파라미터", "의미", "설계에 미치는 영향(장)"],
+              rows: [
+                ["최대 출력 / EIRP", "지역별 송신 한계", "PA 선정·출력설정, 안테나이득 배분 → <a href='#ckt-frontend'>4장</a>·<a href='#ant-ota'>6장</a>"],
+                ["EVM", "변조 품질 한계(MCS별)", "PA 선형성·전원무결성·클럭 위상잡음 → <a href='#ckt-pdn'>PDN</a>·<a href='#ckt-clock'>클럭</a>"],
+                ["스펙트럼 마스크(SEM)/OBW", "점유 대역·인접 누설 한계", "변조·필터·출력 백오프 → <a href='#ckt-filter-coex'>필터</a>"],
+                ["ACPR/ACLR", "인접 채널 누설", "PA 선형성·필터"],
+                ["스퓨리어스/하모닉", "대역 외 방출 한계", "하모닉 필터·차폐·리턴경로 → <a href='#ver-emc-design'>EMC</a>"],
+                ["수신 감도", "데이터율별 최소 수신", "LNA NF·안테나효율·desense → <a href='#ant-ota'>OTA</a>"],
+                ["주파수 정확도(ppm)", "기준 클럭 허용 오차", "XTAL/TCXO → <a href='#ckt-clock'>클럭</a>"],
+                ["듀티사이클 / LBT", "Sub-G·유럽 송신 제약", "펌웨어·공존 → <a href='#proto-coex'>공존</a>"],
+              ]
+            },
+            { t: "note", kind: "why", title: "Power Back-off — 출력과 EVM은 상충", html: "PA를 한계까지 밀면(높은 출력) 비선형이 커져 <b>EVM·스펙트럼 마스크가 악화</b>됩니다. 그래서 고차변조(예: WiFi 256-QAM, 높은 MCS)는 <b>출력을 일부 줄여(back-off)</b> 품질을 맞춥니다. 즉 'target power'는 단일 숫자가 아니라 <b>변조/MCS별로 달라지는 곡선</b>입니다. 데이터시트의 MCS별 출력·EVM 표를 함께 보세요." },
+            { t: "h", text: "목표값 정의 체크리스트" },
+            { t: "check", items: [
+              "지역별 <b>최대 EIRP/출력 한계</b> 확정 → 안테나이득·손실 배분으로 도전출력 목표 도출",
+              "<b>MCS/변조별 target power</b>(back-off 포함)와 EVM 목표 정의",
+              "스펙트럼 마스크·OBW·ACPR·스퓨리어스·하모닉 한계 목록화",
+              "데이터율별 <b>수신 감도 목표</b> 정의 (통신거리 ↔ 링크버짓)",
+              "주파수 정확도(ppm) 목표 → 클럭 부품 선정 근거",
+              "Sub-G/유럽이면 <b>듀티사이클·LBT</b> 요건 펌웨어 반영",
+              "모든 목표값에 <b>양산 산포·온도 마진</b> 반영",
+            ]},
+            { t: "note", kind: "info", title: "연결", html: "출력↔이득↔손실 계산은 1장 <a href='#rf-fundamentals'>링크 버짓</a>, 한계의 근거는 7장 <a href='#ver-cert'>인증</a>, 측정·검증은 7장 <a href='#ver-measure'>측정 항목</a>, 규격별 특성은 2장 <a href='#proto-compare'>프로토콜 비교</a> 참조." },
           ]
         },
         {
@@ -1541,6 +1599,16 @@ window.KB_CONTENT = {
               ["S11 / S21", "반사계수 / 전달계수 (S-파라미터)"],
               ["VNA", "Vector Network Analyzer"],
               ["EVM", "Error Vector Magnitude (변조품질)"],
+              ["EIRP", "Equivalent Isotropically Radiated Power (등가등방복사전력) = 도전출력 − 손실 + 안테나이득. 규제 기준"],
+              ["ERP", "Effective Radiated Power (다이폴 기준 복사전력). EIRP보다 2.15dB 작음"],
+              ["Conducted Power", "도전 출력 — 칩/PA 핀에서 측정한 출력"],
+              ["Back-off", "선형성·EVM·마스크 만족 위해 PA 출력을 한계보다 낮추는 것"],
+              ["SEM / Mask", "Spectrum Emission Mask (스펙트럼 방출 마스크 한계)"],
+              ["OBW", "Occupied Bandwidth (점유 대역폭)"],
+              ["ACPR / ACLR", "Adjacent Channel Power/Leakage Ratio (인접채널 누설)"],
+              ["Spurious", "스퓨리어스 — 의도치 않은 대역 외 방출"],
+              ["Sensitivity", "수신 감도 — 통신 가능한 최소 수신전력(dBm), 낮을수록 좋음"],
+              ["Duty Cycle / LBT", "송신 점유율 제한 / Listen-Before-Talk (Sub-G·유럽 규제)"],
               ["TRP / TIS", "Total Radiated Power / Total Isotropic Sensitivity"],
               ["OTA", "Over-The-Air (무선 방사 측정)"],
               ["DFS", "Dynamic Frequency Selection (5GHz 레이더 회피)"],
