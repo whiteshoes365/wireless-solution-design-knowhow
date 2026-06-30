@@ -1,0 +1,5 @@
+# Local preview / tooling (not needed for public site)
+.claude/
+.DS_Store
+Thumbs.db
+*.log

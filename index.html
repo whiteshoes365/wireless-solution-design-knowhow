@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>무선모듈 HW 설계 지식 베이스 — WiFi·BLE·Zigbee·NFC·HaLow</title>
+  <meta name="description" content="WiFi · BT/BLE · Zigbee/Thread · NFC · Wi-Fi HaLow 무선모듈 하드웨어를 처음부터 끝까지: RF 기초, 회로·PCB·안테나 설계, 검증·인증, 양산까지 계층적으로 정리한 오픈 지식 베이스." />
+  <meta name="keywords" content="무선모듈, RF, WiFi, BLE, Bluetooth, Zigbee, Thread, NFC, Wi-Fi HaLow, 안테나, PCB, 임피던스 매칭, EMC, RF 하드웨어 설계" />
+  <meta name="author" content="무선모듈 HW 지식 베이스" />
+  <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#0f1419" />
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="무선모듈 HW 설계 지식 베이스" />
+  <meta property="og:description" content="WiFi·BLE·Zigbee·NFC·HaLow 무선모듈 하드웨어 설계·검증·양산 지식을 계층적으로 정리한 오픈 문서." />
+  <meta property="og:locale" content="ko_KR" />
+  <meta property="og:image" content="assets/og-image.svg" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <!-- mobile topbar -->
+  <header class="topbar">
+    <button id="menuBtn" class="icon-btn" aria-label="메뉴">☰</button>
+    <h1 id="topTitle">무선모듈 HW 설계 지식 베이스</h1>
+  </header>
+
+  <div class="backdrop" id="backdrop"></div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <h1 id="brandTitle">무선모듈 HW 설계 지식 베이스</h1>
+        <p id="brandSub"></p>
+        <div class="ver" id="brandVer"></div>
+      </div>
+
+      <div class="search-box">
+        <input id="search" type="search" placeholder="검색 (예: 매칭, 그라운드, FCC)" autocomplete="off" />
+      </div>
+
+      <div class="toggles">
+        <button id="themeBtn">☀️ 라이트</button>
+        <button id="expandBtn">⇕ 전체 펼침/접기</button>
+      </div>
+      <div class="toggles">
+        <button id="printBtn">🖨️ 전체 인쇄 / PDF</button>
+      </div>
+
+      <nav id="nav"></nav>
+    </aside>
+
+    <main class="main" id="main"></main>
+  </div>
+
+  <script src="assets/data/content.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

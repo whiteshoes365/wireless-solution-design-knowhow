@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#0f1419"/>
+  <g fill="none" stroke="#4aa3ff" stroke-width="7" stroke-linecap="round">
+    <path d="M120 360 A60 60 0 0 1 120 240"/>
+    <path d="M210 240 A60 60 0 0 1 210 360"/>
+    <path d="M90 400 A100 100 0 0 1 90 200"/>
+    <path d="M240 200 A100 100 0 0 1 240 400"/>
+  </g>
+  <circle cx="165" cy="300" r="18" fill="#4aa3ff"/>
+  <text x="340" y="270" fill="#e6edf3" font-family="Pretendard, sans-serif" font-size="62" font-weight="800">무선모듈 HW 설계 지식 베이스</text>
+  <text x="340" y="345" fill="#9aa7b4" font-family="Pretendard, sans-serif" font-size="34" font-weight="500">WiFi · BT/BLE · Zigbee/Thread · NFC · Wi-Fi HaLow</text>
+  <text x="340" y="410" fill="#9aa7b4" font-family="Pretendard, sans-serif" font-size="30">RF 기초 · 회로 · PCB · 안테나 · 검증/인증 · 양산</text>
+  <rect x="340" y="470" width="520" height="6" rx="3" fill="#4aa3ff" opacity="0.5"/>
+  <text x="340" y="540" fill="#6b7785" font-family="Pretendard, sans-serif" font-size="26">하드웨어 설계를 처음 하는 사람도 빠뜨림 없이 따라가는 오픈 문서</text>
+</svg>
