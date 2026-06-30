@@ -1553,6 +1553,26 @@ window.KB_CONTENT = {
               "공존/간섭: 다른 무선·DC-DC 노이즈가 대역에 들어오나",
               "SW/펌웨어: 설정(출력·채널·캘리값) 확인 — HW로 단정 전 분리",
             ]},
+            { t: "fig",
+              caption: "통신 불량이라는 한 증상을 전원→클럭→매칭→그라운드→공존→SW 순으로 한 계층씩 측정해 배제한다. 강조가 위→아래로 이동. 추측이 아니라 측정으로 좁힌다.",
+              svg: '<svg viewBox="0 0 620 290" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RF 디버깅 계층 분리 흐름">'
+                + '<defs><marker id="dgF" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#7a8694"/></marker></defs>'
+                + '<rect x="200" y="14" width="220" height="34" rx="6" fill="#e5534b" fill-opacity="0.15" stroke="#e5534b" stroke-opacity="0.6"/><text x="310" y="36" text-anchor="middle" class="fig-label" style="fill:#e5534b">증상: 통신 불량</text>'
+                + (function(){
+                    var layers=[['① 전원 (droop/리플)','오실로스코프'],['② 클럭 (주파수/위상잡음)','카운터'],['③ 매칭·안테나 (S11)','VNA'],['④ 그라운드·리턴 (GND split)','레이아웃'],['⑤ 공존·간섭 (노이즈 침범)','스펙트럼'],['⑥ SW·펌웨어 (설정/캘값)','로그']];
+                    var out='';var y=64;
+                    layers.forEach(function(l,i){
+                      var yy=y+i*36;
+                      out+='<line x1="310" y1="'+(yy-12)+'" x2="310" y2="'+(yy-2)+'" stroke="#7a8694" stroke-width="1.5" marker-end="url(#dgF)"/>';
+                      out+='<rect class="kb-blink kb-d'+(i+1)+'" x="150" y="'+yy+'" width="320" height="28" rx="5" fill="#4aa3ff" fill-opacity="0.14" stroke="#4aa3ff" stroke-opacity="0.5"/>';
+                      out+='<text x="165" y="'+(yy+19)+'" class="fig-sub" fill="#4aa3ff">'+l[0]+'</text>';
+                      out+='<text x="455" y="'+(yy+19)+'" text-anchor="end" class="fig-sub" fill="#7a8694">'+l[1]+'</text>';
+                    });
+                    return out;
+                  })()
+                + '<text x="310" y="284" text-anchor="middle" class="fig-sub">한 계층씩 측정·배제 → 원인 좁히기 (증거 기반)</text>'
+                + '</svg>'
+            },
             { t: "note", kind: "tip", title: "노하우 누적란", html: "(실제 디버깅 사례: 증상 / 측정값 / 원인 / 해결 / 교훈 형식으로 누적)" },
           ]
         },
@@ -1600,6 +1620,22 @@ window.KB_CONTENT = {
           blocks: [
             { t: "p", html: "EMC는 시험장에서 잡는 게 아니라 <b>설계 단계에서 예방</b>하는 것입니다. 방사 방출 초과로 인증에 떨어지면 보드를 다시 떠야 하므로, 처음부터 <b>발생원을 줄이고(source) 경로를 막는(path)</b> 설계를 합니다." },
             { t: "note", kind: "info", title: "비유로 먼저", html: "EMC 대책은 <b>소음 관리</b>와 같습니다. ①소음원을 조용하게(발생원 억제: 느린 엣지·필터) ②벽으로 막고(차폐) ③새는 틈을 없앤다(리턴경로·접지). 시험 전날 귀마개(임시 대책)는 한계가 있어, 건물 설계 때부터 방음을 넣어야 합니다." },
+            { t: "fig",
+              caption: "노이즈는 발생원(좌)에서 경로(공기·케이블)를 타고 밖으로 나간다. 대책은 두 단계: ①발생원 억제(필터·느린 엣지) ②경로 차단(차폐·리턴경로). 두 관문을 거치며 방출이 한계 아래로 줄어든다.",
+              svg: '<svg viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="EMC 발생원 억제와 경로 차단">'
+                + '<defs><marker id="emF" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#e5534b"/></marker></defs>'
+                + '<circle cx="70" cy="100" r="22" fill="#e5534b" fill-opacity="0.18" stroke="#e5534b" stroke-opacity="0.6"/>'
+                + '<circle class="kb-pulse" cx="70" cy="100" r="32" fill="none" stroke="#e5534b" stroke-width="2"/>'
+                + '<text x="70" y="150" text-anchor="middle" class="fig-sub" fill="#e5534b">노이즈 발생원</text><text x="70" y="164" text-anchor="middle" class="fig-sub" fill="#7a8694">PA·DC-DC·디지털</text>'
+                + '<rect x="200" y="50" width="60" height="100" rx="6" fill="#4aa3ff" fill-opacity="0.14" stroke="#4aa3ff" stroke-opacity="0.6"/><text x="230" y="96" text-anchor="middle" class="fig-sub" fill="#4aa3ff">① 발생원</text><text x="230" y="110" text-anchor="middle" class="fig-sub" fill="#4aa3ff">억제(필터)</text>'
+                + '<rect x="340" y="50" width="60" height="100" rx="6" fill="#2ea043" fill-opacity="0.14" stroke="#2ea043" stroke-opacity="0.6"/><text x="370" y="96" text-anchor="middle" class="fig-sub" fill="#2ea043">② 경로</text><text x="370" y="110" text-anchor="middle" class="fig-sub" fill="#2ea043">차단(차폐)</text>'
+                + '<line class="kb-flow" x1="94" y1="100" x2="198" y2="100" stroke="#e5534b" stroke-width="3" marker-end="url(#emF)"/>'
+                + '<line class="kb-flow" x1="262" y1="100" x2="338" y2="100" stroke="#e5534b" stroke-width="2.2" marker-end="url(#emF)"/>'
+                + '<line class="kb-flow" x1="402" y1="100" x2="500" y2="100" stroke="#e5534b" stroke-width="1.2" marker-end="url(#emF)"/>'
+                + '<text x="520" y="96" class="fig-sub" fill="#2ea043">방출↓</text><text x="520" y="110" class="fig-sub" fill="#7a8694">(한계 이하)</text>'
+                + '<text x="310" y="190" text-anchor="middle" class="fig-sub">발생원 억제 + 경로 차단 = 설계 단계 EMC 예방</text>'
+                + '</svg>'
+            },
 
             { t: "h", text: "방사의 두 발생원" },
             { t: "kv", rows: [
