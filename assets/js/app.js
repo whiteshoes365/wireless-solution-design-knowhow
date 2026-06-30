@@ -10,12 +10,26 @@
     return n;
   };
 
-  /* ---- index for search ---- */
-  const index = []; // {chapId, chapTitle, secId, secTitle, text}
-  KB.chapters.forEach(ch => ch.sections.forEach(sec => {
+  /* ---- tabs ---- */
+  const TABS = KB.tabs || [{ id: "main", label: "문서", icon: "📘", chapters: KB.chapters || [] }];
+  let activeTab = TABS[0].id;
+  function tabById(id) { return TABS.find(t => t.id === id) || TABS[0]; }
+  function chaptersOf(tabId) { return tabById(tabId).chapters; }
+  function findChapter(chapId) {
+    for (const t of TABS) { const c = t.chapters.find(c => c.id === chapId); if (c) return { tab: t, ch: c }; }
+    return null;
+  }
+  function findSectionTab(secId) {
+    for (const t of TABS) if (t.chapters.some(c => c.sections.some(s => s.id === secId))) return t;
+    return null;
+  }
+
+  /* ---- index for search (all tabs) ---- */
+  const index = []; // {tabId, tabLabel, chapTitle, secId, secTitle, text}
+  TABS.forEach(t => t.chapters.forEach(ch => ch.sections.forEach(sec => {
     const text = blocksToText(sec.blocks);
-    index.push({ chapId: ch.id, chapTitle: ch.title, secId: sec.id, secTitle: sec.title, text });
-  }));
+    index.push({ tabId: t.id, tabLabel: t.label, chapTitle: ch.title, secId: sec.id, secTitle: sec.title, text });
+  })));
 
   function blocksToText(blocks) {
     return (blocks || []).map(b => {
@@ -100,7 +114,7 @@
   function renderAutoCheck() {
     const wrap = el("div", "blk autocheck");
     let total = 0;
-    KB.chapters.forEach(ch => {
+    chaptersOf("design").forEach(ch => {
       const items = [];
       ch.sections.forEach(sec => {
         (sec.blocks || []).forEach(b => {
@@ -125,11 +139,32 @@
     return wrap;
   }
 
+  /* ---- tab bar ---- */
+  function buildTabBar() {
+    const bar = $("#tabbar");
+    if (!bar) return;
+    bar.innerHTML = "";
+    TABS.forEach(t => {
+      const b = el("button", "tab-btn" + (t.id === activeTab ? " active" : ""),
+        `<span>${t.icon || ""}</span><span>${esc(t.label)}</span>`);
+      b.dataset.tab = t.id;
+      b.addEventListener("click", () => {
+        if (t.id === activeTab) return;
+        activeTab = t.id;
+        buildTabBar();
+        buildSidebar();
+        const first = chaptersOf(t.id)[0];
+        if (first) location.hash = first.id;
+      });
+      bar.appendChild(b);
+    });
+  }
+
   /* ---- sidebar ---- */
   function buildSidebar() {
     const nav = $("#nav");
     nav.innerHTML = "";
-    KB.chapters.forEach(ch => {
+    chaptersOf(activeTab).forEach(ch => {
       const wrap = el("div", "nav-chapter");
       wrap.dataset.chap = ch.id;
       const btn = el("button", null,
@@ -150,7 +185,9 @@
 
   /* ---- render a chapter page ---- */
   function renderChapter(chapId, focusSecId) {
-    const ch = KB.chapters.find(c => c.id === chapId) || KB.chapters[0];
+    const found = findChapter(chapId) || { tab: TABS[0], ch: TABS[0].chapters[0] };
+    const ch = found.ch;
+    if (found.tab.id !== activeTab) { activeTab = found.tab.id; buildTabBar(); buildSidebar(); }
     const main = $("#main");
     main.innerHTML = "";
     const head = el("div", "page-head");
@@ -191,9 +228,10 @@
 
   /* ---- chapter prev/next navigation ---- */
   function buildChapterNav(chapId) {
-    const idx = KB.chapters.findIndex(c => c.id === chapId);
-    const prev = KB.chapters[idx - 1];
-    const next = KB.chapters[idx + 1];
+    const chs = chaptersOf(activeTab);
+    const idx = chs.findIndex(c => c.id === chapId);
+    const prev = chs[idx - 1];
+    const next = chs[idx + 1];
     const nav = el("nav", "chap-nav");
     const mk = (ch, dir) => {
       if (!ch) { nav.appendChild(el("span", "chap-nav-spacer")); return; }
@@ -232,17 +270,18 @@
 
   /* ---- routing via hash (section id) ---- */
   function findChapterOfSection(secId) {
-    for (const ch of KB.chapters)
-      if (ch.sections.some(s => s.id === secId)) return ch.id;
+    for (const t of TABS)
+      for (const ch of t.chapters)
+        if (ch.sections.some(s => s.id === secId)) return ch.id;
     return null;
   }
   function route() {
     const hash = decodeURIComponent(location.hash.replace(/^#/, ""));
-    if (!hash) { renderChapter(KB.chapters[0].id); return; }
+    if (!hash) { renderChapter(TABS[0].chapters[0].id); return; }
     const chapId = findChapterOfSection(hash);
     if (chapId) renderChapter(chapId, hash);
-    else if (KB.chapters.some(c => c.id === hash)) renderChapter(hash);
-    else renderChapter(KB.chapters[0].id);
+    else if (findChapter(hash)) renderChapter(hash);
+    else renderChapter(TABS[0].chapters[0].id);
   }
 
   /* ---- scroll-spy: highlight section in view ---- */
@@ -294,7 +333,7 @@
       const h3 = el("h3", null, highlight(item.secTitle, terms));
       h3.style.cursor = "pointer";
       h3.addEventListener("click", () => { location.hash = item.secId; });
-      s.appendChild(el("div", "crumb", esc(item.chapTitle)));
+      s.appendChild(el("div", "crumb", esc(item.tabLabel + " · " + item.chapTitle)));
       s.appendChild(h3);
       s.appendChild(el("p", "blk-p", snippet(item.text, terms)));
       main.appendChild(s);
@@ -340,14 +379,17 @@
     head.appendChild(el("div", "crumb", esc(KB.meta.subtitle) +
       ` · v${KB.meta.version} · ${KB.meta.updated}`));
     main.appendChild(head);
-    KB.chapters.forEach(ch => {
-      main.appendChild(el("h2", "print-chap", (ch.icon ? ch.icon + " " : "") + esc(ch.title)));
-      ch.sections.forEach(sec => {
-        const s = el("section", "section");
-        s.id = sec.id;
-        s.appendChild(el("h3", null, esc(sec.title)));
-        (sec.blocks || []).forEach(b => s.appendChild(renderBlock(b)));
-        main.appendChild(s);
+    TABS.forEach(t => {
+      main.appendChild(el("h1", "print-tab", (t.icon ? t.icon + " " : "") + esc(t.label)));
+      t.chapters.forEach(ch => {
+        main.appendChild(el("h2", "print-chap", (ch.icon ? ch.icon + " " : "") + esc(ch.title)));
+        ch.sections.forEach(sec => {
+          const s = el("section", "section");
+          s.id = sec.id;
+          s.appendChild(el("h3", null, esc(sec.title)));
+          (sec.blocks || []).forEach(b => s.appendChild(renderBlock(b)));
+          main.appendChild(s);
+        });
       });
     });
     window.scrollTo(0, 0);
@@ -366,6 +408,7 @@
     $("#topTitle").textContent = KB.meta.title;
     document.title = KB.meta.title;
 
+    buildTabBar();
     buildSidebar();
 
     let theme = "dark";

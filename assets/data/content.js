@@ -27,7 +27,10 @@ window.KB_CONTENT = {
     updated: "2026-06-30"
   },
 
-  chapters: [
+  tabs: [
+   {
+    id: "design", label: "HW 설계 과정", icon: "🛠️",
+    chapters: [
     /* ───────────────────────── 0. 시작하기 ───────────────────────── */
     {
       id: "intro",
@@ -1852,5 +1855,7 @@ window.KB_CONTENT = {
         }
       ]
     }
+    ]
+   }
   ]
 };
