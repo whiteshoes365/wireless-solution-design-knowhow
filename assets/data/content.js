@@ -292,6 +292,26 @@ window.KB_CONTENT = {
                 ["Wi-Fi HaLow", "Sub-G(900M대)", "지역별", "수백 m~km", "저전력 장거리", "Sub-G 안테나 크기, 지역 주파수"],
               ]
             },
+            { t: "fig",
+              caption: "송신기(좌)에서 나가는 신호가 규격별로 도달하는 거리(개략). 출력·주파수·메시 여부에 따라 도달 범위가 다르다. 파동이 퍼지는 모습은 방사를 나타낸다.",
+              svg: '<svg viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="규격별 도달거리 비교">'
+                + '<circle cx="60" cy="115" r="9" fill="#4aa3ff"/>'
+                + '<circle class="kb-grow" cx="60" cy="115" r="16" fill="none" stroke="#4aa3ff" stroke-width="2"/>'
+                + '<circle class="kb-grow kb-d2" cx="60" cy="115" r="16" fill="none" stroke="#4aa3ff" stroke-width="2"/>'
+                + '<text x="60" y="150" text-anchor="middle" class="fig-sub" fill="#4aa3ff">송신기</text>'
+                + (function(){
+                    var rows=[['NFC','<10cm',95,'#e5534b'],['BLE','~10–30m',150,'#a371f7'],['Zigbee(메시)','~10–100m',230,'#2ea043'],['WiFi','수십 m',300,'#4aa3ff'],['Wi-Fi HaLow','수백 m–km',520,'#e3b341']];
+                    var out='';var y=42;
+                    rows.forEach(function(r,i){
+                      var yy=y+i*34;
+                      out+='<line x1="78" y1="'+yy+'" x2="'+(78+r[2]*0.9)+'" y2="'+yy+'" stroke="'+r[3]+'" stroke-width="6" stroke-linecap="round" opacity="0.85"/>';
+                      out+='<text x="'+(78+r[2]*0.9+8)+'" y="'+(yy+4)+'" class="fig-sub" fill="'+r[3]+'">'+r[0]+' · '+r[1]+'</text>';
+                    });
+                    return out;
+                  })()
+                + '<text x="310" y="222" text-anchor="middle" class="fig-sub">도달거리: NFC ≪ BLE &lt; Zigbee ≈ WiFi ≪ HaLow (개략·환경 의존)</text>'
+                + '</svg>'
+            },
             { t: "note", kind: "info", title: "공존(Coexistence)", html: "WiFi와 BT/Zigbee는 같은 2.4GHz를 씁니다. 한 모듈/한 보드에 함께 있으면 서로 간섭하므로 <b>PTA(Packet Traffic Arbitration) 신호, 안테나 격리, 필터</b>로 공존 설계가 필요합니다. 다음 섹션에서 실전 딥다이브." },
           ]
         },
@@ -309,6 +329,20 @@ window.KB_CONTENT = {
               "Zigbee는 16개 채널(2MHz 간격) — WiFi와 겹치지 않는 채널 선택이 권장",
               "BLE/802.15.4는 <b>주파수 호핑·채널 회피</b>로 간섭을 피함",
             ]},
+            { t: "fig",
+              caption: "2.4GHz 대역에서 WiFi 비중첩 채널 1·6·11이 넓게 자리를 차지(깜빡임=점유). BLE는 작은 채널을 그 틈으로 옮겨다니며(호핑) 충돌을 회피한다. 같은 대역을 시간·주파수로 나눠 쓰는 모습.",
+              svg: '<svg viewBox="0 0 620 200" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2.4GHz WiFi 채널 점유와 BLE 호핑">'
+                + '<text x="40" y="24" class="fig-label">2.4 GHz 대역 (2400–2483 MHz)</text>'
+                + '<rect class="kb-pulse" x="60" y="62" width="120" height="78" rx="4" fill="#4aa3ff" fill-opacity="0.18" stroke="#4aa3ff" stroke-opacity="0.55"/><text x="120" y="106" text-anchor="middle" class="fig-sub" fill="#4aa3ff">WiFi ch1</text>'
+                + '<rect class="kb-pulse kb-d2" x="250" y="62" width="120" height="78" rx="4" fill="#4aa3ff" fill-opacity="0.18" stroke="#4aa3ff" stroke-opacity="0.55"/><text x="310" y="106" text-anchor="middle" class="fig-sub" fill="#4aa3ff">WiFi ch6</text>'
+                + '<rect class="kb-pulse kb-d4" x="440" y="62" width="120" height="78" rx="4" fill="#4aa3ff" fill-opacity="0.18" stroke="#4aa3ff" stroke-opacity="0.55"/><text x="500" y="106" text-anchor="middle" class="fig-sub" fill="#4aa3ff">WiFi ch11</text>'
+                + '<line x1="40" y1="150" x2="580" y2="150" stroke="#7a8694" stroke-width="1.5"/>'
+                + '<text x="40" y="168" class="fig-sub">2400</text><text x="580" y="168" text-anchor="end" class="fig-sub">2483</text>'
+                + '<g><circle r="8" cy="44" fill="#a371f7"><animate attributeName="cx" values="50;215;560;405;215;50" dur="3.2s" calcMode="discrete" repeatCount="indefinite"/></circle>'
+                + '<text x="50" y="40" class="fig-sub" fill="#a371f7"><animate attributeName="x" values="62;227;530;417;227;62" dur="3.2s" calcMode="discrete" repeatCount="indefinite"/>BLE</text></g>'
+                + '<text x="310" y="192" text-anchor="middle" class="fig-sub" fill="#a371f7">BLE 광고채널(37·38·39)은 WiFi 틈으로 회피 · 주파수 호핑</text>'
+                + '</svg>'
+            },
             { t: "h", text: "간섭의 두 종류" },
             { t: "kv", rows: [
               ["자기 공존(in-device)", "한 제품의 WiFi↔BT가 서로의 수신기를 막음. 가까워서(수 cm) 강력 — PTA·필터·격리로 대응"],
