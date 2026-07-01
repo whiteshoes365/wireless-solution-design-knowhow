@@ -1757,6 +1757,77 @@ window.KB_CONTENT = {
             { t: "note", kind: "warn", title: "인증값 = worst case, 양산 = 전수 보정", html: "인증은 보통 대표 샘플로 받지만, 그 샘플이 <b>worst-case 채널·온도</b>에서 한계 안이어야 합니다. 양산에서는 <b>캘리브레이션으로 전 개체를 타겟에 맞춰</b> 산포가 한계를 넘지 않게 합니다. '인증 통과'와 '양산 전수 합격'은 캘리브레이션으로 연결됩니다." },
             { t: "note", kind: "info", title: "연결", html: "타겟 개념은 3장 <a href='#proc-targets'>설계 목표값</a>, 출력 분해는 <a href='#proc-targets'>EIRP</a>, 양산 캘리·치구는 8장 <a href='#prod-rftest'>양산 RF 테스트</a>, 측정 장비·교정은 <a href='#ver-measure'>측정 항목</a> 참조." },
           ]
+        },
+        {
+          id: "ver-cal-esp32",
+          title: "워크드 예제 — ESP32로 보는 타겟파워·캘리브레이션",
+          blocks: [
+            { t: "note", kind: "warn", title: "왜 ESP32를 예로 드나 (그리고 한계)", html: "앞 절의 일반 과정을 <b>실제 칩</b>에 대입해 봅니다. 예시는 <b>ESP32(Espressif, Wi-Fi+BLE)</b> — 가전·IoT에 널리 쓰이고 <b>RF 캘리브레이션·출력 API가 공개 문서로 확인</b> 가능하기 때문입니다. 삼성 모듈 등 다른 칩(Qualcomm/Realtek/Broadcom 등)은 API 이름·레지스터가 다르지만 <b>구조(타겟 테이블 + 개체 캘리 + 국가 설정)는 동일</b>합니다. 아래 API/값은 <b>ESP-IDF 버전에 따라 변할 수 있으니 최신 문서(docs.espressif.com) 확인</b>하세요." },
+
+            { t: "h", text: "일반 개념 → ESP32 대응" },
+            { t: "table",
+              head: ["일반 과정 (앞 절)", "ESP32에서의 실체", "형태"],
+              rows: [
+                ["채널·rate별 타겟파워 테이블", "<b>PHY init data</b>(phy_init_data.bin) — rate·채널별 최대 출력 한계", "빌드 시 바이너리/파티션"],
+                ["지역(국가)별 채널·출력", "<b>esp_wifi_set_country()</b> + 국가별 PHY init data(multiple init bin)", "펌웨어 설정"],
+                ["펌웨어가 타겟 dBm 요청", "<b>esp_wifi_set_max_tx_power()</b> (Wi-Fi), <b>esp_ble_tx_power_set()</b> (BLE)", "런타임 API"],
+                ["개체 캘리브레이션(파워/IQ 등)", "<b>부팅 시 RF calibration</b> → 결과 <b>NVS에 저장</b>", "부팅/양산"],
+                ["주파수 오차 보정", "크리스털 캘값(예: NVS/eFuse의 XTAL 관련 값)", "양산 기입"],
+              ]
+            },
+
+            { t: "h", text: "출력 흐름 (요청 → 실제 EIRP)" },
+            { t: "fig",
+              caption: "펌웨어가 타겟 출력을 요청하면, PHY init 한계·국가 설정으로 상한이 걸리고, 부팅 RF 캘값으로 실제 dBm이 보정되어 PA→안테나로 나간다. 안테나 이득까지 더한 EIRP가 규제 한계 아래여야 한다.",
+              svg: '<svg viewBox="0 0 620 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ESP32 출력 흐름">'
+                + '<defs><marker id="e3F" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4aa3ff"/></marker></defs>'
+                + (function(){
+                    var s=[['펌웨어\\nset_max_tx_power','#a371f7'],['PHY init 한계\\n+ 국가설정','#e3b341'],['RF 캘값\\n(NVS)','#2ea043'],['PA·안테나','#4aa3ff'],['EIRP\\n≤ 규제한계','#e5534b']];
+                    var out='';var x0=32,bw=100,gap=14;
+                    s.forEach(function(it,i){
+                      var x=x0+i*(bw+gap);
+                      out+='<rect x="'+x+'" y="52" width="'+bw+'" height="58" rx="8" fill="'+it[1]+'" fill-opacity="0.14" stroke="'+it[1]+'" stroke-opacity="0.6"/>';
+                      var lines=it[0].split('\\n');
+                      lines.forEach(function(ln,k){out+='<text x="'+(x+bw/2)+'" y="'+(78+k*14)+'" text-anchor="middle" class="fig-sub" style="fill:'+it[1]+';font-size:10.5px">'+ln+'</text>';});
+                      if(i<s.length-1) out+='<line class="kb-flow" x1="'+(x+bw)+'" y1="81" x2="'+(x+bw+gap)+'" y2="81" stroke="#4aa3ff" stroke-width="2" marker-end="url(#e3F)"/>';
+                    });
+                    return out;
+                  })()
+                + '<text x="310" y="150" text-anchor="middle" class="fig-sub">상한(PHY init·국가) ∩ 개체보정(캘값) → 정확·안전한 실제 출력</text>'
+                + '</svg>'
+            },
+
+            { t: "h", text: "1) 타겟파워 지정 — PHY init data + API" },
+            { t: "p", html: "ESP32는 <b>PHY init data</b>에 rate·채널별 최대 출력 한계가 들어 있고, 런타임에는 API로 상한을 겁니다. 실제 출력은 이 둘 중 <b>낮은 값</b>으로 제한됩니다." },
+            { t: "kv", rows: [
+              ["Wi-Fi 최대 출력", "<code>esp_wifi_set_max_tx_power(power)</code> — 단위 <b>0.25dBm</b>, 범위 <b>[8, 84]</b> = <b>2 ~ 20 dBm</b> (예: 80 → 20dBm)"],
+              ["국가/채널", "<code>esp_wifi_set_country(&country)</code> — 국가코드·시작채널·채널수·<code>max_tx_power</code>·정책"],
+              ["BLE 출력", "<code>esp_ble_tx_power_set(type, level)</code> — level은 enum(<code>ESP_PWR_LVL_*</code>, 칩별 dBm 상이)"],
+              ["PHY init 한계", "phy_init_data.bin의 rate별 상한 — 여기서 <b>band edge·고rate 타겟을 낮춰</b> 규제 만족"],
+            ]},
+            { t: "note", kind: "tip", title: "국가별 다중 PHY init", html: "ESP-IDF는 <b>국가별 PHY init data(multiple init data bin)</b>를 지원합니다. 지역마다 채널·출력 한계가 다르므로, 제품이 국가를 알면(설정/프로비저닝) 해당 테이블을 적용해 <b>한 HW로 여러 지역 인증</b>을 커버합니다. (Wi-Fi 탭 <a href='#wifi-region-overview'>국가별 채널</a>과 직결)" },
+
+            { t: "h", text: "2) 캘리브레이션 — 부팅 RF cal + NVS" },
+            { t: "note", kind: "why", title: "ESP32의 RF 캘리브레이션", html: "ESP32는 <b>부팅 시 RF calibration</b>을 수행해 <b>TX 파워·캐리어 누설·IQ 불균형</b> 등을 개체·환경에 맞게 보정합니다. 결과(캘값)를 <b>NVS에 저장</b>해 다음 부팅을 빠르게 합니다. 모드가 있습니다:" },
+            { t: "table",
+              head: ["캘리 모드", "동작", "언제"],
+              rows: [
+                ["PHY_RF_CAL_PARTIAL", "부분 캘리(빠름)", "일반 부팅 기본값"],
+                ["PHY_RF_CAL_FULL", "전체 캘리(느림·정확)", "캘값 무효/버전변경/큰 온도차"],
+                ["PHY_RF_CAL_NONE", "캘리 생략(저장값 사용)", "초고속 부팅(정확도 trade-off)"],
+              ]
+            },
+            { t: "note", kind: "warn", title: "온도·저장 캘값 주의", html: "부분 캘리·저장값 재사용은 부팅을 빠르게 하지만, <b>온도가 캘리 시점과 크게 다르면 출력·성능이 틀어질</b> 수 있습니다. 넓은 온도 범위(가전!)에서는 <b>전체 캘리 조건·주기</b>를 신중히 정하고, 양산 시 대표 온도에서 검증하세요." },
+
+            { t: "h", text: "3) 양산·인증 연결" },
+            { t: "list", ordered: true, items: [
+              "설계 안테나 이득 반영해 <b>PHY init 출력 한계를 규제 EIRP − 마진</b>으로 설정(band edge 채널 하향)",
+              "샘플로 전 채널·온도 측정 → 한계 안 확인 후 <b>인증</b>(대표값 worst-case)",
+              "양산 라인: 개체 <b>부팅 RF 캘리 + 필요시 파워/주파수 캘값 기입</b>, 도전 측정으로 합격 판정",
+              "케이스 포함 <b>OTA(TRP/TIS)</b>로 최종 EIRP·감도 확인",
+            ]},
+            { t: "note", kind: "info", title: "정리 — 개념은 어느 칩이든 같다", html: "칩이 바뀌면 'PHY init data'는 다른 이름의 <b>파워 테이블/레지스터</b>로, 'esp_wifi_set_max_tx_power'는 다른 <b>출력 설정 API</b>로, '부팅 RF cal'은 벤더의 <b>캘리 루틴</b>으로 바뀔 뿐입니다. <b>①타겟 테이블(채널·지역·rate) ②개체 캘리(파워/IQ/주파수) ③국가 설정</b>이라는 세 축은 동일합니다. (일반 과정은 <a href='#ver-cal'>앞 절</a>)" },
+          ]
         }
       ]
     },
