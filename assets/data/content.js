@@ -273,6 +273,89 @@ window.KB_CONTENT = {
           ]
         },
         {
+          id: "rf-rx",
+          title: "딥다이브 — 수신 체인·감도·잡음지수(NF)",
+          blocks: [
+            { t: "p", html: "송신이 '멀리 보내기'라면 수신은 '<b>아주 작은 신호를, 잡음을 최소한만 더해 알아듣기</b>'입니다. 수신 성능은 <b>감도(sensitivity)</b>로 표현되고, 그 열쇠는 <b>잡음지수(NF)</b>와 <b>LNA 앞단 손실</b>입니다. 통신거리의 절반은 사실 수신이 결정합니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "수신은 <b>시끄러운 방에서 속삭임을 알아듣기</b>입니다. 속삭임(미약 신호)을 키우되(증폭), 그 과정에서 <b>내가 내는 잡음(NF)을 최소</b>로 해야 합니다. 첫 번째로 귀 기울이는 사람(LNA)이 조용해야(낮은 NF) 뒤 단계가 아무리 시끄러워도 괜찮습니다." },
+
+            { t: "h", text: "수신 체인 — 안테나에서 비트까지" },
+            { t: "fig",
+              caption: "수신 체인: 안테나 → (스위치/필터) → LNA → 믹서(LO로 하향변환) → 필터 → ADC → 복조. LNA 앞의 모든 손실은 잡음지수에 그대로 더해지고, 첫 단 LNA가 전체 NF를 지배한다.",
+              svg: '<svg viewBox="0 0 620 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="수신 체인 흐름도">'
+                + '<defs><marker id="rxF" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L5.5,3 L0,6 Z" fill="#2ea043"/></marker></defs>'
+                + '<line x1="30" y1="60" x2="30" y2="98" stroke="#2ea043" stroke-width="2"/>'
+                + '<circle class="kb-grow" cx="30" cy="79" r="14" fill="none" stroke="#2ea043" stroke-width="1.5"/>'
+                + '<text x="30" y="118" text-anchor="middle" class="fig-sub" fill="#2ea043">안테나</text>'
+                + (function(){
+                    var s=[['필터/\\n스위치','#9aa7b4'],['LNA','#e5534b'],['믹서 ⊗','#2ea043'],['필터','#9aa7b4'],['ADC','#e3b341'],['복조','#a371f7']];
+                    var out='';var x0=62,bw=76,gap=12,y=54,h=50;
+                    s.forEach(function(it,i){
+                      var x=x0+i*(bw+gap);
+                      out+='<line class="kb-flow" x1="'+(x-gap-(i===0?18:0))+'" y1="79" x2="'+x+'" y2="79" stroke="#2ea043" stroke-width="2" marker-end="url(#rxF)"/>';
+                      out+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="7" fill="'+it[1]+'" fill-opacity="0.15" stroke="'+it[1]+'" stroke-opacity="0.6"/>';
+                      var ln=it[0].split('\\n');
+                      ln.forEach(function(t,k){out+='<text x="'+(x+bw/2)+'" y="'+(y+(ln.length===2?20:30)+k*15)+'" text-anchor="middle" class="fig-sub" style="fill:'+it[1]+';font-size:11px">'+t+'</text>';});
+                    });
+                    // LO under mixer (3rd box index 2)
+                    var mx=62+2*(bw+gap); var mcx=mx+bw/2;
+                    out+='<line x1="'+mcx+'" y1="104" x2="'+mcx+'" y2="140" stroke="#e5534b" stroke-width="1.5"/><text x="'+mcx+'" y="156" text-anchor="middle" class="fig-sub" fill="#e5534b">LO(PLL)</text>';
+                    // highlight LNA-front
+                    out+='<rect x="52" y="42" width="118" height="76" rx="9" fill="none" stroke="#e5534b" stroke-dasharray="4 3" opacity="0.6"/>';
+                    out+='<text x="111" y="132" text-anchor="middle" class="fig-sub" fill="#e5534b">이 앞 손실 = NF에 직접 가산</text>';
+                    return out;
+                  })()
+                + '<text x="310" y="196" text-anchor="middle" class="fig-sub">첫 단(LNA)의 NF·이득이 전체 수신 감도를 좌우한다</text>'
+                + '</svg>'
+            },
+
+            { t: "h", text: "감도(Sensitivity) — 얼마나 작은 신호까지" },
+            { t: "note", kind: "why", title: "감도 공식", html: "<b>감도(dBm) = −174 dBm/Hz (열잡음) + 10·log₁₀(대역폭 Hz) + NF(dB) + 요구 SNR(dB)</b><br>즉 ①물리적 <b>열잡음 바닥</b>(−174dBm/Hz)에 ②<b>대역폭</b>(넓을수록 잡음↑)과 ③<b>NF</b>(회로가 더하는 잡음)와 ④변조가 요구하는 <b>SNR</b>을 더한 값입니다. 이보다 큰 신호라야 복조됩니다. <b>NF를 1dB 줄이면 감도가 1dB 좋아진다</b>(거리 이득)." },
+            { t: "fig",
+              caption: "감도 예산 쌓기. 열잡음 바닥에 대역폭·NF·요구 SNR이 더해져 최소 수신 가능 레벨(감도)이 정해진다. NF를 줄이면 감도 레벨이 내려가(더 약한 신호 수신) 통신거리가 는다.",
+              svg: '<svg viewBox="0 0 620 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="감도 예산 스택">'
+                + (function(){
+                    var seg=[['열잡음 바닥 (−174dBm/Hz)','#9aa7b4',150],['+ 대역폭 10·log(BW)','#4aa3ff',110],['+ NF (회로 잡음)','#e5534b',70],['+ 요구 SNR (변조)','#e3b341',55]];
+                    var out='';var y=30;
+                    seg.forEach(function(s,i){
+                      var yy=y+i*38;
+                      out+='<rect x="40" y="'+yy+'" width="'+s[2]+'" height="28" rx="3" fill="'+s[1]+'" fill-opacity="0.3" stroke="'+s[1]+'" stroke-opacity="0.6"/>';
+                      out+='<text x="'+(40+s[2]+10)+'" y="'+(yy+19)+'" class="fig-sub" fill="'+s[1]+'">'+s[0]+'</text>';
+                    });
+                    return out;
+                  })()
+                + '<line x1="40" y1="188" x2="580" y2="188" stroke="#2ea043" stroke-width="2"/>'
+                + '<text x="40" y="204" class="fig-sub" fill="#2ea043">= 감도(최소 수신 가능 레벨) · 낮을수록(더 음수) 멀리 듣는다</text>'
+                + '</svg>'
+            },
+
+            { t: "h", text: "잡음지수 캐스케이드 — 왜 LNA가 맨 앞·저잡음인가" },
+            { t: "note", kind: "why", title: "Friis 캐스케이드", html: "여러 단이 이어질 때 전체 잡음지수는 <b>F<sub>total</sub> = F₁ + (F₂−1)/G₁ + (F₃−1)/(G₁G₂) + …</b> 입니다. <b>첫 단(F₁)이 그대로 더해지고, 뒷단은 앞단 이득(G)으로 나뉘어 영향이 작아집니다</b>. 그래서 ①<b>첫 단 LNA는 NF가 낮고 이득이 높아야</b> 하고, ②<b>LNA 앞의 손실(스위치·필터·매칭)은 NF에 1:1로 더해져</b> 감도를 직접 깎습니다." },
+            { t: "note", kind: "warn", title: "LNA 앞 손실 = 감도 손실", html: "안테나~LNA 사이의 <b>1dB 손실은 감도 1dB 악화</b>입니다. 그래서 이 구간의 <b>스위치·필터·매칭·전송선 손실을 최소화</b>하고, 가능하면 LNA를 안테나에 가깝게 둡니다. (안테나 효율까지 포함한 실제 수신 성능은 <a href='#ant-ota'>OTA의 TIS</a>로 측정)" },
+
+            { t: "h", text: "큰 신호도 문제 — 선택도·블로킹·다이나믹 레인지" },
+            { t: "kv", rows: [
+              ["선택도(Selectivity)", "원하는 채널만 통과, 인접 강신호 배제 — 필터가 담당"],
+              ["블로킹/desense", "근처 강한 신호(다른 무선·DC-DC 고조파)가 수신기를 마비 → 감도 저하"],
+              ["이미지(image)", "믹서 특성상 f_LO 반대편 주파수도 섞임 → 이미지 제거 필터/구조 필요(Zero-IF는 IQ로 억제)"],
+              ["IP3 / 선형성", "강신호 2개가 만드는 혼변조(IM3)가 채널에 떨어짐 — 선형성(IP3)이 클수록 견딤"],
+              ["다이나믹 레인지", "가장 약한 신호(감도)~가장 강한 신호 사이 폭. AGC로 이득 조절"],
+            ]},
+            { t: "note", kind: "tip", title: "가전에서 특히 — self-desense", html: "가전은 한 보드에 DC-DC·디지털·모터가 많아, 그 <b>고조파가 자기 수신기를 desense</b>시키는 경우가 흔합니다. 감도가 스펙보다 나쁘면 외부가 아니라 <b>내 보드 노이즈</b>를 의심하세요. (7장 <a href='#ver-emc-design'>EMC</a>·<a href='#ver-debug-cases'>디버깅 사례</a>)" },
+
+            { t: "h", text: "수신 성능을 위한 HW 체크리스트" },
+            { t: "check", items: [
+              "안테나~LNA 구간 <b>손실 최소화</b>(스위치·필터·매칭·라인)",
+              "첫 단 <b>LNA의 NF·이득</b> 확인(외장 LNA 시 특히)",
+              "인접 간섭 대비 <b>필터(BPF/SAW) 선택도</b> vs 삽입손실 균형",
+              "DC-DC·디지털 <b>고조파의 수신대역 침범 차단</b>(배치·필터·차폐) — desense 방지",
+              "강신호 환경이면 <b>선형성(IP3)</b> 여유 있는 프론트엔드",
+              "실제 감도는 <b>OTA(TIS)</b>로 — S11·효율이 좋아도 desense면 나쁨",
+            ]},
+            { t: "note", kind: "info", title: "연결", html: "송신 체인은 앞 절 <a href='#rf-chain'>신호 체인</a>, LNA·필터는 4장 <a href='#ckt-frontend'>RF 프론트엔드</a>, 실측은 6장 <a href='#ant-ota'>OTA(TIS)</a>, desense는 7장 <a href='#ver-emc-design'>EMC</a> 참조." },
+          ]
+        },
+        {
           id: "rf-impedance-matching",
           title: "50Ω·임피던스 매칭이 핵심인 이유",
           blocks: [
@@ -975,6 +1058,66 @@ window.KB_CONTENT = {
               "양산 주파수 캘리브레이션 공정 계획",
             ]},
             { t: "note", kind: "info", title: "연결", html: "ppm·load cap 요구는 <a href='#proc-datasheet'>데이터시트</a>에서 확인하고, 클럭 배치·격리는 5장 <a href='#pcb-placement'>부품 배치</a>, EVM 측정은 7장 <a href='#ver-measure'>측정 항목</a> 참조." },
+          ]
+        },
+        {
+          id: "ckt-xtal-select",
+          title: "크리스탈(XTAL) 선정 가이드 — 신규 설계 부품 선정",
+          blocks: [
+            { t: "p", html: "신규 무선모듈을 설계할 때 크리스탈은 '아무거나 주파수만 맞으면' 되는 부품이 아닙니다. <b>주파수·ppm·부하용량(CL)·ESR·구동레벨·온도·크기</b>를 칩과 규격에 맞춰 골라야 하고, 하나만 어긋나도 <b>발진 안 됨·주파수 오차·통신 불량</b>이 됩니다. 부품 선정 시 확인 항목을 정리합니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "크리스탈은 <b>메트로놈(박자기)</b>입니다. 정확한 박자(주파수)를 내되, 태엽(CL·구동레벨)이 시계(칩 발진기)와 맞아야 잘 돕니다. 방 온도가 변해도(가전 −10~+60℃) 박자가 흔들리지 않아야 하고(온도 안정도), 세월이 지나도(노화) 크게 안 틀려야 합니다." },
+
+            { t: "h", text: "① 주파수 — 칩이 요구하는 값" },
+            { t: "list", items: [
+              "RF 칩 데이터시트가 지정한 <b>기준 주파수</b>(예: 26·38.4·40 MHz 등)를 정확히",
+              "슬립/RTC용 <b>32.768kHz</b>가 별도로 필요한지(저전력 타이밍)",
+              "칩이 여러 옵션을 지원해도 <b>레퍼런스 디자인이 쓰는 값</b>을 우선(검증된 설정)",
+            ]},
+
+            { t: "h", text: "② 주파수 안정도(ppm) — 예산으로 관리" },
+            { t: "note", kind: "why", title: "ppm은 '합산 예산'이다", html: "규격 허용 ppm(예: WiFi ±20~25, BLE ±50)은 <b>초기 공차 + 온도 안정도 + 노화 + load cap 오차</b>를 <b>모두 합쳐</b> 만족해야 합니다. 하나만 보고 고르면 온도·수명에서 벗어납니다. 가전은 온도범위가 넓어 <b>온도 안정도 항목이 가장 크게</b> 잡아먹습니다." },
+            { t: "fig",
+              caption: "ppm 예산: 초기공차 + 온도안정도 + 노화 + load cap 오차의 합이 규격 허용 ppm 안에 들어야 한다. 가전 넓은 온도에선 온도 항목이 크므로 마진 관리가 핵심.",
+              svg: '<svg viewBox="0 0 620 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ppm 예산 스택">'
+                + (function(){
+                    var seg=[['초기 공차','#4aa3ff',90],['온도 안정도','#e5534b',150],['노화(수명)','#e3b341',60],['load cap 오차','#a371f7',70]];
+                    var out='';var x=40;
+                    seg.forEach(function(s,i){
+                      out+='<rect x="'+x+'" y="50" width="'+s[1]+'" height="30" rx="3" fill="'+s[2]+'" fill-opacity="0.3" stroke="'+s[2]+'" stroke-opacity="0.6"/>';
+                      out+='<text x="'+(x+s[1]/2)+'" y="70" text-anchor="middle" class="fig-sub" fill="'+s[2]+'" style="font-size:10px">'+s[0]+'</text>';
+                      x+=s[1]+4;
+                    });
+                    out+='<line x1="'+x+'" y1="36" x2="'+x+'" y2="94" stroke="#2ea043" stroke-width="2" stroke-dasharray="4 3"/>';
+                    out+='<text x="'+(x+8)+'" y="68" class="fig-sub" fill="#2ea043">규격 허용</text><text x="'+(x+8)+'" y="82" class="fig-sub" fill="#2ea043">ppm 한계</text>';
+                    return out;
+                  })()
+                + '<text x="40" y="120" class="fig-sub">합계 ≤ 규격 허용 ppm · 넘으면 → TCXO 검토</text>'
+                + '<text x="40" y="140" class="fig-sub" fill="#7a8694">가전(넓은 온도)은 온도 안정도가 예산의 대부분을 차지</text>'
+                + '</svg>'
+            },
+
+            { t: "h", text: "③ 부하용량(CL) — 발진기와 맞춰야" },
+            { t: "note", kind: "why", title: "CL과 load cap", html: "크리스탈은 지정된 <b>부하용량 CL</b>에서 정확한 주파수를 냅니다. 보드의 외부 load cap은 <b>C<sub>ext</sub> ≈ 2 × (CL − C<sub>stray</sub>)</b> 로 정합니다(C<sub>stray</sub>=핀·배선 기생, 보통 2~5pF). CL이 어긋나면 주파수가 <b>당겨져(pulling)</b> ppm 오차가 납니다. <b>칩 발진기가 기대하는 CL과 크리스탈 CL을 일치</b>시키는 것이 핵심." },
+
+            { t: "h", text: "④ ESR·구동레벨 — 확실히 발진하려면" },
+            { t: "kv", rows: [
+              ["ESR(등가직렬저항)", "낮을수록 발진이 잘 뜬다. 칩의 <b>음성저항(negative resistance) 여유 ≥ 5×ESR</b> 권장(startup margin)"],
+              ["구동레벨(Drive Level)", "너무 높으면 크리스탈 손상·노화, 너무 낮으면 발진 실패. 칩 권장 범위 내"],
+              ["Startup time", "발진 안정까지 시간 — 자주 깨는 BLE는 짧을수록 평균전류↓"],
+            ]},
+            { t: "note", kind: "warn", title: "발진 안 뜨는 사고", html: "크리스탈이 <b>ESR이 높거나 CL/구동레벨이 안 맞으면 발진이 아예 안 뜨거나 간헐적으로 죽습니다</b> — 특히 저온에서. 데이터시트의 <b>ESR max·CL·구동레벨</b>을 칩 발진기 스펙과 대조하고, 가능하면 음성저항 마진을 측정하세요." },
+
+            { t: "h", text: "⑤ 온도·크기·공급 — 가전 현실" },
+            { t: "check", items: [
+              "<b>동작 온도 범위</b>에서 안정도(ppm) 스펙 만족 — 가전은 넓게(예: −40~+85℃) 볼 것",
+              "<b>패키지/크기</b>(2016/2520/3225 등)와 실장·마진 균형(소형일수록 특성 여유↓)",
+              "<b>노화(aging)</b> ppm/년 확인 — 제품 수명 긴 가전은 누적치 고려",
+              "규격 ppm 초과 위험 시 <b>TCXO/오실레이터로 대체</b> 검토",
+              "<b>이원화·공급 안정성</b>(EOL) — 대체 크리스탈의 CL·ESR 동등성 확인",
+              "레이아웃: load cap을 핀에 가깝게·대칭, 노이즈원 격리, GND 가드(<a href='#pcb-placement'>배치</a>)",
+            ]},
+            { t: "note", kind: "tip", title: "선정 순서 요약", html: "1) 칩이 요구하는 <b>주파수·CL·구동레벨·ESR max</b>를 데이터시트에서 추출 → 2) 규격 ppm을 <b>온도·노화·공차 합산 예산</b>으로 만족하는 후보 선별 → 3) <b>startup margin(음성저항)</b> 확인 → 4) 온도·크기·공급성 → 5) 시제품에서 <b>주파수 실측·미세조정(load cap)</b> 후 확정. 넘치면 TCXO." },
+            { t: "note", kind: "info", title: "연결", html: "위상잡음·ppm 개념은 앞 절 <a href='#ckt-clock'>기준 클럭</a>, 데이터시트 확인은 3장 <a href='#proc-datasheet'>데이터시트 읽는 법</a>, load cap 배치는 5장 <a href='#pcb-placement'>부품 배치</a>, 양산 주파수 캘리는 <a href='#ver-cal'>캘리브레이션</a>·<a href='#prod-rftest'>양산 RF 테스트</a>." },
           ]
         }
       ]
