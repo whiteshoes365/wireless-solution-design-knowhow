@@ -164,6 +164,115 @@ window.KB_CONTENT = {
           ]
         },
         {
+          id: "rf-chain",
+          title: "송수신 신호 체인 — 기저대역에서 RF까지",
+          blocks: [
+            { t: "p", html: "정보(음성·데이터)는 그대로 공중으로 못 나갑니다. <b>디지털 → 아날로그 기저대역 → 고주파 RF</b>로 단계별 변환을 거쳐야 안테나로 방사됩니다. 이 '송신 체인(Tx chain)'과 그 역순인 수신 체인을 이해하면, RF 모듈의 각 부품이 <b>왜 거기 있는지</b>가 보입니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "송신 체인은 <b>택배 발송</b>입니다. 물건(정보)을 상자에 담고(디지털 부호화·심볼 맵핑), 트럭에 싣고(기저대역→아날로그), <b>고속도로용 컨테이너로 옮겨싣고(업컨버전 — 반송파에 실음)</b>, 힘껏 밀어 보냅니다(PA). 수신은 이 역순으로 풉니다." },
+
+            { t: "h", text: "송신 체인 (Tx) 전체 흐름" },
+            { t: "fig",
+              caption: "정보 → ADC(디지털화) → 디지털 베이스밴드(심볼 맵핑) → DAC(아날로그 기저대역) → 믹서(PLL의 LO와 곱해 RF로 상향변환) → PA(증폭) → 안테나. 믹서 전은 저주파(기저대역), 후는 고주파(RF)다.",
+              svg: '<svg viewBox="0 0 620 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="무선 송신 체인 흐름도">'
+                + '<defs><marker id="txF" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L5.5,3 L0,6 Z" fill="#4aa3ff"/></marker></defs>'
+                + (function(){
+                    var s=[['오디오\\nADC','#9aa7b4'],['디지털\\n베이스밴드','#a371f7'],['DAC','#e3b341'],['믹서 ⊗','#2ea043'],['PA','#4aa3ff']];
+                    var out='';var x0=20,bw=80,gap=15,y=54,h=50;
+                    s.forEach(function(it,i){
+                      var x=x0+i*(bw+gap);
+                      out+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="7" fill="'+it[1]+'" fill-opacity="0.15" stroke="'+it[1]+'" stroke-opacity="0.6"/>';
+                      var ln=it[0].split('\\n');
+                      ln.forEach(function(t,k){out+='<text x="'+(x+bw/2)+'" y="'+(y+ (ln.length===2?20:30) +k*15)+'" text-anchor="middle" class="fig-sub" style="fill:'+it[1]+';font-size:11px">'+t+'</text>';});
+                      if(i<s.length-1) out+='<line class="kb-flow" x1="'+(x+bw)+'" y1="'+(y+h/2)+'" x2="'+(x+bw+gap)+'" y2="'+(y+h/2)+'" stroke="#4aa3ff" stroke-width="2" marker-end="url(#txF)"/>';
+                    });
+                    // antenna
+                    var ax=505;
+                    out+='<line class="kb-flow" x1="485" y1="79" x2="'+ax+'" y2="79" stroke="#4aa3ff" stroke-width="2" marker-end="url(#txF)"/>';
+                    out+='<line x1="'+(ax+8)+'" y1="60" x2="'+(ax+8)+'" y2="98" stroke="#4aa3ff" stroke-width="2"/>';
+                    out+='<circle class="kb-grow" cx="'+(ax+8)+'" cy="79" r="16" fill="none" stroke="#4aa3ff" stroke-width="1.5"/>';
+                    out+='<circle class="kb-grow kb-d3" cx="'+(ax+8)+'" cy="79" r="16" fill="none" stroke="#4aa3ff" stroke-width="1.5"/>';
+                    out+='<text x="'+(ax+8)+'" y="120" text-anchor="middle" class="fig-sub" fill="#4aa3ff">안테나</text>';
+                    // PLL/LO under mixer (box4)
+                    var mx=20+3*(bw+gap); // mixer x
+                    var mcx=mx+bw/2;
+                    out+='<rect x="'+(mcx-55)+'" y="150" width="110" height="34" rx="7" fill="#e5534b" fill-opacity="0.12" stroke="#e5534b" stroke-opacity="0.6"/>';
+                    out+='<text x="'+mcx+'" y="171" text-anchor="middle" class="fig-sub" fill="#e5534b">PLL / LO (f_LO)</text>';
+                    out+='<line class="kb-flow" x1="'+mcx+'" y1="150" x2="'+mcx+'" y2="106" stroke="#e5534b" stroke-width="2" marker-end="url(#txF)"/>';
+                    // baseband vs RF wave hints
+                    out+='<text x="'+(20+2*(bw+gap)+bw/2)+'" y="128" text-anchor="middle" class="fig-sub" fill="#7a8694">← 기저대역(저주파)</text>';
+                    out+='<text x="'+(mx+bw+35)+'" y="128" text-anchor="middle" class="fig-sub" fill="#7a8694">RF(고주파) →</text>';
+                    out+='<text x="310" y="210" text-anchor="middle" class="fig-sub">믹서에서 LO와 곱해 기저대역이 반송파 주파수로 \'상향변환\'된다</text>';
+                    return out;
+                  })()
+                + '</svg>'
+            },
+            { t: "kv", rows: [
+              ["① 정보 입력 (ADC)", "외부 아날로그(음성 등) → 오디오 ADC → 디지털 비트. (데이터는 이미 디지털이면 생략)"],
+              ["② 디지털 베이스밴드", "비트 → 모뎀 처리 · <b>심볼 맵핑</b>(비트를 성좌점=I/Q 값으로). OFDM이면 IFFT 등"],
+              ["③ DAC", "디지털 I/Q → <b>아날로그 기저대역</b> 신호"],
+              ["④ 업컨버전 (믹서)", "아날로그 기저대역 × <b>LO(PLL 공급, f_LO)</b> → 고주파 <b>RF 신호</b>. 주파수를 반송파로 이동"],
+              ["⑤ 증폭·송신 (PA)", "RF 신호 → 전력증폭기(PA) → 안테나 방사"],
+            ]},
+
+            { t: "h", text: "업컨버전 — 믹서가 하는 일" },
+            { t: "p", html: "<b>믹서(mixer)</b>는 두 신호를 곱합니다. 기저대역(정보)에 <b>LO(반송파 주파수)</b>를 곱하면, 주파수 축에서 <b>기저대역 스펙트럼이 f_LO 위치로 통째로 이동</b>합니다. 이것이 '정보를 고주파에 싣는' 업컨버전입니다." },
+            { t: "fig",
+              caption: "주파수 관점의 업컨버전. 0Hz 근처에 있던 기저대역 신호가 믹서에서 LO(f_LO)와 곱해져 반송파 주파수로 옮겨진다. 수신은 이를 다시 0Hz로 내리는 다운컨버전.",
+              svg: '<svg viewBox="0 0 620 170" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주파수 상향변환">'
+                + '<defs><marker id="ucF" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a371f7"/></marker></defs>'
+                + '<line x1="30" y1="120" x2="270" y2="120" stroke="#7a8694" stroke-width="1.5"/><text x="40" y="138" class="fig-sub">0</text><text x="255" y="138" text-anchor="end" class="fig-sub">주파수</text>'
+                + '<path d="M55,120 C 70,80 95,80 110,120 Z" fill="#2ea043" fill-opacity="0.35" stroke="#2ea043"/><text x="82" y="70" text-anchor="middle" class="fig-sub" fill="#2ea043">기저대역</text>'
+                + '<line class="kb-flow" x1="285" y1="100" x2="345" y2="100" stroke="#a371f7" stroke-width="2.5" marker-end="url(#ucF)"/><text x="315" y="90" text-anchor="middle" class="fig-sub" fill="#a371f7">× LO</text>'
+                + '<line x1="360" y1="120" x2="600" y2="120" stroke="#7a8694" stroke-width="1.5"/><text x="360" y="138" class="fig-sub">0</text>'
+                + '<line x1="520" y1="118" x2="520" y2="128" stroke="#e5534b" stroke-width="2"/><text x="520" y="146" text-anchor="middle" class="fig-sub" fill="#e5534b">f_LO</text>'
+                + '<path d="M493,120 C 508,80 533,80 548,120 Z" fill="#4aa3ff" fill-opacity="0.35" stroke="#4aa3ff"/><text x="520" y="70" text-anchor="middle" class="fig-sub" fill="#4aa3ff">RF (반송파로 이동)</text>'
+                + '</svg>'
+            },
+
+            { t: "h", text: "I/Q 직교 변조 — 진폭·위상을 동시에" },
+            { t: "p", html: "현대 무선은 <b>I(동상)·Q(직교, 90°)</b> 두 성분을 각각 변조해 더합니다. 이렇게 하면 한 반송파에 <b>진폭과 위상을 동시에</b> 실을 수 있어 QAM 같은 고효율 변조가 가능합니다." },
+            { t: "fig",
+              caption: "I/Q 변조기: 기저대역 I는 cos(LO)와, Q는 90° 어긋난 sin(LO)과 곱해 더한다. RF = I·cos(ωt) − Q·sin(ωt). 성좌(constellation)의 좌표가 곧 (I, Q)다.",
+              svg: '<svg viewBox="0 0 620 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="IQ 직교 변조기">'
+                + '<defs><marker id="iqF" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L5.5,3 L0,6 Z" fill="#4aa3ff"/></marker></defs>'
+                + '<text x="30" y="54" class="fig-sub" fill="#4aa3ff">I (동상)</text>'
+                + '<line class="kb-flow" x1="80" y1="60" x2="150" y2="60" stroke="#4aa3ff" stroke-width="2" marker-end="url(#iqF)"/>'
+                + '<circle cx="170" cy="60" r="20" fill="none" stroke="#2ea043" stroke-width="1.5"/><text x="170" y="65" text-anchor="middle" class="fig-label" style="fill:#2ea043">⊗</text>'
+                + '<text x="30" y="154" class="fig-sub" fill="#e3b341">Q (직교)</text>'
+                + '<line class="kb-flow" x1="80" y1="150" x2="150" y2="150" stroke="#e3b341" stroke-width="2" marker-end="url(#iqF)"/>'
+                + '<circle cx="170" cy="150" r="20" fill="none" stroke="#2ea043" stroke-width="1.5"/><text x="170" y="155" text-anchor="middle" class="fig-label" style="fill:#2ea043">⊗</text>'
+                + '<rect x="130" y="95" width="80" height="24" rx="5" fill="#e5534b" fill-opacity="0.12" stroke="#e5534b" stroke-opacity="0.6"/><text x="170" y="111" text-anchor="middle" class="fig-sub" fill="#e5534b">LO (PLL)</text>'
+                + '<line x1="170" y1="95" x2="170" y2="82" stroke="#e5534b" stroke-width="1.5"/><text x="205" y="90" class="fig-sub" fill="#e5534b">cos</text>'
+                + '<line x1="170" y1="119" x2="170" y2="130" stroke="#e5534b" stroke-width="1.5"/><text x="205" y="140" class="fig-sub" fill="#e5534b">90° → sin</text>'
+                + '<line class="kb-flow" x1="190" y1="60" x2="300" y2="95" stroke="#4aa3ff" stroke-width="2" marker-end="url(#iqF)"/>'
+                + '<line class="kb-flow" x1="190" y1="150" x2="300" y2="115" stroke="#e3b341" stroke-width="2" marker-end="url(#iqF)"/>'
+                + '<circle cx="320" cy="105" r="22" fill="none" stroke="#a371f7" stroke-width="1.5"/><text x="320" y="111" text-anchor="middle" class="fig-label" style="fill:#a371f7">Σ</text>'
+                + '<line class="kb-flow" x1="342" y1="105" x2="430" y2="105" stroke="#4aa3ff" stroke-width="2.5" marker-end="url(#iqF)"/>'
+                + '<text x="470" y="100" text-anchor="middle" class="fig-sub" fill="#4aa3ff">RF 출력</text><text x="470" y="116" text-anchor="middle" class="fig-sub" fill="#7a8694">→ PA</text>'
+                + '<text x="310" y="196" text-anchor="middle" class="fig-sub">RF = I·cos(ωt) − Q·sin(ωt) · 성좌점(I,Q) = 진폭·위상</text>'
+                + '</svg>'
+            },
+
+            { t: "h", text: "수신 체인 (Rx) — 역순" },
+            { t: "p", html: "수신은 송신의 정확한 역순입니다. 미약한 RF를 먼저 <b>저잡음 증폭(LNA)</b>하고, 믹서로 <b>다운컨버전</b>해 기저대역으로 내린 뒤, ADC로 디지털화해 복조합니다." },
+            { t: "table",
+              head: ["단계", "송신 (Tx)", "수신 (Rx)"],
+              rows: [
+                ["증폭", "PA(전력증폭)", "LNA(저잡음증폭) — NF가 감도 좌우"],
+                ["주파수 변환", "믹서: 기저대역→RF(상향)", "믹서: RF→기저대역(하향)"],
+                ["데이터 변환", "DAC(디지털→아날로그)", "ADC(아날로그→디지털)"],
+                ["처리", "심볼 맵핑·부호화", "복조·복호(성좌 판정)"],
+                ["공통", "LO/PLL, 필터, 매칭, 안테나", "동일(대부분 공유)"],
+              ]
+            },
+            { t: "note", kind: "info", title: "구조 — Zero-IF vs 슈퍼헤테로다인", html: "위 그림은 기저대역↔RF를 한 번에 바꾸는 <b>직접변환(Zero-IF)</b> 구조로, 집적·소형에 유리해 오늘날 무선 SoC의 주류입니다. 과거 <b>슈퍼헤테로다인</b>은 중간주파수(IF)를 한 번 거쳐 이미지·선택도에 강하지만 부품이 많습니다. 가전 모듈은 대개 Zero-IF 트랜시버가 SoC에 집적돼 있습니다." },
+
+            { t: "h", text: "HW 설계자가 챙길 것 (집적돼 있어도)" },
+            { t: "note", kind: "warn", title: "체인의 부작용이 성능을 깎는다", html: "체인 대부분이 트랜시버 SoC에 집적돼 있어도, 설계자는 <b>바깥 요소</b>를 책임집니다: ①<b>LO/PLL 기준 클럭의 위상잡음</b> → 성좌가 번져 EVM 악화(→ <a href='#ckt-clock'>클럭</a>). ②<b>이미지·LO 누설·I/Q 불균형</b> → 스퍼·EVM(→ 필터·<a href='#ver-cal'>캘리브레이션</a>에서 보정). ③<b>PA 비선형성</b> → 하모닉·마스크(→ 필터·back-off). ④<b>전원 노이즈가 LO/VCO에 실리면</b> 스퍼(→ <a href='#ckt-pdn'>PDN</a>)." },
+            { t: "note", kind: "tip", title: "부품이 '왜 거기 있는지'", html: "이 체인을 알면 RF 프론트엔드가 보입니다: <b>PA</b>=⑤증폭, <b>필터</b>=업컨버전이 만든 이미지·하모닉 제거, <b>발룬/매칭</b>=믹서/PA 출력을 안테나 50Ω으로, <b>LNA</b>=수신 첫 증폭. (4장 <a href='#ckt-frontend'>RF 프론트엔드</a>·<a href='#ckt-balun'>발룬</a>과 함께 보세요)" },
+          ]
+        },
+        {
           id: "rf-impedance-matching",
           title: "50Ω·임피던스 매칭이 핵심인 이유",
           blocks: [
