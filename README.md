@@ -23,6 +23,20 @@ python -m http.server 8765
 # 2) 그냥 index.html 더블클릭 (브라우저로 열기)
 ```
 
+## 단일 파일로 공유하기 (standalone)
+
+CSS·JS·콘텐츠를 한 파일에 합친 **`wireless-kb-standalone.html`** 을 만들면,
+그 파일 하나만 보내도(메일 첨부·USB 등) 어디서든 브라우저로 바로 열립니다.
+
+```bash
+node build-standalone.js
+# → wireless-kb-standalone.html 생성 (콘텐츠 수정 후 다시 실행하면 최신본 재생성)
+```
+
+> 온라인이면 웹폰트(Pretendard)까지 적용되고, 오프라인이면 시스템 폰트로 대체됩니다.
+> 공개 배포본에서는 같은 파일을 아래에서도 받을 수 있습니다:
+> `https://whiteshoes365.github.io/wireless-solution-design-knowhow/wireless-kb-standalone.html`
+
 ## GitHub Pages 배포
 
 이 저장소는 정적 파일만 있으므로 GitHub Pages에 그대로 올라갑니다.
