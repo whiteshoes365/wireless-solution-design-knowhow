@@ -1482,7 +1482,46 @@ window.KB_CONTENT = {
               "<b>이원화·공급 안정성</b>(EOL) — 대체 크리스탈의 CL·ESR 동등성 확인",
               "레이아웃: load cap을 핀에 가깝게·대칭, 노이즈원 격리, GND 가드(<a href='#pcb-placement'>배치</a>)",
             ]},
-            { t: "note", kind: "tip", title: "선정 순서 요약", html: "1) 칩이 요구하는 <b>주파수·CL·구동레벨·ESR max</b>를 데이터시트에서 추출 → 2) 규격 ppm을 <b>온도·노화·공차 합산 예산</b>으로 만족하는 후보 선별 → 3) <b>startup margin(음성저항)</b> 확인 → 4) 온도·크기·공급성 → 5) 시제품에서 <b>주파수 실측·미세조정(load cap)</b> 후 확정. 넘치면 TCXO." },
+            { t: "h", text: "⑥ 위상 잡음 체배 — 기준 주파수 선택의 숨은 영향" },
+            { t: "note", kind: "why", title: "20·log₁₀(N) 법칙", html: "기준 주파수 f<sub>REF</sub>는 PLL이 <b>N배 체배(N = f<sub>carrier</sub> / f<sub>REF</sub>)</b>해 반송파를 만듭니다. 이때 <b>기준의 위상잡음은 캐리어에서 20·log₁₀(N) dB 만큼 악화</b>됩니다. 예: 40MHz → 2.44GHz면 N≈61, 20·log₁₀(61) ≈ <b>+35.7dB</b>. 즉 크리스탈의 위상잡음이 캐리어에서 36dB 커져 나타납니다. <b>고차변조(1024/4096-QAM)일수록 이 잡음이 EVM을 직접 깎습니다.</b>" },
+            { t: "fig",
+              caption: "기준(f_REF)의 위상잡음 바닥이 PLL 체배(×N)로 캐리어에서 20·log(N)만큼 올라간다. 같은 캐리어라도 기준 주파수를 높이면 N이 작아져 체배 악화가 줄어든다.",
+              svg: '<svg viewBox="0 0 620 190" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="위상잡음 20logN 체배">'
+                + '<defs><marker id="pnF" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a371f7"/></marker></defs>'
+                + '<rect x="40" y="90" width="110" height="52" rx="7" fill="#2ea043" fill-opacity="0.14" stroke="#2ea043" stroke-opacity="0.6"/><text x="95" y="112" text-anchor="middle" class="fig-sub" fill="#2ea043">기준 XTAL</text><text x="95" y="127" text-anchor="middle" class="fig-sub" fill="#2ea043">f_REF · 낮은 잡음</text>'
+                + '<rect x="255" y="90" width="110" height="52" rx="7" fill="#e5534b" fill-opacity="0.12" stroke="#e5534b" stroke-opacity="0.6"/><text x="310" y="112" text-anchor="middle" class="fig-sub" fill="#e5534b">PLL ×N</text><text x="310" y="127" text-anchor="middle" class="fig-sub" fill="#e5534b">N=f_c/f_REF</text>'
+                + '<rect x="470" y="90" width="110" height="52" rx="7" fill="#4aa3ff" fill-opacity="0.14" stroke="#4aa3ff" stroke-opacity="0.6"/><text x="525" y="112" text-anchor="middle" class="fig-sub" fill="#4aa3ff">캐리어 f_c</text><text x="525" y="127" text-anchor="middle" class="fig-sub" fill="#4aa3ff">잡음 +20·logN</text>'
+                + '<line class="kb-flow" x1="150" y1="116" x2="253" y2="116" stroke="#a371f7" stroke-width="2.5" marker-end="url(#pnF)"/>'
+                + '<line class="kb-flow" x1="365" y1="116" x2="468" y2="116" stroke="#a371f7" stroke-width="2.5" marker-end="url(#pnF)"/>'
+                + '<text x="95" y="60" text-anchor="middle" class="fig-sub">낮은 바닥 ▁</text>'
+                + '<text x="525" y="60" text-anchor="middle" class="fig-sub" fill="#e5534b">올라간 바닥 ▔ (+20·logN dB)</text>'
+                + '<text x="310" y="175" text-anchor="middle" class="fig-sub">기준 주파수↑ → N↓ → 체배 악화↓ (그래서 40MHz 등 고주파 기준 유리)</text>'
+                + '</svg>'
+            },
+            { t: "note", kind: "tip", title: "그래서 40 / 38.4 MHz를 쓴다", html: "기준을 높이면 ①<b>N이 작아져 위상잡음 체배가 줄고</b> ②채널 주파수를 <b>정수/간단한 분주비</b>로 만들기 쉬워(스퍼·fractional-N 잡음↓) ③넓은 대역폭 채널 합성에 유리합니다. 그래서 SoC가 40·38.4·26MHz 같은 값을 지정하며 <b>임의 변경은 불가</b>합니다. 위상잡음이 빡센 5/6G·고차 QAM일수록 이 선택이 중요합니다. (개념은 <a href='#ckt-clock'>기준 클럭</a>, 영향은 <a href='#rf-rx'>수신 감도</a>·EVM)" },
+
+            { t: "h", text: "⑦ 부성저항 마진 — 발진 확실성 '측정'으로 검증" },
+            { t: "note", kind: "why", title: "왜 여유 저항으로 확인하나", html: "발진이 유지되려면 발진기의 <b>부성저항 |−R|이 크리스탈 ESR보다 충분히 커야</b> 합니다. 데이터시트 값만 믿지 말고, <b>크리스탈에 직렬로 저항을 조금씩 키우다가 발진이 멈추는 지점(R<sub>stop</sub>)</b>을 찾으면 실제 마진을 잽니다: <b>마진 = (ESR + R<sub>stop</sub>) / ESR</b>. 통상 <b>ESR<sub>max</sub> ≤ (1/3 ~ 1/5)|−R|</b>, 즉 마진 ≥ 3~5배를 권장합니다." },
+            { t: "fig",
+              caption: "부성저항 마진 측정: 크리스탈에 직렬 저항 R을 키우다 발진이 멈추는 R_stop을 찾는다. (ESR+R_stop)/ESR 이 실제 startup 마진. 저온·저전압 worst case에서 확인해야 안전.",
+              svg: '<svg viewBox="0 0 620 180" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="부성저항 마진 측정">'
+                + '<rect x="40" y="70" width="90" height="44" rx="6" fill="#4aa3ff" fill-opacity="0.14" stroke="#4aa3ff" stroke-opacity="0.6"/><text x="85" y="90" text-anchor="middle" class="fig-sub" fill="#4aa3ff">SoC 발진단</text><text x="85" y="105" text-anchor="middle" class="fig-sub" fill="#4aa3ff">|−R|</text>'
+                + '<line x1="130" y1="92" x2="180" y2="92" stroke="#7a8694" stroke-width="1.5"/>'
+                + '<rect x="180" y="80" width="60" height="24" rx="3" fill="#e3b341" fill-opacity="0.25" stroke="#e3b341"/><text x="210" y="97" text-anchor="middle" class="fig-sub" fill="#e3b341">R (가변)</text>'
+                + '<line x1="240" y1="92" x2="290" y2="92" stroke="#7a8694" stroke-width="1.5"/>'
+                + '<rect x="290" y="80" width="70" height="24" rx="3" fill="#2ea043" fill-opacity="0.25" stroke="#2ea043"/><text x="325" y="97" text-anchor="middle" class="fig-sub" fill="#2ea043">XTAL(ESR)</text>'
+                + '<text x="210" y="60" text-anchor="middle" class="fig-sub">R을 키우다 발진 멈춤 → R_stop</text>'
+                + '<text x="470" y="86" text-anchor="middle" class="fig-label" style="fill:#a371f7">마진 =</text>'
+                + '<text x="470" y="106" text-anchor="middle" class="fig-sub" fill="#a371f7">(ESR + R_stop) / ESR ≥ 3~5</text>'
+                + '<text x="310" y="150" text-anchor="middle" class="fig-sub">저온·저전압(worst case)에서 측정 · 부족하면 ESR 낮은 크리스탈로</text>'
+                + '</svg>'
+            },
+            { t: "note", kind: "warn", title: "구동레벨(DL)도 함께 확인", html: "마진을 키우려 발진을 세게 걸면 <b>구동레벨(Drive Level)이 크리스탈 정격을 넘어 노화·주파수 이동·파손</b>을 부릅니다. 부성저항 마진과 구동레벨은 <b>동시에</b> 봐야 합니다(직렬저항이 DL도 낮춤). 데이터시트 DL max 이내로." },
+
+            { t: "h", text: "⑧ 주파수 당김(pulling)·트림 감도" },
+            { t: "note", kind: "why", title: "load cap이 주파수를 얼마나 옮기나", html: "부하용량 오차에 따른 주파수 이동은 <b>Δf/f ≈ C₁ / (2·(C₀ + C<sub>L</sub>)²) · ΔC<sub>L</sub></b> 경향(C₁=동적, C₀=션트 용량)입니다. 핵심 직관: <b>C<sub>L</sub>이 작을수록 트림 감도(같은 ΔC<sub>L</sub>에 대한 Δf)가 커져</b> 기생용량·부품 공차에 민감해집니다. 그래서 <b>너무 작은 CL 크리스탈은 양산 산포·PCB 기생에 취약</b>합니다." },
+            { t: "note", kind: "tip", title: "실무", html: "시제품에서 주파수를 실측해 <b>load cap으로 미세조정(±1~2pF 단위)</b>하고, <b>여러 샘플·온도</b>에서 재확인합니다. 기생용량(C<sub>stray</sub>) 가정이 틀리면 전 로트가 오프셋되니, 첫 시제품에서 반드시 검증하세요. (양산 주파수 캘리는 <a href='#ver-cal'>캘리브레이션</a>)" },
+            { t: "note", kind: "tip", title: "선정 순서 요약", html: "1) 칩이 요구하는 <b>주파수·CL·구동레벨·ESR max</b>를 데이터시트에서 추출 → 2) 규격 ppm을 <b>온도·노화·공차 합산 예산</b>으로 만족하는 후보 선별 → 3) <b>startup margin(음성저항)</b>·위상잡음 확인 → 4) 온도·크기·공급성 → 5) 시제품에서 <b>주파수 실측·미세조정(load cap)</b> 후 확정. 넘치면 TCXO." },
             { t: "note", kind: "info", title: "연결", html: "위상잡음·ppm 개념은 앞 절 <a href='#ckt-clock'>기준 클럭</a>, 데이터시트 확인은 3장 <a href='#proc-datasheet'>데이터시트 읽는 법</a>, load cap 배치는 5장 <a href='#pcb-placement'>부품 배치</a>, 양산 주파수 캘리는 <a href='#ver-cal'>캘리브레이션</a>·<a href='#prod-rftest'>양산 RF 테스트</a>." },
           ]
         }
