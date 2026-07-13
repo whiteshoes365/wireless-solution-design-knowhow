@@ -2006,7 +2006,120 @@ window.KB_CONTENT = {
                 ["코일(NFC)", "근접 자기결합", "RF용 아님", "NFC 전용"],
               ]
             },
-            { t: "note", kind: "tip", title: "선택 기준", html: "①공간 ②요구 효율/거리 ③원가 ④케이스 재질(금속이면 외장/FPC 유리) 순으로 좁혀갑니다. PCB 안테나는 공짜처럼 보여도 <b>그라운드 크기와 클리어런스</b>를 확보 못 하면 효율이 안 나옵니다. 종류별 설계 상세는 다음 섹션 참조." },
+            { t: "note", kind: "tip", title: "선택 기준", html: "①공간 ②요구 효율/거리 ③원가 ④케이스 재질(금속이면 외장/FPC 유리) 순으로 좁혀갑니다. PCB 안테나는 공짜처럼 보여도 <b>그라운드 크기와 클리어런스</b>를 확보 못 하면 효율이 안 나옵니다. 종류별 현물 형태·크기·Home IoT 타입은 다음 섹션 참조." },
+          ]
+        },
+        {
+          id: "ant-gallery",
+          title: "종류 도감 — 현물 형태·크기·Home IoT 타입",
+          blocks: [
+            { t: "p", html: "안테나는 종류마다 <b>실제 생긴 모습</b>이 다릅니다. 형태를 눈에 익히면 데이터시트·BOM을 볼 때 훨씬 빠릅니다. Home IoT에서 실제로 쓰이는 타입들을 형태 그림·크기 비교·비교표로 정리합니다." },
+            { t: "note", kind: "info", title: "그림에 대하여", html: "아래는 <b>실제 사진이 아니라 각 부품의 형태를 본뜬 일러스트</b>입니다(사진은 저작권 문제로 대신함). 정확한 치수·외형은 각 벤더 부품 데이터시트를 참고하세요. 형태의 '느낌'을 잡는 용도입니다." },
+
+            { t: "h", text: "종류별 현물 형태" },
+            { t: "fig",
+              caption: "Home IoT에 쓰이는 대표 안테나 형태(일러스트). 상단: 칩(세라믹 SMD)·PCB 패턴(동박)·FPC(필름+u.FL)·스프링(코일). 하단: 스탬핑 메탈(절곡 판금)·LDS(플라스틱 직접 도금)·외장 휩/다이폴·u.FL 커넥터 연결.",
+              svg: '<svg viewBox="0 0 620 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="안테나 종류별 현물 형태 일러스트">'
+                + (function(){
+                    var cards=[[18,30],[166,30],[314,30],[462,30],[18,195],[166,195],[314,195],[462,195]];
+                    var out='';
+                    cards.forEach(function(c){ out+='<rect x="'+c[0]+'" y="'+c[1]+'" width="138" height="150" rx="10" fill="var(--surface-1, #1b232e)" fill-opacity="0.25" stroke="#7a8694" stroke-opacity="0.3"/>'; });
+                    function lbl(cx,y,t,s,col){ return '<text x="'+cx+'" y="'+y+'" text-anchor="middle" class="fig-label" style="fill:'+col+';font-size:12px">'+t+'</text><text x="'+cx+'" y="'+(y+14)+'" text-anchor="middle" class="fig-sub" style="font-size:9.5px">'+s+'</text>'; }
+                    // 1 칩 안테나 (cx 87)
+                    out+='<rect x="60" y="108" width="54" height="9" fill="#9aa7b4" fill-opacity="0.5"/>';
+                    out+='<rect x="65" y="82" width="44" height="24" rx="2" fill="#d8c9a0" stroke="#b3a271"/>';
+                    out+='<rect x="65" y="82" width="7" height="24" fill="#c8ccd0"/><rect x="102" y="82" width="7" height="24" fill="#c8ccd0"/>';
+                    out+=lbl(87,150,'칩(세라믹)','초소형 SMD','#e3b341');
+                    // 2 PCB IFA (cx 235)
+                    out+='<rect x="180" y="66" width="110" height="60" rx="3" fill="#2ea043" fill-opacity="0.14" stroke="#2ea043" stroke-opacity="0.5"/>';
+                    out+='<polyline points="196,116 196,80 214,80 214,100 232,100 232,80 250,80 250,100 268,100 268,80" fill="none" stroke="#e3b341" stroke-width="2.5"/>';
+                    out+='<circle cx="196" cy="116" r="3.5" fill="#e5534b"/>';
+                    out+=lbl(235,150,'PCB 패턴','IFA/메안더 · 동박','#2ea043');
+                    // 3 FPC (cx 383)
+                    out+='<rect x="338" y="70" width="90" height="26" rx="5" fill="#e3b341" fill-opacity="0.28" stroke="#e3b341" stroke-opacity="0.6"/>';
+                    out+='<path d="M383,96 L383,116 L400,124" fill="none" stroke="#7a8694" stroke-width="2"/>';
+                    out+='<circle cx="405" cy="126" r="7" fill="none" stroke="#4aa3ff" stroke-width="2"/><circle cx="405" cy="126" r="2" fill="#4aa3ff"/>';
+                    out+=lbl(383,150,'FPC (+u.FL)','필름 · 효율↑','#e3b341');
+                    // 4 spring/helical (cx 531)
+                    for(var i=0;i<6;i++){ out+='<ellipse cx="531" cy="'+(74+i*9)+'" rx="16" ry="5" fill="none" stroke="#c8ccd0" stroke-width="2.2"/>'; }
+                    out+='<rect x="516" y="128" width="30" height="7" fill="#9aa7b4" fill-opacity="0.5"/>';
+                    out+=lbl(531,150,'스프링/헬리컬','코일 · 초소형','#c8ccd0');
+                    // 5 stamped metal (cx 87 row2)
+                    out+='<path d="M60,300 L60,255 L90,240 L118,255 L118,278 L96,278 L96,300 Z" fill="#9aa7b4" fill-opacity="0.45" stroke="#9aa7b4"/>';
+                    out+='<line x1="70" y1="300" x2="70" y2="312" stroke="#9aa7b4" stroke-width="2.5"/>';
+                    out+=lbl(87,332,'스탬핑 메탈(판금)','절곡 · 3D·대량저가','#9aa7b4');
+                    // 6 LDS iso (cx 235 row2)
+                    out+='<polygon points="205,300 205,258 245,240 285,258 285,300 245,318" fill="#6b7785" fill-opacity="0.35" stroke="#6b7785"/>';
+                    out+='<polygon points="205,258 245,240 285,258 245,276" fill="#6b7785" fill-opacity="0.2" stroke="#6b7785"/>';
+                    out+='<path d="M214,296 L214,268 M226,300 L226,266 M245,300 L262,278" fill="none" stroke="#e3b341" stroke-width="2"/>';
+                    out+=lbl(235,332,'LDS','플라스틱 직접도금·3D','#e3b341');
+                    // 7 external whip/dipole (cx 383 row2)
+                    out+='<rect x="368" y="290" width="30" height="16" rx="2" fill="#4aa3ff" fill-opacity="0.2" stroke="#4aa3ff"/>';
+                    out+='<line x1="383" y1="290" x2="383" y2="244" stroke="#c8ccd0" stroke-width="4" stroke-linecap="round"/><circle cx="383" cy="266" r="3" fill="#9aa7b4"/>';
+                    out+='<path d="M368,300 L350,308" stroke="#7a8694" stroke-width="2" fill="none"/>';
+                    out+=lbl(383,332,'외장 휩/다이폴','로드 · 고효율','#4aa3ff');
+                    // 8 u.FL connector (cx 531 row2)
+                    out+='<rect x="500" y="288" width="62" height="18" rx="2" fill="#2ea043" fill-opacity="0.14" stroke="#2ea043" stroke-opacity="0.4"/>';
+                    out+='<circle cx="520" cy="297" r="8" fill="none" stroke="#4aa3ff" stroke-width="2"/><circle cx="520" cy="297" r="2.5" fill="#4aa3ff"/>';
+                    out+='<path d="M528,297 C 555,290 560,270 545,258" fill="none" stroke="#7a8694" stroke-width="2"/><line x1="545" y1="258" x2="545" y2="242" stroke="#c8ccd0" stroke-width="3"/>';
+                    out+=lbl(531,332,'u.FL/IPEX 커넥터','외장 안테나 연결','#4aa3ff');
+                    return out;
+                  })()
+                + '</svg>'
+            },
+
+            { t: "h", text: "종류 비교 (Home IoT 포함)" },
+            { t: "table",
+              head: ["종류", "형태·구현", "효율", "원가", "공간/케이스", "Home IoT 적합"],
+              rows: [
+                ["칩(세라믹)", "SMD 블록", "중", "부품비 有", "초소형·GND 의존↑", "공간 극제약 소형기기"],
+                ["PCB 패턴", "기판 동박(IFA/메안더)", "중", "0(동박)", "GND·클리어런스 필요", "원가민감 대량(가장 흔함)"],
+                ["FPC(+u.FL)", "플렉시블 필름+동축", "상", "부품·조립", "하우징 부착 자유", "금속 근접·고성능 필요 시"],
+                ["스프링/헬리컬", "코일 스프링", "중", "저", "초소형 3D", "리모컨·초소형 기기"],
+                ["스탬핑 메탈(판금)", "절곡 판금 + 캐리어/핀", "상", "대량 시 저", "3D 공간·캐리어 활용", "곡면·대량양산 제품"],
+                ["LDS", "플라스틱에 레이저+직접도금", "상", "초기 툴↑", "하우징 3D·곡면 활용", "공간제약·디자인 중시"],
+                ["외장 휩/다이폴", "로드 + u.FL 커넥터", "최상", "부품·조립", "외부 돌출", "게이트웨이·허브·라우터"],
+                ["금속 프레임/베젤", "기구 금속을 안테나로", "상", "설계 복잡", "금속 하우징", "금속 외장 제품"],
+              ]
+            },
+            { t: "note", kind: "tip", title: "빠른 선택", html: "<b>원가·대량</b>=PCB 패턴 → 공간 부족하면 칩 → <b>효율·금속근접</b>=FPC/판금 → <b>3D 곡면·디자인</b>=LDS/판금 → <b>고정형 허브</b>=외장 휩. 금속 하우징이면 PCB/칩은 거의 안 되고 <b>FPC·판금·LDS·외장</b>으로 갑니다." },
+
+            { t: "h", text: "주파수 → 파장 → 크기·그라운드" },
+            { t: "p", html: "안테나의 물리 크기는 <b>파장(λ)에 비례</b>합니다(대략 λ/4). 주파수가 낮을수록 파장이 길어 <b>안테나도 커지고, 함께 동작하는 그라운드 영역도 커야</b> 합니다. 같은 제품에서 대역이 바뀌면 크기·배치가 확 달라집니다." },
+            { t: "fig",
+              caption: "λ/4 안테나 길이(왼쪽)와 권장 그라운드 크기(오른쪽)의 대역별 비교(개략, 자유공간 기준). 900MHz는 2.4GHz의 ~2.7배, 5GHz의 ~5배 크다. 낮은 대역일수록 안테나·그라운드 모두 커진다.",
+              svg: '<svg viewBox="0 0 620 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="주파수별 파장 안테나 크기 그라운드 비교">'
+                + '<text x="150" y="28" text-anchor="middle" class="fig-sub" fill="#7a8694">λ/4 안테나 길이(개략)</text>'
+                + '<text x="510" y="28" text-anchor="middle" class="fig-sub" fill="#7a8694">권장 그라운드(상대)</text>'
+                + (function(){
+                    var b=[['900 MHz (Sub-G)','#e3b341',8.3,48],['2.4 GHz','#4aa3ff',3.1,24],['5 GHz','#2ea043',1.5,14]];
+                    var out='';var y0=50,px=32;
+                    b.forEach(function(r,i){
+                      var yy=y0+i*58; var w=r[2]*px;
+                      out+='<text x="30" y="'+(yy-6)+'" class="fig-sub" fill="'+r[1]+'">'+r[0]+'</text>';
+                      out+='<rect x="30" y="'+yy+'" width="'+w+'" height="26" rx="3" fill="'+r[1]+'" fill-opacity="0.3" stroke="'+r[1]+'" stroke-opacity="0.6"/>';
+                      out+='<text x="'+(30+w+8)+'" y="'+(yy+18)+'" class="fig-sub" fill="'+r[1]+'">≈ '+r[2]+' cm</text>';
+                      // ground square right
+                      var gs=r[3]; var gx=560-gs/2; var gy=yy+13-gs/2;
+                      out+='<rect x="'+gx+'" y="'+gy+'" width="'+gs+'" height="'+gs+'" rx="2" fill="'+r[1]+'" fill-opacity="0.18" stroke="'+r[1]+'" stroke-opacity="0.6"/>';
+                    });
+                    return out;
+                  })()
+                + '<text x="310" y="232" text-anchor="middle" class="fig-sub">주파수↓ = 파장↑ = 안테나·그라운드 커짐 (소형 제품에서 Sub-G가 어려운 이유)</text>'
+                + '</svg>'
+            },
+            { t: "note", kind: "why", title: "그라운드가 커야 하는 이유", html: "모노폴·IFA·칩·판금 안테나는 <b>그라운드 플레인을 안테나의 일부(카운터포이즈)</b>로 씁니다. 파장이 길면(저주파) 필요한 그라운드도 커집니다. 소형 제품에서 <b>그라운드가 부족하면 효율·대역폭이 급락</b>하므로, 저대역일수록 보드·기구 공간을 초기에 확보해야 합니다. (Sub-G는 <a href='#ant-subg'>전용 절</a> 참조)" },
+
+            { t: "h", text: "메탈 안테나 계열 — Home IoT에서 왜 뜨는가" },
+            { t: "p", html: "가전·Home IoT는 <b>금속·곡면 하우징, 얇은 디자인, 대량 양산</b>이 많아, 평면 PCB/칩만으로 안 되는 경우가 늘고 있습니다. 그래서 <b>메탈 안테나(판금·LDS)</b> 계열이 부상합니다." },
+            { t: "kv", rows: [
+              ["스탬핑 메탈(판금)", "금속판을 <b>절곡·성형</b>해 만든 3D 안테나. 캐리어(플라스틱)에 얹거나 핀·클립으로 접점. <b>대량 양산 원가 저렴</b>, 견고, 3D 공간 활용"],
+              ["LDS (Laser Direct Structuring)", "플라스틱 부품 표면에 <b>레이저로 패턴을 새기고 직접 도금</b>. 하우징·캐리어의 곡면을 그대로 안테나로 — <b>공간 극대화·디자인 자유</b>. 초기 툴/공정비↑"],
+              ["스프링/헬리컬", "코일 스프링형. 초소형·저가, 리모컨 등. 접점(솔더/핀) 신뢰성 관건"],
+              ["금속 프레임/베젤", "제품의 <b>금속 기구 자체를 안테나로</b> 활용(슬롯·급전). 금속 외장 제품에 유효하나 설계 난이도↑"],
+            ]},
+            { t: "note", kind: "warn", title: "메탈 안테나의 함정 — 접점·조립 산포", html: "판금·스프링·LDS는 <b>기구 조립으로 급전 접점이 형성</b>됩니다. 그래서 ①<b>접점 압력·위치 산포</b> ②<b>기구 공차</b>가 그대로 임피던스·효율 산포가 됩니다. 또 3D 형상이라 <b>튜닝이 평면보다 복잡</b>합니다. 반드시 <b>기구 조립 상태·양산 산포</b>로 튜닝·검증하세요(맨 보드 무의미). — <a href='#ant-tuning'>튜닝</a>·<a href='#ant-ota'>OTA</a>" },
+            { t: "note", kind: "info", title: "연결", html: "PCB 안테나 설계 상세는 <a href='#ant-types-deep'>다음 절</a>, Sub-G 크기 문제는 <a href='#ant-subg'>Sub-G 안테나</a>, 배치·근접금속은 <a href='#ant-placement'>배치</a>, 성능 검증은 <a href='#ant-ota'>OTA</a> 참조." },
           ]
         },
         {
