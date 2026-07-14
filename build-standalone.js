@@ -20,8 +20,21 @@ const scripts = [
   "assets/js/app.js",
 ].map(read).join("\n");
 
+// assets/img 의 이미지들을 data URI 로 인라인 (단일본 오프라인 동작용)
+let scriptsWithImg = scripts;
+const imgDir = path.join(root, "assets", "img");
+if (fs.existsSync(imgDir)) {
+  for (const f of fs.readdirSync(imgDir)) {
+    const ext = path.extname(f).slice(1).toLowerCase();
+    const mime = ext === "png" ? "image/png" : ext === "svg" ? "image/svg+xml" : "image/jpeg";
+    const data = "data:" + mime + ";base64," +
+      fs.readFileSync(path.join(imgDir, f)).toString("base64");
+    scriptsWithImg = scriptsWithImg.split("assets/img/" + f).join(data);
+  }
+}
+
 // </script> 가 문자열에 있으면 인라인이 깨지므로 안전 이스케이프
-const safeScripts = scripts.replace(/<\/script>/gi, "<\\/script>");
+const safeScripts = scriptsWithImg.replace(/<\/script>/gi, "<\\/script>");
 
 // favicon 을 data URI 로 인라인
 const favSvg = read("assets/favicon.svg");

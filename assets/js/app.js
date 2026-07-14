@@ -38,6 +38,7 @@
         case "list": case "check": return (b.items || []).map(strip).join(" ");
         case "note": return strip((b.title || "") + " " + (b.html || ""));
         case "fig": return strip(b.caption || "");
+        case "imgrid": return (b.items || []).map(i => strip(i.caption || "") + " " + (i.alt || "")).join(" ");
         case "table": return [(b.head || []).join(" "), ...(b.rows || []).map(r => r.join(" "))].join(" ");
         case "kv": return (b.rows || []).map(r => r.join(" ")).join(" ");
         default: return "";
@@ -104,6 +105,20 @@
         f.appendChild(box);
         if (b.caption) f.appendChild(el("figcaption", null, b.caption));
         return f;
+      }
+      case "imgrid": {
+        const wrap = el("div", "blk imgrid");
+        (b.items || []).forEach(it => {
+          const f = el("figure");
+          const img = el("img");
+          img.src = it.src; img.alt = it.alt || ""; img.loading = "lazy";
+          f.appendChild(img);
+          const cap = el("figcaption",
+            null, esc(it.caption || "") + (it.credit ? '<br><span class="credit">' + it.credit + "</span>" : ""));
+          f.appendChild(cap);
+          wrap.appendChild(f);
+        });
+        return wrap;
       }
       case "autocheck": return renderAutoCheck();
       default: return el("div");
