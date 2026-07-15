@@ -778,6 +778,113 @@ window.KB_CONTENT = {
           ]
         },
         {
+          id: "proc-benchmark",
+          title: "경쟁사 모듈 벤치마킹(BM) — 분석에서 인사이트로",
+          blocks: [
+            { t: "p", html: "경쟁사 무선모듈 BM의 목적은 <b>스펙 나열</b>이 아니라 <b>'그래서 우리가 무엇을 해야 하나'(인사이트·액션)</b>를 뽑는 것입니다. 분해·측정으로 사실을 모으고, <b>축별로 정규화해 비교</b>하고, <b>차이(Gap)의 원인</b>을 짚어 <b>실행(Action)</b>으로 연결하는 프레임을 제공합니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "BM은 <b>상대 팀 경기 분석</b>입니다. 점수(스펙)만 적으면 소용없고, '왜 우리보다 빠른가(전술=부품·구조)'를 찾아 <b>우리 전술을 바꾸는 것</b>이 목적입니다. 데이터는 수단, <b>인사이트가 결과물</b>입니다." },
+
+            { t: "h", text: "BM 진행 흐름" },
+            { t: "fig",
+              caption: "경쟁 모듈 확보·분해 → 축별 측정/분석 → 정규화 비교 → Gap 식별 → 인사이트 도출 → 액션(설계·부품·로드맵). '측정'에서 끝나지 말고 반드시 '액션'까지.",
+              svg: '<svg viewBox="0 0 620 130" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="벤치마킹 진행 흐름">'
+                + '<defs><marker id="bmF" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4aa3ff"/></marker></defs>'
+                + (function(){
+                    var s=[['확보·분해','#9aa7b4'],['측정·분석','#e3b341'],['정규화 비교','#4aa3ff'],['Gap 식별','#e5534b'],['인사이트','#a371f7'],['액션','#2ea043']];
+                    var out='';var x0=18,bw=84,gap=12,y=42,h=48;
+                    s.forEach(function(it,i){var x=x0+i*(bw+gap);
+                      out+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="7" fill="'+it[1]+'" fill-opacity="0.15" stroke="'+it[1]+'" stroke-opacity="0.6"/>';
+                      out+='<text x="'+(x+bw/2)+'" y="'+(y+29)+'" text-anchor="middle" class="fig-label" style="fill:'+it[1]+';font-size:11.5px">'+it[0]+'</text>';
+                      if(i<s.length-1) out+='<line class="kb-flow" x1="'+(x+bw)+'" y1="'+(y+h/2)+'" x2="'+(x+bw+gap)+'" y2="'+(y+h/2)+'" stroke="#4aa3ff" stroke-width="2" marker-end="url(#bmF)"/>';
+                    });
+                    return out;
+                  })()
+                + '<text x="310" y="118" text-anchor="middle" class="fig-sub">데이터는 수단 · 인사이트·액션이 결과물</text>'
+                + '</svg>'
+            },
+
+            { t: "h", text: "① 무엇을 뜯어보나 — BM 분석 축" },
+            { t: "table",
+              head: ["분석 축", "무엇을 보나", "인사이트 예"],
+              rows: [
+                ["RF 성능", "Tx 출력·수신감도·EVM·OTA(TRP/TIS)", "감도 우수 → LNA/안테나 방식 벤치"],
+                ["전력", "Tx/Rx/Sleep 전류·절전(TWT·듀티)", "전류↓ → 전원·PHY·펌웨어 전략"],
+                ["BOM·원가", "부품 수·통합도·추정 단가", "원가↓ → FEM/IPD 통합·안테나 방식"],
+                ["부품 구성", "칩(벤더)·FEM·발룬·필터·안테나", "칩 채택·이원화 동향 파악"],
+                ["PCB", "층수·재료·크기·스택업", "층수↓·저가재 → 원가 여유 확인"],
+                ["안테나", "방식(칩/PCB/판금/LDS)·배치·효율", "효율·공간·원가 균형 전략"],
+                ["인증·지역", "지원 대역·지역 커버·출력", "지역 확장·규격 로드맵"],
+                ["열·기구", "쉴드캔·방열·기구 결합", "발열·조립성 개선 힌트"],
+              ]
+            },
+
+            { t: "h", text: "② 비교 장표 템플릿 (정규화)" },
+            { t: "p", html: "축별로 <b>같은 조건에서 측정</b>해 자사·경쟁을 나란히 놓고, 맨 오른쪽에 <b>Gap/시사점</b>을 적습니다. (값은 실제 분해·측정으로 채우세요)" },
+            { t: "table",
+              head: ["항목", "자사", "경쟁 A", "경쟁 B", "Gap / 시사점"],
+              rows: [
+                ["Tx 출력(dBm)", "—", "—", "—", ""],
+                ["수신감도(dBm)", "—", "—", "—", ""],
+                ["Sleep 전류(µA)", "—", "—", "—", ""],
+                ["부품 수 / 통합도", "—", "—", "—", ""],
+                ["추정 BOM(상대)", "—", "—", "—", ""],
+                ["PCB 층수 / 크기", "—", "—", "—", ""],
+                ["안테나 방식", "—", "—", "—", ""],
+                ["지원 규격/세대", "—", "—", "—", ""],
+              ]
+            },
+            { t: "note", kind: "tip", title: "정규화가 핵심", html: "측정 조건(온도·채널·전압·치구)이 다르면 비교가 무의미합니다. <b>같은 조건·같은 치구</b>로 재고, 원가는 '절대값'보다 <b>상대 지수(자사=100)</b>로 다루면 오차에 강합니다." },
+
+            { t: "h", text: "③ 다차원 비교 — 레이더 차트" },
+            { t: "fig",
+              caption: "여러 축을 한눈에 보는 레이더(스파이더) 차트. 자사(파랑)와 경쟁(빨강)의 강·약점 형태가 드러난다. 경쟁이 바깥으로 튀어나온 축 = 우리가 따라가야 할 Gap.",
+              svg: '<svg viewBox="0 0 620 280" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="경쟁 비교 레이더 차트">'
+                + (function(){
+                    var cx=310,cy=145,R=95;
+                    var axes=['RF 성능','전력효율','원가경쟁력','소형화','기능·규격','공급안정성'];
+                    var self=[0.7,0.6,0.5,0.8,0.7,0.9];
+                    var comp=[0.85,0.75,0.85,0.6,0.6,0.55];
+                    function pt(i,r){var a=(-90+i*60)*Math.PI/180;return [cx+r*Math.cos(a),cy+r*Math.sin(a)];}
+                    var out='';
+                    // grid rings
+                    [0.33,0.66,1].forEach(function(k){var pts=[];for(var i=0;i<6;i++){var p=pt(i,R*k);pts.push(p[0].toFixed(0)+','+p[1].toFixed(0));}out+='<polygon points="'+pts.join(' ')+'" fill="none" stroke="#7a8694" stroke-opacity="0.3"/>';});
+                    // spokes + labels
+                    for(var i=0;i<6;i++){var p=pt(i,R);out+='<line x1="'+cx+'" y1="'+cy+'" x2="'+p[0].toFixed(0)+'" y2="'+p[1].toFixed(0)+'" stroke="#7a8694" stroke-opacity="0.3"/>';var lp=pt(i,R+22);out+='<text x="'+lp[0].toFixed(0)+'" y="'+lp[1].toFixed(0)+'" text-anchor="middle" class="fig-sub" style="font-size:10.5px">'+axes[i]+'</text>';}
+                    function poly(v,col){var pts=[];for(var i=0;i<6;i++){var p=pt(i,R*v[i]);pts.push(p[0].toFixed(0)+','+p[1].toFixed(0));}return '<polygon points="'+pts.join(' ')+'" fill="'+col+'" fill-opacity="0.18" stroke="'+col+'" stroke-width="2"/>';}
+                    out+=poly(comp,'#e5534b');
+                    out+=poly(self,'#4aa3ff');
+                    return out;
+                  })()
+                + '<rect x="40" y="256" width="12" height="12" fill="#4aa3ff" fill-opacity="0.4" stroke="#4aa3ff"/><text x="58" y="266" class="fig-sub" fill="#4aa3ff">자사</text>'
+                + '<rect x="120" y="256" width="12" height="12" fill="#e5534b" fill-opacity="0.4" stroke="#e5534b"/><text x="138" y="266" class="fig-sub" fill="#e5534b">경쟁(예시)</text>'
+                + '<text x="500" y="266" class="fig-sub" fill="#7a8694">바깥=우수 · 값은 예시</text>'
+                + '</svg>'
+            },
+
+            { t: "h", text: "④ 인사이트 발굴 — So-What 프레임" },
+            { t: "p", html: "사실을 '그래서 무엇(So-What)'으로 밀어붙입니다: <b>Fact → Gap → Why(원인) → Insight(시사점) → Action(실행)</b>. 원인(Why)까지 파야 베낄 게 아니라 <b>우리 방식의 액션</b>이 나옵니다." },
+            { t: "table",
+              head: ["Fact(사실)", "Gap(차이)", "Why(원인 추정)", "Insight(시사점)", "Action(실행)"],
+              rows: [
+                ["경쟁 감도 −3dB 우수", "우리 대비 3dB", "외장 LNA + FPC 안테나", "감도=거리 경쟁력", "차기 LNA·안테나 방식 재평가"],
+                ["경쟁 부품 수 30%↓", "통합도 차이", "FEM·IPD로 통합", "BOM·면적 원가 여유", "FEM 통합·매칭 IPD 검토"],
+                ["Sleep 전류 절반", "저전력 격차", "PHY·듀티·전원 설계", "배터리 수명 소구점", "전원·펌웨어 절전 전략"],
+              ]
+            },
+            { t: "note", kind: "warn", title: "BM의 함정·유의", html: "①<b>측정 조건 불일치</b>로 잘못된 Gap(정규화 필수). ②원가·구조는 <b>추정</b>임을 명시(단정 금지). ③분해·분석은 <b>경쟁 정보 수집의 합법·윤리 범위</b> 내에서(특허·영업비밀 침해·설계 무단복제 금지 — 벤치마킹은 '원리·방향' 학습이지 카피가 아님). ④'좋아 보인다'로 끝내지 말고 <b>원인(Why)</b>까지." },
+            { t: "h", text: "BM 수행 체크리스트" },
+            { t: "check", items: [
+              "분석 축·측정 항목을 <b>사전 정의</b>(자사·경쟁 동일 잣대)",
+              "측정 조건(온도·채널·전압·치구) <b>정규화</b>",
+              "부품 구성은 <b>분해(teardown)</b>로 확인(칩 벤더·FEM·안테나 방식)",
+              "원가는 <b>상대 지수</b>로, 추정임을 표기",
+              "각 Gap마다 <b>Why → Insight → Action</b> 한 줄씩",
+              "결과를 <b>결론(액션) 먼저</b> 장표화(경영/설계 의사결정용)",
+            ]},
+            { t: "note", kind: "info", title: "연결", html: "BM 결과는 칩/부품 <a href='#proc-selection'>선정</a>·<a href='#proc-datasheet'>데이터시트 분석</a>·<a href='#prod-secondsource'>이원화</a>로, 성능 항목은 <a href='#ant-ota'>OTA</a>·<a href='#rf-rx'>수신감도</a>·<a href='#ckt-pdn'>전력</a>으로 이어집니다." },
+          ]
+        },
+        {
           id: "proc-flow",
           title: "3~8단계 흐름과 게이트",
           blocks: [
