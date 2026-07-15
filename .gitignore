@@ -1,5 +1,9 @@
-# Local preview / tooling (not needed for public site)
-.claude/
+# Local preview / tooling — .claude 는 무시하되, 스킬은 프로젝트와 함께 이동
+.claude/*
+!.claude/skills/
 .DS_Store
 Thumbs.db
 *.log
+
+# BM 분석 결과는 로컬 전용(경쟁사 데이터 — 공개 금지)
+bm-output/
