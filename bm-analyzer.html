@@ -45,6 +45,15 @@
   #result th{background:var(--elev);font-weight:700;white-space:nowrap}
   .key-note{font-size:12px;color:var(--faint);margin-top:6px}
   a{color:var(--accent)}
+  input[type=file]{padding:8px;font-size:13px;color:var(--text);max-width:100%}
+  .imgwrap{position:relative;display:inline-block;max-width:100%;line-height:0;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#000}
+  .imgwrap img{display:block;max-width:100%;height:auto}
+  .marker{position:absolute;transform:translate(-50%,-50%);min-width:24px;height:24px;padding:0 6px;border-radius:999px;background:var(--accent);color:#fff;font-size:12.5px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.6);cursor:default}
+  .legend table{width:100%;border-collapse:collapse;margin:12px 0;font-size:13.5px}
+  .legend th,.legend td{border:1px solid var(--border);padding:7px 10px;text-align:left;vertical-align:top}
+  .legend th{background:var(--elev);white-space:nowrap}
+  .legend td:first-child{font-weight:800;color:var(--accent);width:1%;white-space:nowrap;text-align:center}
+  .conf-low{color:var(--danger);font-weight:700}.conf-mid{color:var(--warn);font-weight:700}.conf-high{color:var(--ok);font-weight:700}
 </style>
 </head>
 <body>
@@ -55,7 +64,7 @@
     <h3>⚠️ 보안 — 반드시 확인</h3>
     <div style="font-size:13.5px">
       • 이 도구는 <b>사내/로컬에서만</b> 쓰세요. 공개 사이트로 취급 금지.<br>
-      • 입력한 <b>경쟁사 데이터는 분석을 위해 Anthropic API로 전송</b>됩니다 — 회사 정책상 외부 LLM API 전송이 허용되는지 먼저 확인하세요.<br>
+      • 입력한 <b>경쟁사 데이터·업로드 사진은 분석을 위해 Anthropic API로 전송</b>됩니다 — 회사 정책상 외부 LLM API 전송이 허용되는지 먼저 확인하세요.<br>
       • API 키는 <b>이 브라우저(localStorage)에만</b> 저장되며 Anthropic 외 다른 곳으로 전송되지 않습니다. 공용 PC에서는 사용 후 키를 지우세요.<br>
       • 벤치마킹은 원리·방향 학습이지 설계 카피가 아닙니다(특허·영업비밀 준수).
     </div>
@@ -116,6 +125,26 @@
     </div>
     <div id="result"></div>
     <details><summary>원본 마크다운 보기</summary><pre id="raw" style="white-space:pre-wrap;font-size:12.5px;color:var(--dim);margin-top:8px"></pre></details>
+  </div>
+
+  <div class="box">
+    <h3>🔍 모듈 사진 부품 식별 <span class="key-note">(teardown 사진 → 부품 종류·번호 마커·마킹 추정)</span></h3>
+    <div style="font-size:12.5px;color:var(--dim);margin-bottom:8px">
+      모듈 윗면(부품면) 사진을 올리면 주요 부품에 <b>번호 마커</b>를 겹쳐 표시하고, 부품 종류·마킹(추정)·신뢰도를 표로 정리합니다.
+      부품번호는 <b>추정</b>이며(흐린 실크는 "판독불가"), <b>PCB 층수는 윗면 사진으로 판정 불가</b>(엣지 단면/X-ray 필요)로 표기합니다.
+    </div>
+    <input id="imgFile" type="file" accept="image/*" />
+    <div class="actions" style="margin-top:10px">
+      <button id="runImg">사진 분석</button>
+      <span class="status" id="imgStatus"></span>
+    </div>
+    <div id="imgResultBox" style="display:none;margin-top:14px">
+      <div id="imgwrap" class="imgwrap"></div>
+      <div id="legend"></div>
+      <div id="imgNotes"></div>
+      <div class="actions" style="justify-content:flex-end"><button class="ghost" id="imgCopy">결과 복사</button></div>
+      <details><summary>원본 마크다운/JSON 보기</summary><pre id="imgRaw" style="white-space:pre-wrap;font-size:12px;color:var(--dim);margin-top:8px"></pre></details>
+    </div>
   </div>
 
 <script>
@@ -274,6 +303,119 @@ $("#loadEx").onclick=()=>{
 - 인증/지역: 라벨상 자사 KC,FCC / A KC,FCC,CE / B KC (미기재 국가 가능 → 비확정)`;
   setStatus("예시 채움 — '분석 실행'을 누르세요.");
 };
+
+// ===== 모듈 사진 부품 식별 (vision) =====
+let imgB64=null, imgMime=null, imgMD="";
+function imgStatus(t,spin){ $("#imgStatus").innerHTML=(spin?'<span class="spinner"></span>':'')+(t||""); }
+
+const IMG_SYSTEM = `당신은 무선모듈 PCB 사진을 분석하는 RF HW 부품 식별 전문가다. 사진에서 눈에 보이는 주요 부품을 식별해 번호를 매긴다.
+
+규칙(중요):
+- 실크스크린/부품 마킹(모델명·날짜코드·부품번호)을 최대한 판독하되, 불확실하면 "판독불가" 또는 "추정"으로 표기하고 절대 지어내지 마라. 각 부품에 신뢰도(높음/중간/낮음)를 붙인다.
+- 부품 종류는 패키지·형상으로 추정: RF SoC(중앙 대형 QFN/QFP/다이), SPI 플래시(8핀 SOIC, 예: 'FM25Q..'), 크리스탈(금속캔, 'N40.00'=40MHz 등), DC-DC 인덕터(사각 몰드), 메탈 안테나(판금/금속캔형), 커넥터(u.FL 등), RF 매칭/디커플링 수동소자(0402/0201) 등.
+- PCB 층수는 윗면(top) 사진만으로는 확정 불가하다. 층수를 단정하지 말고 "윗면 사진으로는 층수 판정 불가 — 엣지 단면/X-ray 필요"로 표기.
+- 부품 위치는 이미지 좌표로: 좌상단=(0,0), 우하단=(1,1) 기준의 소수 x,y (부품 중심점).
+
+출력 형식(정확히 이 순서):
+1) 먼저 JSON 코드블록 하나(다른 말 없이). 형식:
+\`\`\`json
+{"components":[{"n":1,"type":"RF SoC","part":"판독값 또는 추정","confidence":"낮음","x":0.47,"y":0.52}],
+ "summary":{"module_label":"실크 판독값","size":"예:15x40mm","estimated_component_count":"약 N개(주요 능동+수동 개략)","pcb_layers":"윗면 사진으로 판정 불가 — 엣지/X-ray 필요"}}
+\`\`\`
+   · n은 1부터, 왼쪽→오른쪽/큰 부품 우선. x,y는 반드시 0~1 소수.
+2) 그 다음 한국어 Markdown 분석:
+   ## 요약 (모듈 라벨·크기·추정 부품 수·층수 주의)
+   ## 번호별 부품 (각 번호: 종류 · 마킹(추정/판독불가) · 신뢰도 · 근거)
+   ## BM 관점 인사이트 (통합도·BOM·안테나/전원 구성에서 읽히는 설계 방향, 2~4줄)
+   ## 주의 — "사진 판독은 추정이며 부품번호·개수·층수는 실물/단면 대조가 필요"를 명시.`;
+
+$("#imgFile").onchange = e => {
+  const f = e.target.files && e.target.files[0]; if(!f) return;
+  imgMime = f.type || "image/jpeg";
+  const r = new FileReader();
+  r.onload = () => {
+    imgB64 = String(r.result).split(",")[1];
+    $("#imgResultBox").style.display = "block";
+    $("#imgwrap").innerHTML = '<img src="'+r.result+'" alt="module">';
+    $("#legend").innerHTML=""; $("#imgNotes").innerHTML=""; $("#imgRaw").textContent=""; imgMD="";
+    imgStatus("사진 로드됨 — '사진 분석'을 누르세요.");
+  };
+  r.readAsDataURL(f);
+};
+
+$("#runImg").onclick = async () => {
+  const key = $("#apiKey").value.trim();
+  if(!key){ imgStatus("API 키를 입력하세요."); return; }
+  if(!imgB64){ imgStatus("사진을 먼저 선택하세요."); return; }
+  localStorage.setItem(KEY_LS, key);
+  $("#runImg").disabled = true; imgStatus("사진 분석 중 (부품 식별)…", true);
+  imgMD=""; $("#imgRaw").textContent=""; $("#legend").innerHTML=""; $("#imgNotes").innerHTML="";
+  $("#imgwrap").querySelectorAll(".marker").forEach(m=>m.remove());
+  try{
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method:"POST",
+      headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
+      body:JSON.stringify({
+        model:$("#model").value, max_tokens:6000, thinking:{type:"adaptive"}, system:IMG_SYSTEM,
+        messages:[{role:"user",content:[
+          {type:"image",source:{type:"base64",media_type:imgMime,data:imgB64}},
+          {type:"text",text:"이 무선모듈 PCB 사진의 주요 부품을 식별하고 번호를 매겨줘."}
+        ]}],
+        stream:true
+      })
+    });
+    if(!resp.ok){ let m="HTTP "+resp.status; try{const j=await resp.json(); m=(j.error&&j.error.message)||m;}catch(e){} throw new Error(m); }
+    const reader=resp.body.getReader(); const dec=new TextDecoder(); let buf="";
+    while(true){
+      const {done,value}=await reader.read(); if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split("\n"); buf=lines.pop();
+      for(const line of lines){
+        const s=line.trim(); if(!s.startsWith("data:"))continue;
+        const data=s.slice(5).trim(); if(!data)continue;
+        try{const ev=JSON.parse(data);
+          if(ev.type==="content_block_delta"&&ev.delta&&ev.delta.type==="text_delta"){ imgMD+=ev.delta.text; $("#imgRaw").textContent=imgMD; }
+          else if(ev.type==="error"){ throw new Error(ev.error&&ev.error.message||"stream error"); }
+        }catch(e){/* partial */}
+      }
+    }
+    let comps=[];
+    const jm=imgMD.match(/```json([\s\S]*?)```/);
+    if(jm){ try{ const o=JSON.parse(jm[1].trim()); comps=o.components||[]; }catch(e){ imgStatus("완료(좌표 파싱 실패 — 표/설명만 표시)"); } }
+    drawMarkers(comps); renderLegend(comps);
+    const notes=imgMD.replace(/```json[\s\S]*?```/,"").trim();
+    $("#imgNotes").innerHTML=renderMD(notes);
+    if(!/파싱 실패/.test($("#imgStatus").textContent)) imgStatus("완료. ⚠️ 추정치 — 부품번호·개수·층수는 실물/단면 대조 필요.");
+  }catch(err){
+    imgStatus("오류: "+err.message);
+    $("#imgNotes").innerHTML=`<p style="color:var(--danger)">요청 실패: ${esc(err.message)}</p>`;
+  }finally{ $("#runImg").disabled=false; }
+};
+
+function drawMarkers(comps){
+  const wrap=$("#imgwrap"); wrap.querySelectorAll(".marker").forEach(m=>m.remove());
+  (comps||[]).forEach(c=>{
+    const x=Number(c.x), y=Number(c.y);
+    if(!isFinite(x)||!isFinite(y)) return;
+    const m=document.createElement("div"); m.className="marker";
+    m.style.left=(Math.max(0,Math.min(1,x))*100)+"%";
+    m.style.top=(Math.max(0,Math.min(1,y))*100)+"%";
+    m.textContent=String(c.n);
+    m.title=(c.type||"")+(c.part?" · "+c.part:"");
+    wrap.appendChild(m);
+  });
+}
+function renderLegend(comps){
+  if(!comps||!comps.length){ $("#legend").innerHTML=""; return; }
+  let h='<div class="legend"><table><tr><th>#</th><th>부품 종류</th><th>마킹/부품번호(추정)</th><th>신뢰도</th></tr>';
+  comps.forEach(c=>{
+    const cf=(c.confidence||"").toString();
+    const cls=/낮|low/i.test(cf)?"conf-low":/중|mid/i.test(cf)?"conf-mid":/높|high/i.test(cf)?"conf-high":"";
+    h+="<tr><td>"+esc(String(c.n))+"</td><td>"+esc(c.type||"")+"</td><td>"+esc(c.part||"—")+"</td><td class='"+cls+"'>"+esc(cf||"—")+"</td></tr>";
+  });
+  h+="</table></div>"; $("#legend").innerHTML=h;
+}
+$("#imgCopy").onclick=()=>{ navigator.clipboard.writeText(imgMD).then(()=>imgStatus("복사됨")); };
 </script>
 </body>
 </html>
