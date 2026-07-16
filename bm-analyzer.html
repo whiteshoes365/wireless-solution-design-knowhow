@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>경쟁사 BM 분석기 (로컬 전용)</title>
+<meta name="robots" content="noindex, nofollow" />
+<style>
+  :root{--bg:#0f1419;--elev:#161c24;--card:#1b232e;--border:#28303c;--text:#e6edf3;--dim:#9aa7b4;--faint:#6b7785;--accent:#4aa3ff;--accent-soft:#1d3a5c;--warn:#e3b341;--warn-bg:#2b2410;--danger:#e5534b;--danger-bg:#2b1412;--ok:#2ea043;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"Pretendard",-apple-system,"Segoe UI","Malgun Gothic",system-ui,sans-serif;background:var(--bg);color:var(--text);line-height:1.7;font-size:15px;padding:24px;max-width:1000px;margin:0 auto}
+  h1{font-size:22px;font-weight:800;letter-spacing:-.3px}
+  h1 .badge{font-size:11px;font-weight:600;color:var(--warn);border:1px solid var(--warn);border-radius:999px;padding:2px 9px;margin-left:8px;vertical-align:middle}
+  .sub{color:var(--dim);font-size:13px;margin:4px 0 16px}
+  .box{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin:14px 0}
+  .danger{border-left:4px solid var(--danger);background:var(--danger-bg)}
+  .warn{border-left:4px solid var(--warn);background:var(--warn-bg)}
+  .box h3{font-size:14px;margin-bottom:6px}
+  label{display:block;font-size:12.5px;color:var(--dim);margin:10px 0 4px}
+  input,textarea,select{width:100%;background:var(--elev);border:1px solid var(--border);color:var(--text);border-radius:9px;padding:10px 12px;font-size:14px;font-family:inherit}
+  input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+  textarea{min-height:220px;resize:vertical;font-family:"SFMono-Regular",Consolas,monospace;font-size:13px;line-height:1.6}
+  .row{display:flex;gap:12px;flex-wrap:wrap}
+  .row>div{flex:1;min-width:180px}
+  button{background:var(--accent);color:#fff;border:none;border-radius:9px;padding:11px 20px;font-size:14.5px;font-weight:700;cursor:pointer}
+  button:hover{filter:brightness(1.1)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  button.ghost{background:var(--elev);color:var(--text);border:1px solid var(--border);font-weight:600;padding:8px 14px;font-size:13px}
+  .actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:14px}
+  .status{font-size:13px;color:var(--dim)}
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  code{background:#0c1117;padding:2px 6px;border-radius:5px;font-family:"SFMono-Regular",Consolas,monospace;font-size:13px;border:1px solid var(--border)}
+  details{margin-top:8px}summary{cursor:pointer;color:var(--dim);font-size:13px}
+  /* rendered markdown result */
+  #result{margin-top:8px}
+  #result h2{font-size:19px;font-weight:750;margin:20px 0 10px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+  #result h3{font-size:16px;margin:16px 0 8px}
+  #result p{margin:8px 0}
+  #result ul{padding-left:22px;margin:8px 0}#result li{margin:5px 0}
+  #result strong{color:var(--accent)}
+  #result hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+  #result table{width:100%;border-collapse:collapse;font-size:13.5px;margin:12px 0;display:block;overflow-x:auto}
+  #result th,#result td{border:1px solid var(--border);padding:8px 11px;text-align:left;vertical-align:top}
+  #result th{background:var(--elev);font-weight:700;white-space:nowrap}
+  .key-note{font-size:12px;color:var(--faint);margin-top:6px}
+  a{color:var(--accent)}
+</style>
+</head>
+<body>
+  <h1>📊 경쟁사 BM 분석기 <span class="badge">로컬 전용</span></h1>
+  <p class="sub">경쟁 모듈 데이터를 입력하면 Claude API가 비교 장표 + So-What 인사이트를 생성합니다. (지식 사이트 <code>proc-benchmark</code> / <code>bm-analyze</code> 스킬과 동일 프레임)</p>
+
+  <div class="box danger">
+    <h3>⚠️ 보안 — 반드시 확인</h3>
+    <div style="font-size:13.5px">
+      • 이 도구는 <b>사내/로컬에서만</b> 쓰세요. 공개 사이트로 취급 금지.<br>
+      • 입력한 <b>경쟁사 데이터는 분석을 위해 Anthropic API로 전송</b>됩니다 — 회사 정책상 외부 LLM API 전송이 허용되는지 먼저 확인하세요.<br>
+      • API 키는 <b>이 브라우저(localStorage)에만</b> 저장되며 Anthropic 외 다른 곳으로 전송되지 않습니다. 공용 PC에서는 사용 후 키를 지우세요.<br>
+      • 벤치마킹은 원리·방향 학습이지 설계 카피가 아닙니다(특허·영업비밀 준수).
+    </div>
+  </div>
+
+  <div class="box">
+    <label>Anthropic API 키 <span class="key-note">(sk-ant-... — 이 브라우저에만 저장)</span></label>
+    <input id="apiKey" type="password" placeholder="sk-ant-api03-..." autocomplete="off" />
+    <div class="row">
+      <div>
+        <label>모델</label>
+        <select id="model">
+          <option value="claude-opus-4-8">claude-opus-4-8 (권장·최고품질)</option>
+          <option value="claude-sonnet-5">claude-sonnet-5 (저렴·빠름)</option>
+          <option value="claude-haiku-4-5">claude-haiku-4-5 (최저가)</option>
+        </select>
+      </div>
+      <div style="flex:0 0 auto;display:flex;align-items:flex-end;gap:8px">
+        <button class="ghost" id="saveKey">키 저장</button>
+        <button class="ghost" id="clearKey">키 삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="box">
+    <label>경쟁 모듈 데이터 붙여넣기 <span class="key-note">(빈칸·모르는 값은 비워도 됨)</span></label>
+    <textarea id="input" placeholder="[대상]
+- 자사: 모델명 / 벤더
+- 경쟁A: 모델명 / 벤더
+- 경쟁B: ...
+
+[측정 조건] 온도, 채널, 전압, 치구 (아는 만큼)
+
+[값] (항목: 자사 / 경쟁A / 경쟁B, 없으면 ?)
+- Tx출력(dBm):
+- 수신감도(dBm):
+- Sleep 전류(µA):
+- 부품 수/구성(칩·FEM·발룬·필터·안테나):
+- PCB 층수/크기/재료:
+- 안테나 방식:
+- 지원 규격/세대·인증 지역:
+- 추정 BOM(자사=100 기준):
+
+[출처] 각 값이 데이터시트/실측/추정 중 무엇인지 (아는 만큼)"></textarea>
+    <div class="actions">
+      <button id="run">분석 실행</button>
+      <button class="ghost" id="loadEx">예시 채우기</button>
+      <span class="status" id="status"></span>
+    </div>
+  </div>
+
+  <div class="box" id="resultBox" style="display:none">
+    <div class="actions" style="margin:0 0 8px;justify-content:flex-end">
+      <button class="ghost" id="copyBtn">결과 복사</button>
+      <button class="ghost" id="saveBtn">.md 저장</button>
+    </div>
+    <div id="result"></div>
+    <details><summary>원본 마크다운 보기</summary><pre id="raw" style="white-space:pre-wrap;font-size:12.5px;color:var(--dim);margin-top:8px"></pre></details>
+  </div>
+
+<script>
+const $ = s => document.querySelector(s);
+const KEY_LS = "bm-analyzer-apikey";
+
+// restore saved key
+$("#apiKey").value = localStorage.getItem(KEY_LS) || "";
+$("#saveKey").onclick = () => { localStorage.setItem(KEY_LS, $("#apiKey").value.trim()); setStatus("키 저장됨 (이 브라우저)"); };
+$("#clearKey").onclick = () => { localStorage.removeItem(KEY_LS); $("#apiKey").value=""; setStatus("키 삭제됨"); };
+
+function setStatus(t, spin){ $("#status").innerHTML = (spin?'<span class="spinner"></span>':'') + (t||""); }
+
+const SYSTEM = `당신은 삼성전자 생활가전 무선통신모듈(RF) HW 벤치마킹 분석 전문가다.
+사용자가 준 자사/경쟁 모듈 자료(데이터시트·teardown·측정값)를 바탕으로 "스펙 나열"이 아니라 인사이트·액션을 도출한다.
+
+원칙:
+- 자료에 없는 값은 지어내지 말고 "?" 로 둔다. 각 값 옆에 (실측)/(추정)/(데이터시트) 출처를 표기(알 수 있으면).
+- 측정 조건이 다르면 비교 무효임을 명시. 원가는 상대지수(자사=100)로.
+- Gap의 원인(Why)까지 파고들어 '카피'가 아닌 우리 방식의 Action을 도출.
+- 벤치마킹은 원리·방향 학습이며 특허·영업비밀 침해·설계 무단복제가 아님을 전제.
+
+반드시 아래 순서의 한국어 Markdown으로만 출력(다른 말 없이):
+
+## 결론 (먼저)
+- 한 줄 결론.
+- 상위 3개 액션(우선순위순, 불릿).
+
+## 비교 장표
+| 항목 | 자사 | 경쟁 A | 경쟁 B | Gap / 시사점 |
+(RF성능·전력·BOM/부품구성·PCB·안테나·인증/지역 등 자료에 있는 항목만. 값에 출처 괄호 표기)
+
+## So-What 인사이트
+| Fact(사실) | Gap(차이) | Why(원인 추정) | Insight(시사점) | Action(실행) |
+(임팩트 큰 순 최소 3행. Why는 '추정'임을 명시)
+
+## 데이터 공백 (추가로 확보/측정할 항목)
+- 불릿 목록.
+
+## 유의
+- 측정조건 정규화 여부, 추정값 비중 등 이 분석의 한계를 1~2줄로.`;
+
+// ---- minimal markdown renderer (headings, bold, tables, lists, hr) ----
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));}
+function inline(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");}
+function renderMD(md){
+  const lines = md.split("\n"); let html=""; let i=0;
+  while(i<lines.length){
+    let ln=lines[i];
+    if(/^\s*#{1,3}\s/.test(ln)){const m=ln.match(/^\s*(#{1,3})\s+(.*)/);const t=m[1].length;html+=`<h${t===1?2:t}>${inline(m[2])}</h${t===1?2:t}>`;i++;continue;}
+    if(/^\s*---+\s*$/.test(ln)){html+="<hr>";i++;continue;}
+    if(/^\s*\|.*\|\s*$/.test(ln)){ // table
+      const tbl=[];while(i<lines.length&&/^\s*\|.*\|\s*$/.test(lines[i])){tbl.push(lines[i]);i++;}
+      const rows=tbl.map(r=>r.trim().replace(/^\||\|$/g,"").split("|").map(c=>c.trim()));
+      const body=rows.filter(r=>!r.every(c=>/^:?-+:?$/.test(c)||c===""));
+      html+="<table>";body.forEach((r,ri)=>{const tag=ri===0?"th":"td";html+="<tr>"+r.map(c=>`<${tag}>${inline(c)}</${tag}>`).join("")+"</tr>";});html+="</table>";continue;
+    }
+    if(/^\s*[-*]\s+/.test(ln)){const items=[];while(i<lines.length&&/^\s*[-*]\s+/.test(lines[i])){items.push(lines[i].replace(/^\s*[-*]\s+/,""));i++;}html+="<ul>"+items.map(x=>`<li>${inline(x)}</li>`).join("")+"</ul>";continue;}
+    if(ln.trim()===""){i++;continue;}
+    html+=`<p>${inline(ln)}</p>`;i++;
+  }
+  return html;
+}
+
+let currentMD="";
+$("#run").onclick = runAnalysis;
+async function runAnalysis(){
+  const key=$("#apiKey").value.trim();
+  const text=$("#input").value.trim();
+  if(!key){setStatus("API 키를 입력하세요.");return;}
+  if(!text){setStatus("경쟁 모듈 데이터를 입력하세요.");return;}
+  localStorage.setItem(KEY_LS,key);
+  $("#run").disabled=true; setStatus("분석 중 (모델이 생각 후 작성)…",true);
+  $("#resultBox").style.display="block"; $("#result").innerHTML=""; $("#raw").textContent=""; currentMD="";
+  try{
+    const resp=await fetch("https://api.anthropic.com/v1/messages",{
+      method:"POST",
+      headers:{
+        "content-type":"application/json",
+        "x-api-key":key,
+        "anthropic-version":"2023-06-01",
+        "anthropic-dangerous-direct-browser-access":"true"
+      },
+      body:JSON.stringify({
+        model:$("#model").value,
+        max_tokens:12000,
+        thinking:{type:"adaptive"},
+        system:SYSTEM,
+        messages:[{role:"user",content:text}],
+        stream:true
+      })
+    });
+    if(!resp.ok){
+      let msg="HTTP "+resp.status;
+      try{const j=await resp.json();msg=(j.error&&j.error.message)||msg;}catch(e){}
+      throw new Error(msg);
+    }
+    const reader=resp.body.getReader();const dec=new TextDecoder();let buf="";
+    while(true){
+      const {done,value}=await reader.read(); if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split("\n"); buf=lines.pop();
+      for(const line of lines){
+        const s=line.trim(); if(!s.startsWith("data:"))continue;
+        const data=s.slice(5).trim(); if(!data)continue;
+        try{const ev=JSON.parse(data);
+          if(ev.type==="content_block_delta"&&ev.delta&&ev.delta.type==="text_delta"){
+            currentMD+=ev.delta.text; $("#result").innerHTML=renderMD(currentMD); $("#raw").textContent=currentMD;
+          }else if(ev.type==="error"){throw new Error(ev.error&&ev.error.message||"stream error");}
+        }catch(e){/* ignore partial json */}
+      }
+    }
+    setStatus("완료. ⚠️ 결과는 bm-output/ 등 로컬에만 저장하세요.");
+  }catch(err){
+    setStatus("오류: "+err.message);
+    $("#result").innerHTML=`<p style="color:var(--danger)">요청 실패: ${esc(err.message)}</p>
+      <p class="key-note">키가 맞는지, 크레딧이 있는지, 네트워크(사내 프록시)가 api.anthropic.com을 허용하는지 확인하세요.</p>`;
+  }finally{$("#run").disabled=false;}
+}
+
+$("#copyBtn").onclick=()=>{navigator.clipboard.writeText(currentMD).then(()=>setStatus("복사됨"));};
+$("#saveBtn").onclick=()=>{
+  const d=new Date().toISOString().slice(0,10);
+  const blob=new Blob([currentMD],{type:"text/markdown"});
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`BM_${d}.md`;a.click();
+  setStatus("BM_"+d+".md 저장됨 (로컬 전용 보관)");
+};
+$("#loadEx").onclick=()=>{
+  $("#input").value=`[대상]
+- 자사: SWU-24A / 자사
+- 경쟁A: XY-2450 / A社
+- 경쟁B: ZZ-Combo / B社
+
+[측정 조건] 상온 25℃, 2.4G ch6, 3.3V, 도전 커넥터 (자사만 실측)
+
+[값]
+- Tx출력(dBm): 18(실측) / 19(데이터시트) / ?
+- 수신감도(dBm): -95(실측) / -98(데이터시트) / -97(데이터시트)
+- Sleep 전류(µA): 3.0(실측) / 1.5(데이터시트) / 2.0(추정)
+- 부품 수/구성: 칩+발룬+π매칭+PCB안테나 / 칩+FEM(통합)+FPC안테나 / 콤보칩+칩안테나
+- PCB 층수/크기: 4층/25x18mm / 4층/22x16mm / 2층/28x20mm
+- 안테나 방식: PCB패턴 / FPC(+u.FL) / 칩
+- 지원 규격/지역: WiFi4 BLE / KC,FCC / WiFi5 BLE / KC,FCC,CE / WiFi4 / KC
+- 추정 BOM(자사=100): 100 / 115 / 80`;
+  setStatus("예시 채움 — '분석 실행'을 누르세요.");
+};
+</script>
+</body>
+</html>
