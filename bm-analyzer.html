@@ -54,6 +54,13 @@
   .legend th{background:var(--elev);white-space:nowrap}
   .legend td:first-child{font-weight:800;color:var(--accent);width:1%;white-space:nowrap;text-align:center}
   .conf-low{color:var(--danger);font-weight:700}.conf-mid{color:var(--warn);font-weight:700}.conf-high{color:var(--ok);font-weight:700}
+  .thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+  .thumb{position:relative;width:104px;height:78px;border:1px solid var(--border);border-radius:8px;overflow:hidden;background:#000}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb .idx{position:absolute;left:3px;top:3px;background:var(--accent);color:#fff;font-size:10px;font-weight:800;border-radius:4px;padding:1px 6px}
+  .thumb .rm{position:absolute;right:2px;top:2px;background:rgba(0,0,0,.6);color:#fff;border:none;border-radius:5px;width:20px;height:20px;font-size:13px;line-height:1;cursor:pointer;padding:0}
+  .imgfig{margin:12px 0}
+  .imgfig .cap{font-size:12px;color:var(--dim);margin:5px 0 0;font-weight:600}
 </style>
 </head>
 <body>
@@ -128,18 +135,20 @@
   </div>
 
   <div class="box">
-    <h3>🔍 모듈 사진 부품 식별 <span class="key-note">(teardown 사진 → 부품 종류·번호 마커·마킹 추정)</span></h3>
+    <h3>🔍 사진 기반 종합 BM <span class="key-note">(모듈 teardown 사진 + 문서·스펙 사진 여러 장 → 부품 식별 + 종합 분석)</span></h3>
     <div style="font-size:12.5px;color:var(--dim);margin-bottom:8px">
-      모듈 윗면(부품면) 사진을 올리면 주요 부품에 <b>번호 마커</b>를 겹쳐 표시하고, 부품 종류·마킹(추정)·신뢰도를 표로 정리합니다.
-      부품번호는 <b>추정</b>이며(흐린 실크는 "판독불가"), <b>PCB 층수는 윗면 사진으로 판정 불가</b>(엣지 단면/X-ray 필요)로 표기합니다.
+      모듈 윗면(부품면) 사진과 <b>모듈 정보 문서 사진(데이터시트·라벨·스펙표)</b>을 <b>여러 장</b> 올리면, 모듈 부품에 <b>번호 마커</b>를 겹쳐 표시하고 문서에서 스펙을 판독해 <b>종합 BM</b>(비교 장표·So-What)을 만듭니다. 위 텍스트 입력칸에 값이 있으면 함께 반영합니다.<br>
+      부품번호는 <b>추정</b>(흐린 실크는 "판독불가"), <b>PCB 층수는 윗면 사진으로 판정 불가</b>(엣지 단면/X-ray 필요)로 표기합니다.
     </div>
-    <input id="imgFile" type="file" accept="image/*" />
+    <input id="imgFile" type="file" accept="image/*" multiple />
+    <div id="thumbs" class="thumbs"></div>
     <div class="actions" style="margin-top:10px">
       <button id="runImg">사진 분석</button>
+      <button class="ghost" id="clearImgs">사진 비우기</button>
       <span class="status" id="imgStatus"></span>
     </div>
     <div id="imgResultBox" style="display:none;margin-top:14px">
-      <div id="imgwrap" class="imgwrap"></div>
+      <div id="imgwraps"></div>
       <div id="legend"></div>
       <div id="imgNotes"></div>
       <div class="actions" style="justify-content:flex-end"><button class="ghost" id="imgCopy">결과 복사</button></div>
@@ -304,64 +313,83 @@ $("#loadEx").onclick=()=>{
   setStatus("예시 채움 — '분석 실행'을 누르세요.");
 };
 
-// ===== 모듈 사진 부품 식별 (vision) =====
-let imgB64=null, imgMime=null, imgMD="";
+// ===== 사진 기반 종합 BM (multi-image vision) =====
+let imgs=[]; let imgMD="";
 function imgStatus(t,spin){ $("#imgStatus").innerHTML=(spin?'<span class="spinner"></span>':'')+(t||""); }
+const clamp01 = v => Math.max(0, Math.min(1, v));
 
-const IMG_SYSTEM = `당신은 무선모듈 PCB 사진을 분석하는 RF HW 부품 식별 전문가다. 사진에서 눈에 보이는 주요 부품을 식별해 번호를 매긴다.
+const IMG_SYSTEM = `당신은 무선모듈 PCB 사진과 관련 문서 사진을 종합 분석하는 RF HW 벤치마킹 전문가다.
+입력으로 [사진 1], [사진 2] … 여러 장이 주어진다. 각 사진은 (a) 모듈 실물(부품면/teardown) 또는 (b) 문서(데이터시트·라벨·스펙표·규격표)일 수 있다. 각 사진의 종류를 스스로 판단해 활용한다.
+
+목표: (1) 모듈 사진의 주요 부품 식별 + 번호 마커 좌표, (2) 문서 사진에서 모델·스펙·인증 등 정보 판독, (3) 이를 종합한 BM(비교 장표·So-What) 인사이트.
 
 규칙(중요):
-- 실크스크린/부품 마킹(모델명·날짜코드·부품번호)을 최대한 판독하되, 불확실하면 "판독불가" 또는 "추정"으로 표기하고 절대 지어내지 마라. 각 부품에 신뢰도(높음/중간/낮음)를 붙인다.
-- 부품 종류는 패키지·형상으로 추정: RF SoC(중앙 대형 QFN/QFP/다이), SPI 플래시(8핀 SOIC, 예: 'FM25Q..'), 크리스탈(금속캔, 'N40.00'=40MHz 등), DC-DC 인덕터(사각 몰드), 메탈 안테나(판금/금속캔형), 커넥터(u.FL 등), RF 매칭/디커플링 수동소자(0402/0201) 등.
-- PCB 층수는 윗면(top) 사진만으로는 확정 불가하다. 층수를 단정하지 말고 "윗면 사진으로는 층수 판정 불가 — 엣지 단면/X-ray 필요"로 표기.
-- 부품 위치는 이미지 좌표로: 좌상단=(0,0), 우하단=(1,1) 기준의 소수 x,y (부품 중심점).
+- 실크/부품 마킹/문서 텍스트를 최대한 판독하되, 불확실하면 "판독불가"/"추정"으로 표기하고 절대 지어내지 마라. 각 부품·값에 신뢰도(높음/중간/낮음).
+- 부품 종류는 패키지·형상으로 추정: RF SoC(대형 QFN/QFP/다이), SPI 플래시(8핀 SOIC, 예 'FM25Q..'), 크리스탈(금속캔, 'N40.00'=40MHz), DC-DC 인덕터(사각 몰드), 메탈 안테나(판금), u.FL 커넥터, RF 매칭/디커플링 수동소자(0402/0201) 등.
+- 축별 신뢰도(사이트 BM과 동일): teardown으로 확인되는 축(부품 구성·BOM·PCB·안테나·열/기구)은 신뢰 높음 → 비교의 중심. RF성능·전력(세트레벨)·인증/지역은 저신뢰 소스 → 문서(데이터시트/시험성적서/인증DB)로 확보된 값만 비교하고, 아니면 (저신뢰) 표기하거나 '데이터 공백'으로 넘긴다.
+- PCB 층수는 윗면 사진만으로 판정 불가 → "윗면 사진으로는 층수 판정 불가 — 엣지 단면/X-ray 필요"로 표기, 단정 금지.
+- 부품 위치 좌표: 해당 사진의 좌상단=(0,0), 우하단=(1,1) 기준 소수 x,y(부품 중심). 어느 사진인지 img(사진 번호, 1부터)도 표기. n은 전체 사진을 통틀어 1부터 증가하는 유일 번호. 문서 사진의 정보 항목은 components에 넣지 말 것(부품 마커 대상만).
 
 출력 형식(정확히 이 순서):
-1) 먼저 JSON 코드블록 하나(다른 말 없이). 형식:
+1) 먼저 JSON 코드블록 하나(다른 말 없이):
 \`\`\`json
-{"components":[{"n":1,"type":"RF SoC","part":"판독값 또는 추정","confidence":"낮음","x":0.47,"y":0.52}],
- "summary":{"module_label":"실크 판독값","size":"예:15x40mm","estimated_component_count":"약 N개(주요 능동+수동 개략)","pcb_layers":"윗면 사진으로 판정 불가 — 엣지/X-ray 필요"}}
+{"components":[{"img":1,"n":1,"type":"RF SoC","part":"판독/추정","confidence":"낮음","x":0.47,"y":0.52}],
+ "summary":{"module_label":"판독값","size":"예:15x40mm","estimated_component_count":"약 N개","pcb_layers":"윗면 사진 판정 불가 — 엣지/X-ray 필요","docs_read":"문서 사진에서 읽은 핵심 정보 요약"}}
 \`\`\`
-   · n은 1부터, 왼쪽→오른쪽/큰 부품 우선. x,y는 반드시 0~1 소수.
-2) 그 다음 한국어 Markdown 분석:
-   ## 요약 (모듈 라벨·크기·추정 부품 수·층수 주의)
-   ## 번호별 부품 (각 번호: 종류 · 마킹(추정/판독불가) · 신뢰도 · 근거)
-   ## BM 관점 인사이트 (통합도·BOM·안테나/전원 구성에서 읽히는 설계 방향, 2~4줄)
-   ## 주의 — "사진 판독은 추정이며 부품번호·개수·층수는 실물/단면 대조가 필요"를 명시.`;
+   · img=사진 번호(1부터), n=전체 통틀어 유일 번호(1부터), x,y는 반드시 0~1 소수.
+2) 그 다음 한국어 Markdown:
+   ## 결론 (먼저) — 한 줄 결론 + 상위 3개 액션(우선순위순)
+   ## 번호별 부품 (사진별로, 번호: 종류·마킹(추정/판독불가)·신뢰도·근거)
+   ## 비교 장표 (신뢰 높은 teardown 축: 부품구성·BOM·PCB·안테나·열/기구) — | 항목 | 자사 | 경쟁 | Gap/시사점 |
+   ## 참고 축 (저신뢰·비확정: RF성능·전력·인증/지역 — 문서로 확보된 값만 넣고, 아니면 데이터 공백으로)
+   ## So-What 인사이트 — | Fact | Gap | Why(추정) | Insight | Action | (임팩트 큰 순 최소 3행)
+   ## 데이터 공백 (추가로 확보/측정할 항목)
+   ## 주의 — "사진·문서 판독은 추정이며 부품번호·개수·층수·스펙은 실물/단면/원문 대조가 필요"를 명시.`;
+
+function renderThumbs(){
+  const t=$("#thumbs");
+  if(!imgs.length){ t.innerHTML=""; return; }
+  t.innerHTML=imgs.map((im,i)=>'<div class="thumb"><span class="idx">사진 '+(i+1)+'</span><button class="rm" data-i="'+i+'" title="제거">×</button><img src="'+im.url+'"></div>').join("");
+  t.querySelectorAll(".rm").forEach(b=>b.onclick=()=>{ imgs.splice(Number(b.dataset.i),1); renderThumbs(); imgStatus(imgs.length?imgs.length+"장 준비됨":"사진 없음"); });
+}
 
 $("#imgFile").onchange = e => {
-  const f = e.target.files && e.target.files[0]; if(!f) return;
-  imgMime = f.type || "image/jpeg";
-  const r = new FileReader();
-  r.onload = () => {
-    imgB64 = String(r.result).split(",")[1];
-    $("#imgResultBox").style.display = "block";
-    $("#imgwrap").innerHTML = '<img src="'+r.result+'" alt="module">';
-    $("#legend").innerHTML=""; $("#imgNotes").innerHTML=""; $("#imgRaw").textContent=""; imgMD="";
-    imgStatus("사진 로드됨 — '사진 분석'을 누르세요.");
-  };
-  r.readAsDataURL(f);
+  const files = Array.from(e.target.files||[]); if(!files.length) return;
+  let pending=files.length;
+  files.forEach(f=>{
+    const r=new FileReader();
+    r.onload=()=>{
+      imgs.push({ b64:String(r.result).split(",")[1], mime:f.type||"image/jpeg", url:r.result });
+      if(--pending===0){ renderThumbs(); imgStatus(imgs.length+"장 준비됨 — '사진 분석'을 누르세요."); }
+    };
+    r.readAsDataURL(f);
+  });
+  e.target.value=""; // 같은 파일 재선택·추가 허용
 };
+$("#clearImgs").onclick=()=>{ imgs=[]; renderThumbs(); $("#imgResultBox").style.display="none"; imgStatus("사진 비움"); };
 
 $("#runImg").onclick = async () => {
   const key = $("#apiKey").value.trim();
   if(!key){ imgStatus("API 키를 입력하세요."); return; }
-  if(!imgB64){ imgStatus("사진을 먼저 선택하세요."); return; }
+  if(!imgs.length){ imgStatus("사진을 먼저 업로드하세요."); return; }
   localStorage.setItem(KEY_LS, key);
-  $("#runImg").disabled = true; imgStatus("사진 분석 중 (부품 식별)…", true);
-  imgMD=""; $("#imgRaw").textContent=""; $("#legend").innerHTML=""; $("#imgNotes").innerHTML="";
-  $("#imgwrap").querySelectorAll(".marker").forEach(m=>m.remove());
+  $("#runImg").disabled = true; imgStatus("사진 "+imgs.length+"장 종합 분석 중…", true);
+  imgMD=""; $("#imgRaw").textContent=""; $("#legend").innerHTML=""; $("#imgNotes").innerHTML=""; $("#imgwraps").innerHTML="";
+  $("#imgResultBox").style.display="block";
+  const content=[];
+  imgs.forEach((im,i)=>{
+    content.push({type:"text",text:"[사진 "+(i+1)+"]"});
+    content.push({type:"image",source:{type:"base64",media_type:im.mime,data:im.b64}});
+  });
+  const extra=$("#input").value.trim();
+  content.push({type:"text",text:"위 사진들(모듈 teardown / 문서·스펙)을 종합해 부품 식별 + BM 분석을 해줘. 각 부품은 어느 [사진 N]인지 img로 표기."+(extra?"\n\n[추가 텍스트 데이터]\n"+extra:"")});
   try{
     const resp = await fetch("https://api.anthropic.com/v1/messages", {
       method:"POST",
       headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},
       body:JSON.stringify({
-        model:$("#model").value, max_tokens:6000, thinking:{type:"adaptive"}, system:IMG_SYSTEM,
-        messages:[{role:"user",content:[
-          {type:"image",source:{type:"base64",media_type:imgMime,data:imgB64}},
-          {type:"text",text:"이 무선모듈 PCB 사진의 주요 부품을 식별하고 번호를 매겨줘."}
-        ]}],
-        stream:true
+        model:$("#model").value, max_tokens:8000, thinking:{type:"adaptive"}, system:IMG_SYSTEM,
+        messages:[{role:"user",content}], stream:true
       })
     });
     if(!resp.ok){ let m="HTTP "+resp.status; try{const j=await resp.json(); m=(j.error&&j.error.message)||m;}catch(e){} throw new Error(m); }
@@ -379,27 +407,28 @@ $("#runImg").onclick = async () => {
         }catch(e){/* partial */}
       }
     }
-    let comps=[];
+    let comps=[], parseFail=false;
     const jm=imgMD.match(/```json([\s\S]*?)```/);
-    if(jm){ try{ const o=JSON.parse(jm[1].trim()); comps=o.components||[]; }catch(e){ imgStatus("완료(좌표 파싱 실패 — 표/설명만 표시)"); } }
-    drawMarkers(comps); renderLegend(comps);
+    if(jm){ try{ const o=JSON.parse(jm[1].trim()); comps=o.components||[]; }catch(e){ parseFail=true; } }
+    renderImages(comps); renderLegend(comps);
     const notes=imgMD.replace(/```json[\s\S]*?```/,"").trim();
     $("#imgNotes").innerHTML=renderMD(notes);
-    if(!/파싱 실패/.test($("#imgStatus").textContent)) imgStatus("완료. ⚠️ 추정치 — 부품번호·개수·층수는 실물/단면 대조 필요.");
+    imgStatus(parseFail ? "완료(좌표 파싱 실패 — 사진·표/설명만 표시). ⚠️ 추정치." : "완료. ⚠️ 추정치 — 부품번호·개수·층수·스펙은 실물/단면/원문 대조 필요.");
   }catch(err){
     imgStatus("오류: "+err.message);
-    $("#imgNotes").innerHTML=`<p style="color:var(--danger)">요청 실패: ${esc(err.message)}</p>`;
+    $("#imgNotes").innerHTML='<p style="color:var(--danger)">요청 실패: '+esc(err.message)+'</p>';
   }finally{ $("#runImg").disabled=false; }
 };
 
-function drawMarkers(comps){
-  const wrap=$("#imgwrap"); wrap.querySelectorAll(".marker").forEach(m=>m.remove());
+function renderImages(comps){
+  const box=$("#imgwraps");
+  box.innerHTML=imgs.map((im,i)=>'<div class="imgfig"><div class="imgwrap" data-img="'+(i+1)+'"><img src="'+im.url+'"></div><div class="cap">사진 '+(i+1)+'</div></div>').join("");
   (comps||[]).forEach(c=>{
-    const x=Number(c.x), y=Number(c.y);
+    const ii=Number(c.img)||1, x=Number(c.x), y=Number(c.y);
     if(!isFinite(x)||!isFinite(y)) return;
+    const wrap=box.querySelector('.imgwrap[data-img="'+ii+'"]'); if(!wrap) return;
     const m=document.createElement("div"); m.className="marker";
-    m.style.left=(Math.max(0,Math.min(1,x))*100)+"%";
-    m.style.top=(Math.max(0,Math.min(1,y))*100)+"%";
+    m.style.left=(clamp01(x)*100)+"%"; m.style.top=(clamp01(y)*100)+"%";
     m.textContent=String(c.n);
     m.title=(c.type||"")+(c.part?" · "+c.part:"");
     wrap.appendChild(m);
@@ -407,11 +436,11 @@ function drawMarkers(comps){
 }
 function renderLegend(comps){
   if(!comps||!comps.length){ $("#legend").innerHTML=""; return; }
-  let h='<div class="legend"><table><tr><th>#</th><th>부품 종류</th><th>마킹/부품번호(추정)</th><th>신뢰도</th></tr>';
+  let h='<div class="legend"><table><tr><th>#</th><th>사진</th><th>부품 종류</th><th>마킹/부품번호(추정)</th><th>신뢰도</th></tr>';
   comps.forEach(c=>{
     const cf=(c.confidence||"").toString();
     const cls=/낮|low/i.test(cf)?"conf-low":/중|mid/i.test(cf)?"conf-mid":/높|high/i.test(cf)?"conf-high":"";
-    h+="<tr><td>"+esc(String(c.n))+"</td><td>"+esc(c.type||"")+"</td><td>"+esc(c.part||"—")+"</td><td class='"+cls+"'>"+esc(cf||"—")+"</td></tr>";
+    h+="<tr><td>"+esc(String(c.n))+"</td><td>"+esc("사진 "+(Number(c.img)||1))+"</td><td>"+esc(c.type||"")+"</td><td>"+esc(c.part||"—")+"</td><td class='"+cls+"'>"+esc(cf||"—")+"</td></tr>";
   });
   h+="</table></div>"; $("#legend").innerHTML=h;
 }

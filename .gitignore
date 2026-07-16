@@ -5,5 +5,11 @@
 Thumbs.db
 *.log
 
-# BM 분석 결과는 로컬 전용(경쟁사 데이터 — 공개 금지)
+# BM 분석 결과·입력 자료는 로컬 전용(경쟁사 데이터 — 공개 금지)
 bm-output/
+BM임시사진폴더/
+*.competitor.png
+*.competitor.jpg
+# 경쟁사 사진/자료 폴더 관례 (공개 금지)
+bm-input/
+bm-photos/
