@@ -91,6 +91,9 @@ chapter (대분류) → section (중분류) → blocks[] (콘텐츠 단위)
 블록에 항목을 추가하면 사이드바·검색·체크리스트에 자동 반영됩니다.
 블록 타입: `p` `h` `list` `check` `table` `kv` `note(tip|warn|why|info)` `fig(svg)` `autocheck`.
 
+새 **개념 소개 섹션**은 Why-First 5단 구조(비유→원리→흔한 오해→실무→더 깊이)를 따릅니다
+— 규약: [docs/why-first-authoring.md](docs/why-first-authoring.md).
+
 ## 라이선스
 
 문서 콘텐츠 및 코드의 이용 범위는 저장소 소유자 정책에 따릅니다.
