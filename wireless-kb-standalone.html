@@ -933,7 +933,7 @@ window.KB_CONTENT = {
             { t: "kv", rows: [
               ["S11 (입력 반사)", "포트1로 넣은 것 중 되튕긴 비율 = <b>리턴로스</b>. −10dB면 반사 10%. 매칭 품질의 지표"],
               ["S21 (순방향 전달)", "포트1→포트2로 건너간 비율 = <b>이득(증폭기) 또는 삽입손실(필터·케이블)</b>"],
-              ["S12 (역방향 격리)", "포트2→포트1 누설. 증폭기의 역방향 격리(안정성과 직결)"],
+              ["S12 (역방향 격리)", "포트2→포트1 누설. 증폭기의 역방향 격리 — 나쁘면 발진 위험(→ <a href='#ckt-stability'>발진을 잡아라</a>)"],
               ["S22 (출력 반사)", "포트2 쪽에서 본 반사. 출력 매칭 품질"],
             ]},
             { t: "h", text: "기준면(Reference Plane) — \"어디서 본 값인가\"" },
@@ -1547,7 +1547,7 @@ window.KB_CONTENT = {
           id: "ckt-frontend",
           title: "RF 프론트엔드 — PA/LNA/스위치/필터",
           blocks: [
-            { t: "p", html: "안테나와 칩 사이의 신호 경로 구성 요소입니다. 칩에 내장된 경우도 있고 외장하는 경우도 있습니다." },
+            { t: "p", html: "안테나와 칩 사이의 신호 경로 구성 요소입니다. 칩에 내장된 경우도 있고 외장하는 경우도 있습니다. 증폭기(PA/LNA)를 다룰 땐 <b>원치 않는 발진</b>이라는 함정이 따라옵니다 — 다음 절 <a href='#ckt-stability'>발진을 잡아라</a>에서 딥다이브합니다." },
             { t: "kv", rows: [
               ["PA (전력증폭기)", "송신 출력 증폭. 발열·선형성·전류 관건"],
               ["LNA (저잡음증폭기)", "수신 미약신호 증폭. 잡음지수(NF)가 수신감도 좌우"],
@@ -1557,6 +1557,47 @@ window.KB_CONTENT = {
               ["Diplexer/FEM", "여러 기능 통합 모듈(Front-End Module)"],
             ]},
             { t: "note", kind: "tip", title: "공존 필터", html: "WiFi+BT 콤보나 셀룰러 근접 환경에서는 BPF/SAW로 인접 대역 간섭을 막습니다. 단, 필터 삽입손실(insertion loss)만큼 출력/감도가 깎이므로 trade-off." },
+          ]
+        },
+        {
+          id: "ckt-stability",
+          title: "딥다이브 — 발진을 잡아라: 증폭기 안정도(원치 않는 발진)",
+          blocks: [
+            { t: "p", html: "증폭기는 조건만 갖춰지면 <b>입력이 없어도 스스로 신호를 만들어내는 발진기</b>로 돌변합니다. 크리스탈 발진기의 발진은 <b>의도된</b> 것이지만(→ <a href='#ckt-clock'>기준 클럭</a>), 이 절의 주제는 <b>원치 않는 발진</b> — 스퓨리어스 방출·전류 급증·인증 탈락을 부르는 실전 사고 유형입니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "강연장의 <b>마이크 하울링</b>입니다. 스피커에서 나온 소리가 마이크로 되돌아 들어가 다시 증폭되기를 반복하면 '삐—' 하고 스스로 울부짖죠. 증폭기도 같습니다 — 출력이 <b>어떤 경로로든 입력으로 되돌아가고</b>, 한 바퀴 돈 이득과 위상이 조건을 만족하면 하울링(발진)이 시작됩니다. 마이크를 스피커에서 멀리 떼는 것(격리)이 해법인 것도 똑같습니다." },
+            { t: "note", kind: "why", title: "원리 — 발진의 2조건 (Barkhausen)", html: "루프를 한 바퀴 돈 신호가 ①<b>이득 ≥ 1</b> (줄지 않고) ②<b>위상 0°(=360°)</b> (같은 위상으로 보강) — 이 두 조건을 <b>어떤 주파수에서든 동시에</b> 만족하면 그 주파수에서 발진합니다. 잡음은 모든 주파수를 품고 있어 '씨앗'은 항상 존재합니다. 증폭기의 안정 판별 지표가 <b>K-factor(Rollett)</b>: <b>K > 1 (그리고 |Δ| < 1)</b>이면 어떤 소스/부하 임피던스에서도 발진하지 않는 <b>무조건 안정</b>. 핵심 변수는 <b>S12(역방향 격리)</b>입니다 — 출력→입력 누설이 클수록 위험합니다(→ <a href='#rf-port-sparam'>S파라미터</a>)." },
+            { t: "fig",
+              caption: "증폭기 발진의 원리. 출력의 일부가 궤환 경로(그라운드 공통 임피던스·전원·공간 결합)로 입력에 되돌아가고, 루프 이득 ≥1 & 위상 360°가 만족되는 주파수에서 신호가 스스로 자라난다 — 입력이 없어도.",
+              svg: '<svg viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="증폭기 궤환 발진 루프">'
+                + '<defs>'
+                + '<marker id="stF" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4aa3ff"/></marker>'
+                + '<marker id="stR" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#e5534b"/></marker>'
+                + '</defs>'
+                + '<path d="M250,60 L250,140 L350,100 Z" fill="#4aa3ff" fill-opacity="0.15" stroke="#4aa3ff" stroke-opacity="0.7" stroke-width="2"/>'
+                + '<text x="283" y="105" text-anchor="middle" class="fig-label" style="fill:#4aa3ff">증폭</text>'
+                + '<line class="kb-flow" x1="120" y1="100" x2="245" y2="100" stroke="#4aa3ff" stroke-width="3" marker-end="url(#stF)"/>'
+                + '<text x="150" y="88" text-anchor="middle" class="fig-sub">입력 (무신호여도)</text>'
+                + '<line class="kb-flow" x1="352" y1="100" x2="500" y2="100" stroke="#4aa3ff" stroke-width="3" marker-end="url(#stF)"/>'
+                + '<text x="430" y="88" text-anchor="middle" class="fig-sub">출력</text>'
+                + '<path class="kb-flow-rev" d="M430,110 Q430,185 300,185 Q170,185 170,112" fill="none" stroke="#e5534b" stroke-width="2.5" stroke-dasharray="6 4" marker-end="url(#stR)"/>'
+                + '<text x="300" y="207" text-anchor="middle" class="fig-sub" fill="#e5534b">궤환 경로 — GND 공통 임피던스 · 전원 공유 · 공간 결합</text>'
+                + '<circle class="kb-pulse" cx="170" cy="100" r="7" fill="#e5534b"/>'
+                + '<text x="310" y="36" text-anchor="middle" class="fig-label" style="fill:#e5534b">루프 이득 ≥ 1 + 위상 360° → 스스로 자라나는 신호</text>'
+                + '</svg>'
+            },
+            { t: "h", text: "실전에서 발진을 만드는 범인들" },
+            { t: "table",
+              head: ["궤환 경로(범인)", "메커니즘", "대책"],
+              rows: [
+                ["<b>그라운드 공통 인덕턴스</b>", "출력단 전류가 GND 비아(≈1nH)에 전압을 만들고, 입력단이 같은 GND를 공유하면 그 전압이 입력에 궤환", "입·출력단 GND 비아 분리·다수 배치 (→ <a href='#pcb-ground'>리턴 패스</a>)"],
+                ["<b>전원 라인 공유</b>", "출력단 전류 변동이 전원선을 타고 입력단 바이어스를 흔듦 — 저주파 발진(모터보팅)", "단(stage)별 디커플링 + 페라이트 비드 격리 (→ <a href='#ckt-pdn'>PDN</a>)"],
+                ["<b>공간(방사) 결합</b>", "출력 매칭·안테나 패턴에서 입력 라인으로 전자파 결합", "입·출력 배치 격리, 쉴드캔 (→ <a href='#pcb-placement'>부품 배치</a>)"],
+                ["<b>부하 부정합</b>", "안테나 미장착 상태나 극단적 부하에서 조건부 안정(K<1) 영역 진입", "전 부하 조건(VSWR 원) 안정성 확인 — 안테나 없이 켜는 시험도"],
+              ]
+            },
+            { t: "note", kind: "warn", title: "흔한 오해 — \"발진은 출력 큰 PA만의 문제?\"", html: "<b>LNA도 발진합니다</b> — 이득이 높고 S12 격리가 부족하면 조건은 충분합니다. 더 위험한 오해는 측정 습관입니다: <b>발진 주파수는 동작 대역 밖</b>(수백 MHz 저주파, 또는 대역 위 고주파)인 경우가 많아, 채널 대역만 보는 측정으론 절대 못 봅니다. 스펙트럼을 <b>넓게(예: 0~6GHz)</b> 훑어야 잡힙니다. 발진은 인증 측정(스퓨리어스)에서야 발각되는 단골 사고입니다(→ <a href='#ver-emc-design'>EMC 사전대책</a>)." },
+            { t: "note", kind: "tip", title: "현장 노하우 — 발진의 지문과 응급 처치", html: "<b>의심 신호</b>: ①입력이 없는데 스펙트럼에 피크 ②소비전류가 비정상적으로 크거나 출렁임 ③<b>손을 가까이 대면 증상이 변함</b>(기생 임피던스 변화로 루프 조건이 흔들림) ④온도·전압에 따라 나타났다 사라짐. <b>처치 순서</b>: 전원 디커플링 보강 → GND 비아 추가 → 입·출력 격리(배치·쉴드) → 그래도 안 되면 이득을 낮추거나 저항성 부하(수Ω 직렬)로 루프 이득을 1 아래로. 프로브를 대면 조건이 바뀌므로 <b>비접촉(니어필드 프로브)</b>으로 위치를 좁히세요(→ <a href='#ver-debug'>디버깅 사고 흐름</a>)." },
+            { t: "note", kind: "info", title: "더 깊이 보기", html: "'발진을 잡아라', '발진이 뭐길래'의 일반 이론은 <a href='https://rfdh.com/' target='_blank' rel='noopener'>rfdh.com</a> STUDY > RF 회로의 기초를 참고하세요. 이 섹션은 그 개념을 모듈 레이아웃·디버깅·인증 실무로 연결한 것입니다. 의도된 발진(크리스탈)은 <a href='#ckt-xtal-select'>XTAL 선정 가이드</a>의 부성저항 마진과 대칭되는 개념입니다 — 그쪽은 '확실히 발진시키기', 이쪽은 '절대 발진 못 하게 하기'." },
           ]
         },
         {
@@ -3059,6 +3100,8 @@ window.KB_CONTENT = {
               ["P1dB", "이득 1dB 압축점 — 선형(소신호) 영역이 끝나는 대신호 지표. 실사용 출력은 여기서 back-off"],
               ["OIP3 / IMD3", "3차 혼변조 절편점 / 3차 혼변조 왜곡 — 비선형성 척도. 경험칙 OIP3 ≈ P1dB + 9~10dB"],
               ["소신호 / 대신호", "선형 근사가 성립하는 영역(LNA·S파라미터·NF) / 압축·왜곡이 지배하는 영역(PA·P1dB·EVM)"],
+              ["K-factor (Rollett)", "증폭기 무조건 안정 판별 계수 — K>1(그리고 |Δ|<1)이면 어떤 소스/부하에서도 발진하지 않음"],
+              ["Barkhausen 조건", "발진의 2조건: 루프 이득 ≥ 1 & 루프 위상 360°. 이를 만족하는 주파수에서 증폭기는 발진기가 됨"],
               ["VNA", "Vector Network Analyzer"],
               ["EVM", "Error Vector Magnitude (변조품질)"],
               ["EIRP", "Equivalent Isotropically Radiated Power (등가등방복사전력) = 도전출력 − 손실 + 안테나이득. 규제 기준"],

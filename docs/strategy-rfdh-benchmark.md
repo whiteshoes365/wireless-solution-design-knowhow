@@ -108,7 +108,7 @@ rfdh의 힘을 **재사용 가능한 패턴**으로 만든다. 각 핵심 개념
 |---|---|---|---|
 | **P1 (즉효)** ✅ 완료(2026-07-18) | 최우선 4개 직관 딥다이브 신규: 대신호/소신호(`rf-signal-levels`), L과 C(`rf-lc`), 공진 통합(`rf-resonance`), Port·기준면·S파라미터(`rf-port-sparam`) + 용어집 5건(SRF·P1dB·OIP3·소/대신호·Reference Plane) | 섹션 4개(40블록), 도식 4개, 교차링크 22개 | 입문자 개념 체득 급상승 |
 | **P2** ✅ 완료(2026-07-19) | Why-First 규약 문서화(`docs/why-first-authoring.md`) + 소급 적용: `rf-fundamentals`(dB 오해·rfdh 참고), `rf-impedance-matching`(변속기 비유·"50Ω 저항 매칭?" 오해·참고), `pcb-impedance`(λ/10 규칙·"50Ω=선 저항?" 오해). S파라미터 보강은 P1의 `rf-port-sparam`으로 충족. 기여 가이드(intro·README)에 규약 연결 | 규약 1건 + 3개 섹션 리터치 | 설명 일관성·품질 표준화 |
-| **P3** | 4장 증폭기 안정도(발진) 보강 + 개념 도식 애니메이션 SVG + 외부 참고 링크 정비 | 딥다이브 1~2개 | 중급 심화·차별화 완성 |
+| **P3** ✅ 완료(2026-07-19) | 4장 `ckt-stability` 신규 — 발진을 잡아라(하울링 비유, Barkhausen 2조건, K-factor, 궤환 4경로 표, 디버깅 지문) + 궤환 루프 애니메이션 SVG + 교차링크(S12↔안정도, XTAL 부성저항과 대칭 구도) + 용어집 2건(K-factor·Barkhausen) | 딥다이브 1개(10블록) | 중급 심화·차별화 완성 |
 
 > 각 Phase는 독립 배포 가능. P1만으로도 체감 효과 큼.
 
