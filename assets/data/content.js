@@ -167,6 +167,94 @@ window.KB_CONTENT = {
           ]
         },
         {
+          id: "rf-lc",
+          title: "딥다이브 — RF 관점의 L과 C (기생성분·자기공진 SRF)",
+          blocks: [
+            { t: "p", html: "회로 이론의 L·C는 이상적인 부품이지만, RF에선 <b>모든 부품·패턴·비아가 기생성분을 가진 복합체</b>입니다. '이 부품은 100nF다'가 아니라 '<b>이 주파수에서 임피던스가 얼마인가</b>'로 보는 관점 전환이 RF 회로 이해의 출발점입니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "부품의 겉표기는 <b>명함</b>일 뿐입니다. 낮은 주파수에선 명함대로(커패시터답게) 행동하지만, 주파수가 올라가면 몸속에 숨어 있던 기생성분(전극·단자의 인덕턴스)이 깨어나 어느 지점부터는 <b>정반대 부품(인덕터)으로 변신</b>합니다. 그 변신 지점이 자기공진주파수(SRF)입니다." },
+            { t: "h", text: "임피던스로 다시 보는 L과 C" },
+            { t: "kv", rows: [
+              ["인덕터 Z_L = j2πfL", "주파수↑ → 임피던스↑. 고주파를 <b>막는다</b>(초크). 낮은 주파수·DC는 통과"],
+              ["커패시터 Z_C = 1/(j2πfC)", "주파수↑ → 임피던스↓. 고주파를 <b>통과</b>시킨다(커플링/디커플링). DC는 차단"],
+              ["체감 수치 ①", "겨우 <b>1nH</b>도 2.4GHz에선 <b>+j15Ω</b> — 짧은 와이어·비아 하나(≈0.5~1nH)가 무시 못 할 부품이 됨"],
+              ["체감 수치 ②", "겨우 <b>1pF</b>도 2.4GHz에선 <b>−j66Ω</b> — 패드·패턴 사이 기생 1pF로도 신호가 샌다(크로스토크)"],
+            ]},
+            { t: "note", kind: "why", title: "왜 기생성분이 생기나", html: "①<b>모든 도선은 인덕터</b>입니다 — 전류가 흐르면 자기장이 생기므로, 리드·비아·패턴은 대략 <b>1nH/mm</b>의 인덕턴스를 가집니다. ②<b>마주 보는 도체는 커패시터</b>입니다 — 패드와 그라운드, 권선과 권선 사이에 캐패시턴스가 생깁니다. 그래서 실제 MLCC = C + ESL(등가직렬인덕턴스 0.3~0.6nH) + ESR(등가직렬저항), 실제 인덕터 = L + 권선저항 + 권선간 C. 모든 부품의 등가회로는 <b>R·L·C의 조합</b>입니다." },
+            { t: "fig",
+              caption: "커패시터의 임피던스 vs 주파수. 이상적이라면 주파수에 따라 계속 내려가야 하지만(점선), 실제 부품은 기생 인덕턴스(ESL) 때문에 SRF에서 바닥을 찍고 다시 올라간다 — SRF 위에선 커패시터가 아니라 인덕터다.",
+              svg: '<svg viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="커패시터 임피던스의 주파수 특성과 자기공진주파수">'
+                + '<line x1="60" y1="185" x2="580" y2="185" stroke="#7a8694" stroke-width="1.5"/><line x1="60" y1="185" x2="60" y2="25" stroke="#7a8694" stroke-width="1.5"/>'
+                + '<text x="575" y="203" text-anchor="end" class="fig-sub">주파수 (log)</text><text x="52" y="35" text-anchor="end" class="fig-sub">|Z|</text>'
+                + '<path d="M90,45 L520,170" stroke="#4aa3ff" stroke-width="2" stroke-dasharray="5 5" fill="none" opacity="0.5"/>'
+                + '<text x="470" y="150" class="fig-sub" fill="#4aa3ff" opacity="0.7">이상적 C (계속 하강)</text>'
+                + '<path d="M90,45 L310,158 Q320,166 330,158 L520,62" stroke="#4aa3ff" stroke-width="3" fill="none"/>'
+                + '<circle class="kb-pulse" cx="320" cy="163" r="7" fill="#e5534b"/>'
+                + '<text x="320" y="150" text-anchor="middle" class="fig-label" style="fill:#e5534b">SRF (자기공진)</text>'
+                + '<text x="180" y="80" text-anchor="middle" class="fig-sub" fill="#4aa3ff">용량성 — 표기대로 동작</text>'
+                + '<text x="465" y="52" text-anchor="middle" class="fig-sub" fill="#a371f7">유도성 — 인덕터로 변신!</text>'
+                + '<line x1="320" y1="170" x2="320" y2="185" stroke="#e5534b" stroke-dasharray="3 3" opacity="0.6"/>'
+                + '<text x="310" y="222" text-anchor="middle" class="fig-sub">SRF에선 리액턴스 상쇄로 |Z| 최소(≈ESR) — 그 위는 ESL이 지배</text>'
+                + '</svg>'
+            },
+            { t: "h", text: "SRF — 부품이 '변신'하는 지점 (실전 수치)" },
+            { t: "table",
+              head: ["부품 (0402 기준)", "SRF 대략", "2.4GHz에서의 정체"],
+              rows: [
+                ["100nF MLCC", "20–30 MHz", "인덕터 — 2.4GHz 디커플링 <b>불가</b>"],
+                ["1nF MLCC", "수백 MHz", "인덕터"],
+                ["수 pF~10pF (C0G)", "2~5 GHz+", "아직 커패시터 — <b>매칭·RF 커플링용은 이 영역</b>"],
+                ["칩 인덕터 수 nH", "수 GHz", "SRF 근처에선 표기값보다 커 보임 — 매칭 시뮬과 실측 차이의 원인"],
+              ]
+            },
+            { t: "note", kind: "warn", title: "흔한 오해 — \"커패시터는 용량이 클수록 좋다?\"", html: "디커플링에 100nF 하나면 전 대역이 커버된다는 믿음이 대표적 함정입니다. 100nF는 SRF(수십 MHz) 위에선 이미 인덕터라 <b>고주파 노이즈를 못 잡습니다</b>. 그래서 PDN은 大·中·小 용량을 병렬로 깝니다(→ <a href='#ckt-pdn'>PDN 딥다이브</a>). 반대로 매칭 회로 부품은 <b>SRF가 동작 주파수보다 충분히 높은지</b>를 반드시 확인해야 합니다 — SRF를 넘긴 부품값은 계산과 전혀 다르게 동작합니다." },
+            { t: "note", kind: "tip", title: "현장 노하우 — RF용 소자 선정 체크", html: "매칭·필터용 L/C는 ①<b>SRF > 동작 주파수</b>(여유 2배 이상 권장) ②<b>C0G/NP0 유전체</b>(온도·전압에 용량 안정) ③<b>타이트 톨러런스</b>(±0.1pF급) ④<b>0402 이하 소형</b>(기생↓)을 확인하세요. 벤더가 제공하는 <b>s2p 파일</b>로 시뮬레이션하면 기생 포함 실제 거동을 반영할 수 있습니다. 그리고 <b>PCB도 부품입니다</b> — 비아 1개 ≈ 0.5~1nH이므로 디커플링 비아는 짧게·여러 개(→ <a href='#pcb-ground'>그라운드·리턴 패스</a>)." },
+            { t: "note", kind: "info", title: "더 깊이 보기", html: "이 관점('RF에서 본 L과 C')의 원조 격 설명은 <a href='https://rfdh.com/' target='_blank' rel='noopener'>rfdh.com</a>의 STUDY > RF 기초강의실 'RF관점에서 본 L과 C'에서 볼 수 있습니다. 이 섹션은 그 문제의식을 가전 무선모듈 실무 수치로 재구성한 것입니다." },
+          ]
+        },
+        {
+          id: "rf-resonance",
+          title: "딥다이브 — 공진(Resonance)의 이해 — 매칭·안테나·필터·클럭의 공통 뿌리",
+          blocks: [
+            { t: "p", html: "공진은 RF에서 가장 중요한 단일 개념입니다. L과 C가 에너지를 주고받다가 특정 주파수에서 <b>리액턴스가 정확히 상쇄</b>되는 현상으로, <b>매칭·안테나·필터·크리스탈이 전부 공진의 응용</b>입니다. 이 하나를 이해하면 사이트의 절반이 하나로 연결됩니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "공진은 <b>그네 밀기</b>입니다. 그네가 좋아하는 박자(고유 진동수)에 맞춰 밀면 작은 힘으로도 크게 흔들리고, 박자가 어긋나면 아무리 세게 밀어도 흔들리지 않습니다. 회로도 마찬가지 — <b>좋아하는 주파수(f₀)에서만 에너지가 효율적으로 쌓이고 전달</b>됩니다." },
+            { t: "note", kind: "why", title: "원리 — 에너지 시소", html: "인덕터는 <b>전류(자기장)</b>로, 커패시터는 <b>전압(전기장)</b>으로 에너지를 저장합니다. 공진주파수 <b>f₀ = 1/(2π√(LC))</b>에서 두 리액턴스는 크기가 같고 부호가 반대(+j2πfL = −1/(j2πfC))가 되어 <b>서로 상쇄 — 순저항만 남습니다</b>. 에너지는 L↔C 사이를 시소처럼 오가며 진동합니다. 앞 절 <a href='#rf-lc'>L과 C</a>의 SRF도 부품 자신의 C(또는 L)와 기생성분이 만드는 공진입니다." },
+            { t: "fig",
+              caption: "직렬 공진(파랑)은 f₀에서 임피던스가 최소가 되어 그 주파수만 통과시키고, 병렬 공진(보라)은 f₀에서 최대가 되어 그 주파수만 차단한다. 같은 f₀ = 1/(2π√LC), 정반대의 쓰임.",
+              svg: '<svg viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="직렬 공진과 병렬 공진의 임피던스 곡선">'
+                + '<line x1="60" y1="185" x2="580" y2="185" stroke="#7a8694" stroke-width="1.5"/><line x1="60" y1="185" x2="60" y2="25" stroke="#7a8694" stroke-width="1.5"/>'
+                + '<text x="575" y="203" text-anchor="end" class="fig-sub">주파수</text><text x="52" y="35" text-anchor="end" class="fig-sub">|Z|</text>'
+                + '<line x1="320" y1="30" x2="320" y2="185" stroke="#7a8694" stroke-dasharray="4 4" opacity="0.5"/>'
+                + '<text x="320" y="205" text-anchor="middle" class="fig-label">f₀ = 1/(2π√LC)</text>'
+                + '<path d="M90,70 Q250,80 310,168 Q320,178 330,168 Q390,80 550,70" stroke="#4aa3ff" stroke-width="3" fill="none"/>'
+                + '<circle class="kb-pulse" cx="320" cy="173" r="6" fill="#4aa3ff"/>'
+                + '<text x="150" y="120" class="fig-sub" fill="#4aa3ff">직렬 공진: Z 최소 → 통과</text>'
+                + '<path d="M90,160 Q250,150 310,52 Q320,42 330,52 Q390,150 550,160" stroke="#a371f7" stroke-width="3" fill="none"/>'
+                + '<circle class="kb-pulse kb-d2" cx="320" cy="47" r="6" fill="#a371f7"/>'
+                + '<text x="400" y="70" class="fig-sub" fill="#a371f7">병렬 공진: Z 최대 → 차단</text>'
+                + '</svg>'
+            },
+            { t: "table",
+              head: ["구분", "공진에서 임피던스", "동작", "대표 용도"],
+              rows: [
+                ["직렬 공진 (L−C 직렬)", "최소 (≈ESR만 남음)", "그 주파수만 <b>통과</b>", "대역통과 필터 요소, 직렬 매칭"],
+                ["병렬 공진 (L∥C, 탱크)", "최대", "그 주파수만 <b>차단</b>", "노치/트랩(고조파 차단), VCO 탱크 회로"],
+              ]
+            },
+            { t: "h", text: "이 사이트 전체에서 만나는 공진의 얼굴들" },
+            { t: "kv", rows: [
+              ["임피던스 매칭", "잔여 리액턴스를 반대 부호 소자로 상쇄 = <b>동작 주파수에서 공진시키는 일</b> (→ <a href='#rf-impedance-matching'>매칭</a>)"],
+              ["안테나", "λ/4 모노폴은 그 길이 자체가 공진기. 공진 주파수에서 임피던스가 실수가 되어 방사가 최대 (→ <a href='#ant-types-deep'>PCB 안테나 설계</a>)"],
+              ["필터", "공진기 여러 개를 결합해 통과/저지 대역을 형성. SAW·LC 필터 모두 공진기 조합 (→ <a href='#ckt-filter-coex'>필터·공존</a>)"],
+              ["크리스탈(XTAL)", "수정 결정의 기계적 공진. Q가 수만~수십만으로 극도로 날카로워 주파수 기준으로 사용 (→ <a href='#ckt-clock'>기준 클럭</a>)"],
+              ["원치 않는 공진", "PDN 반공진 피크(→ <a href='#ckt-pdn'>PDN</a>), 쉴드캔 캐비티 공진, 케이블 공진 — <b>디버깅 단골 범인</b>"],
+            ]},
+            { t: "note", kind: "why", title: "Q — 공진의 날카로움", html: "<b>Q = f₀ / 대역폭(−3dB)</b>. Q가 높으면 좁고 강하게(크리스탈·노치 필터), 낮으면 넓고 완만하게(광대역 매칭) 반응합니다. 매칭에서 넓은 대역을 커버하려면 일부러 Q를 낮춰야 하는 이유가 여기 있습니다(→ <a href='#rf-smith'>스미스 차트의 'Q와 대역폭'</a>)." },
+            { t: "note", kind: "warn", title: "흔한 오해 — \"공진은 좋은 것?\"", html: "원하는 곳(안테나·필터·클럭)에선 최고의 도구지만, <b>원치 않는 곳에서 생기면 특정 주파수만 폭주하거나 죽는 원인</b>이 됩니다. 실전 사례: ①쉴드캔 내부 공간이 캐비티 공진을 일으켜 <b>특정 채널만 성능 저하</b> ②PDN 반공진이 특정 주파수 노이즈를 오히려 증폭 ③프로브의 긴 그라운드 리드가 측정 파형에 링잉(가짜 신호)을 만듦." },
+            { t: "note", kind: "tip", title: "현장 노하우 — '특정 주파수만 나쁘면' 공진을 의심하라", html: "디버깅에서 <b>\"특정 채널/주파수에서만 나쁘다\"는 공진의 지문</b>입니다. 주파수를 쓸어(sweep) 딥/피크를 찾고, 그 주파수의 <b>λ/2·λ/4 물리 길이로 역산</b>하면 범인(케이블 길이, 캔 치수, 패턴 길이)이 보입니다. 예: 5GHz에서 딥 → λ/2 = 3cm → 쉴드캔 안치수나 3cm짜리 패턴을 의심 (→ <a href='#ver-debug'>디버깅 사고 흐름</a>)." },
+            { t: "note", kind: "info", title: "더 깊이 보기", html: "공진 개념의 일반 이론은 <a href='https://rfdh.com/' target='_blank' rel='noopener'>rfdh.com</a> STUDY > RF 회로의 기초 '공진(Resonance)의 이해'를 참고하세요. 이 섹션은 그 개념을 무선모듈 설계·디버깅 실무로 연결한 것입니다." },
+          ]
+        },
+        {
           id: "rf-chain",
           title: "송수신 신호 체인 — 기저대역에서 RF까지",
           blocks: [
@@ -273,6 +361,43 @@ window.KB_CONTENT = {
             { t: "h", text: "HW 설계자가 챙길 것 (집적돼 있어도)" },
             { t: "note", kind: "warn", title: "체인의 부작용이 성능을 깎는다", html: "체인 대부분이 트랜시버 SoC에 집적돼 있어도, 설계자는 <b>바깥 요소</b>를 책임집니다: ①<b>LO/PLL 기준 클럭의 위상잡음</b> → 성좌가 번져 EVM 악화(→ <a href='#ckt-clock'>클럭</a>). ②<b>이미지·LO 누설·I/Q 불균형</b> → 스퍼·EVM(→ 필터·<a href='#ver-cal'>캘리브레이션</a>에서 보정). ③<b>PA 비선형성</b> → 하모닉·마스크(→ 필터·back-off). ④<b>전원 노이즈가 LO/VCO에 실리면</b> 스퍼(→ <a href='#ckt-pdn'>PDN</a>)." },
             { t: "note", kind: "tip", title: "부품이 '왜 거기 있는지'", html: "이 체인을 알면 RF 프론트엔드가 보입니다: <b>PA</b>=⑤증폭, <b>필터</b>=업컨버전이 만든 이미지·하모닉 제거, <b>발룬/매칭</b>=믹서/PA 출력을 안테나 50Ω으로, <b>LNA</b>=수신 첫 증폭. (4장 <a href='#ckt-frontend'>RF 프론트엔드</a>·<a href='#ckt-balun'>발룬</a>과 함께 보세요)" },
+          ]
+        },
+        {
+          id: "rf-signal-levels",
+          title: "대신호 vs 소신호 — 선형의 세계와 압축의 세계",
+          blocks: [
+            { t: "p", html: "같은 증폭기라도 <b>신호 크기에 따라 다른 물리로 동작</b>합니다. 수신(LNA)은 미약 신호를 다루는 <b>소신호(선형)의 세계</b>, 송신(PA)은 큰 출력을 짜내는 <b>대신호(비선형)의 세계</b>입니다. 이 구분을 모르면 데이터시트의 어떤 스펙이 어디에 적용되는지 헷갈리고, 측정도 잘못 설계하게 됩니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "스피커 볼륨과 같습니다. 적당한 볼륨까지는 원음 그대로 커지지만(<b>선형</b>), 최대로 올리면 소리가 찢어집니다(<b>왜곡</b>). 앰프가 '더는 못 키우는' 한계(전원 전압)에 부딪혀 <b>파형의 꼭대기가 잘려나가는 것</b> — 이것이 압축(compression)입니다." },
+            { t: "note", kind: "why", title: "원리 — 선형 근사가 깨지는 지점", html: "<b>소신호</b> = 동작점 주변에서 선형 근사가 성립하는 영역. 이득·S파라미터·NF는 모두 소신호 개념이라 <b>신호 크기와 무관하게 일정</b>합니다. <b>대신호</b> = 출력이 전원 전압·전류 한계에 접근해 선형 근사가 깨지는 영역 — 이득이 줄고(압축), 잘린 파형이 <b>고조파·혼변조(IMD)</b>를 만듭니다. 경계의 척도가 <b>P1dB</b>(이득이 1dB 줄어드는 출력점)이며, 그 너머가 <b>Psat</b>(포화). 참고로 <b>OIP3 ≈ P1dB + 9~10dB</b>의 경험칙이 있습니다." },
+            { t: "fig",
+              caption: "증폭기의 입력 대 출력. 소신호 영역에선 이상 직선(점선)을 따라가지만, 출력이 커지면 곡선이 휘어져 P1dB(이상 대비 이득 1dB 감소)를 지나 포화(Psat)에 이른다. 대신호 영역에선 EVM·마스크가 함께 무너진다.",
+              svg: '<svg viewBox="0 0 620 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="증폭기 압축 곡선과 P1dB">'
+                + '<line x1="70" y1="195" x2="580" y2="195" stroke="#7a8694" stroke-width="1.5"/><line x1="70" y1="195" x2="70" y2="25" stroke="#7a8694" stroke-width="1.5"/>'
+                + '<text x="575" y="213" text-anchor="end" class="fig-sub">입력 전력 Pin</text><text x="62" y="35" text-anchor="end" class="fig-sub">Pout</text>'
+                + '<path d="M90,180 L470,45" stroke="#2ea043" stroke-width="2" stroke-dasharray="5 5" fill="none" opacity="0.6"/>'
+                + '<text x="470" y="38" text-anchor="middle" class="fig-sub" fill="#2ea043">이상 선형 (이득 일정)</text>'
+                + '<path d="M90,180 L330,95 Q420,64 480,60 L560,58" stroke="#4aa3ff" stroke-width="3" fill="none"/>'
+                + '<circle class="kb-pulse" cx="408" cy="67" r="7" fill="#e5534b"/>'
+                + '<text x="400" y="93" text-anchor="middle" class="fig-label" style="fill:#e5534b">P1dB</text>'
+                + '<text x="540" y="45" text-anchor="middle" class="fig-sub" fill="#e5534b">Psat (포화)</text>'
+                + '<text x="185" y="150" text-anchor="middle" class="fig-sub" fill="#4aa3ff">소신호 — 선형, S파라미터 유효</text>'
+                + '<text x="470" y="130" text-anchor="middle" class="fig-sub" fill="#e5534b">대신호 — 압축·왜곡·EVM 열화</text>'
+                + '<text x="310" y="230" text-anchor="middle" class="fig-sub">실사용 출력은 P1dB에서 수 dB 물러난(back-off) 지점</text>'
+                + '</svg>'
+            },
+            { t: "table",
+              head: ["구분", "소신호", "대신호"],
+              rows: [
+                ["대표 블록", "LNA·수신 체인", "PA·송신 출력단"],
+                ["유효한 지표", "이득, S파라미터, NF", "P1dB, Psat, EVM, ACLR, 고조파"],
+                ["특성", "신호 크기와 무관(선형)", "출력 크기에 따라 변함(비선형)"],
+                ["측정 도구", "VNA (소신호 스윕)", "스펙트럼/신호 분석기 + <b>실제 변조 신호</b>"],
+              ]
+            },
+            { t: "note", kind: "warn", title: "흔한 오해 — \"데이터시트 최대 출력 = 쓸 수 있는 출력?\"", html: "Psat·P1dB 근처에선 EVM·스펙트럼 마스크가 깨져 <b>실사용이 불가능</b>합니다. WiFi 같은 OFDM은 파형의 피크 대 평균비(PAPR)가 커서 평균 출력을 P1dB보다 <b>수 dB 낮춰(back-off) 운용</b>해야 하고, MCS가 높을수록(64→256QAM) 요구 EVM이 엄격해 <b>사용 가능 출력이 더 낮아집니다</b>. 규격·레이트별 타겟파워가 전부 다른 이유가 이것입니다(→ <a href='#proc-targets'>Target 정의</a>, <a href='#ver-cal'>타겟파워·캘리브레이션</a>)." },
+            { t: "note", kind: "tip", title: "현장 노하우", html: "VNA로 잰 S21(소신호 이득)과 실제 변조 출력 성능은 <b>다른 세계</b>입니다 — PA 평가는 반드시 실제 변조 파형으로 EVM·마스크·소비전류를 함께 보세요. 전원 설계도 대신호 문제입니다: 송신 버스트 순간의 전류 피크가 전원 droop을 만들어 출력·EVM을 흔듭니다(→ <a href='#ckt-pdn'>PDN</a>, <a href='#ckt-frontend'>RF 프론트엔드</a>)." },
+            { t: "note", kind: "info", title: "더 깊이 보기", html: "대신호/소신호 개념의 일반 설명은 <a href='https://rfdh.com/' target='_blank' rel='noopener'>rfdh.com</a> STUDY > RF 회로의 기초 '대신호와 소신호의 차이'를 참고하세요. 이 섹션은 그 개념을 WiFi 모듈의 타겟파워·백오프 실무로 연결한 것입니다." },
           ]
         },
         {
@@ -394,6 +519,46 @@ window.KB_CONTENT = {
             ]},
             { t: "note", kind: "warn", title: "초심자 필수 — 매칭 자리 미리 확보", html: "설계 초기에 안테나 급전선에 <b>π형 매칭(3소자: shunt-series-shunt) 패드를 반드시 비워두세요</b>. 시제품에서 측정 후 부품값을 바꿔야 하는데, 자리가 없으면 PCB를 다시 떠야 합니다. 0Ω/NM(Not Mounted)로 깔아두는 것이 정석입니다." },
             { t: "note", kind: "tip", title: "스미스 차트", html: "매칭은 스미스 차트로 직관화합니다. 직렬 L은 시계방향, 직렬 C는 반시계방향, 병렬 소자는 어드미턴스 원을 따라 이동. VNA로 S11을 보며 중심(50Ω)으로 끌어오는 작업입니다. 자세한 절차는 다음 섹션에서 딥다이브합니다." },
+          ]
+        },
+        {
+          id: "rf-port-sparam",
+          title: "Port·기준면·S파라미터 — RF 성적표를 읽는 언어",
+          blocks: [
+            { t: "p", html: "데이터시트·측정 리포트·시뮬레이션의 공용어가 <b>S파라미터</b>입니다. 왜 저주파 회로처럼 전압·전류로 말하지 않고 '반사·전달'로 말하는지를 이해하면, VNA 측정과 매칭 작업 전체가 명확해집니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "포트(Port)는 <b>항구</b>입니다. 신호라는 배가 드나드는 관문이죠. RF 성적표는 \"몇 척을 들여보냈고(입사파), 몇 척이 항구에서 되돌아왔고(반사파), 몇 척이 건너편 항구에 도착했나(전달파)\"의 <b>비율</b>로 씁니다. 회로 내부가 아무리 복잡해도, 항구에서 오간 배만 세면 그 회로의 성질을 완전히 기술할 수 있습니다." },
+            { t: "note", kind: "why", title: "왜 전압·전류가 아니라 '파동'인가", html: "고주파에선 두 가지가 무너집니다. ①<b>측정용 개방(open)/단락(short)이 불가능</b> — 개방된 끝은 안테나처럼 방사하고 증폭기는 발진하며, 단락용 리드는 그 자체가 인덕터가 됩니다(<a href='#rf-lc'>1nH/mm</a>). ②<b>전압·전류가 위치마다 다릅니다</b> — 전송선 위 신호는 파동이라 어디서 재느냐에 따라 값이 바뀝니다(정재파). 그래서 위치에 무관한 <b>진행파(입사파 a, 반사파 b)</b>와 <b>50Ω 기준</b>으로 정의한 것이 S파라미터입니다." },
+            { t: "fig",
+              caption: "2포트 회로망의 S파라미터. 포트1로 입사한 파(a₁) 중 되돌아온 비율이 S11(반사), 포트2로 건너간 비율이 S21(전달). 반대 방향(S22·S12)도 대칭으로 정의된다.",
+              svg: '<svg viewBox="0 0 620 210" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2포트 회로망과 S파라미터 정의">'
+                + '<defs>'
+                + '<marker id="spF" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#4aa3ff"/></marker>'
+                + '<marker id="spR" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#e5534b"/></marker>'
+                + '<marker id="spT" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#2ea043"/></marker>'
+                + '</defs>'
+                + '<rect x="240" y="55" width="140" height="80" rx="10" fill="#4aa3ff" fill-opacity="0.12" stroke="#4aa3ff" stroke-opacity="0.6"/>'
+                + '<text x="310" y="90" text-anchor="middle" class="fig-label">DUT</text><text x="310" y="110" text-anchor="middle" class="fig-sub">(필터·발룬·안테나…)</text>'
+                + '<text x="232" y="48" text-anchor="end" class="fig-sub">포트1</text><text x="388" y="48" class="fig-sub">포트2</text>'
+                + '<line class="kb-flow" x1="80" y1="75" x2="232" y2="75" stroke="#4aa3ff" stroke-width="3" marker-end="url(#spF)"/>'
+                + '<text x="150" y="65" text-anchor="middle" class="fig-sub" fill="#4aa3ff">입사파 a₁</text>'
+                + '<line class="kb-flow-rev" x1="232" y1="112" x2="80" y2="112" stroke="#e5534b" stroke-width="2.5" marker-end="url(#spR)"/>'
+                + '<text x="150" y="132" text-anchor="middle" class="fig-sub" fill="#e5534b">반사파 b₁ → S11 = b₁/a₁</text>'
+                + '<line class="kb-flow kb-d2" x1="388" y1="93" x2="545" y2="93" stroke="#2ea043" stroke-width="3" marker-end="url(#spT)"/>'
+                + '<text x="465" y="82" text-anchor="middle" class="fig-sub" fill="#2ea043">전달파 b₂ → S21 = b₂/a₁</text>'
+                + '<text x="310" y="185" text-anchor="middle" class="fig-sub">모든 파는 50Ω 기준 — 포트에 드나든 파의 비율만으로 회로를 완전히 기술</text>'
+                + '</svg>'
+            },
+            { t: "kv", rows: [
+              ["S11 (입력 반사)", "포트1로 넣은 것 중 되튕긴 비율 = <b>리턴로스</b>. −10dB면 반사 10%. 매칭 품질의 지표"],
+              ["S21 (순방향 전달)", "포트1→포트2로 건너간 비율 = <b>이득(증폭기) 또는 삽입손실(필터·케이블)</b>"],
+              ["S12 (역방향 격리)", "포트2→포트1 누설. 증폭기의 역방향 격리(안정성과 직결)"],
+              ["S22 (출력 반사)", "포트2 쪽에서 본 반사. 출력 매칭 품질"],
+            ]},
+            { t: "h", text: "기준면(Reference Plane) — \"어디서 본 값인가\"" },
+            { t: "note", kind: "why", title: "같은 부품도 '보는 위치'에 따라 값이 다르다", html: "S파라미터는 <b>기준면(측정의 원점)</b>에서 정의됩니다. 같은 안테나라도 케이블 끝에서 보면 케이블의 손실·위상이 더해진 다른 값이 보입니다. <b>VNA 교정(SOLT cal)</b>이 하는 일이 바로 기준면을 케이블 끝(또는 지그 끝)으로 옮기는 것이고, <b>de-embedding</b>은 지그 성분을 수학적으로 제거해 기준면을 DUT 바로 앞까지 밀어넣는 작업입니다. <a href='#rf-smith'>스미스 차트 실전</a> 절차의 1번이 교정인 이유입니다." },
+            { t: "note", kind: "warn", title: "흔한 오해 — \"S11만 좋으면 안테나 OK?\"", html: "S11은 <b>'반사가 적다(에너지가 들어갔다)'까지만</b> 보장합니다. 들어간 에너지가 전파로 방사됐는지, 열로 사라졌는지는 별개 — 그 답은 <b>효율·OTA(TRP)</b>가 줍니다(→ <a href='#ant-ota'>OTA 측정</a>). 소형 안테나는 S11이 좋아도 효율이 낮을 수 있고, 심지어 <b>손실이 큰 경로일수록 반사가 흡수돼 S11이 좋아 '보이는' 함정</b>도 있습니다." },
+            { t: "note", kind: "tip", title: "현장 노하우", html: "①벤더가 주는 <b>.s2p(터치스톤) 파일</b>이 곧 부품의 S파라미터 — 매칭·필터 시뮬레이션에 그대로 불러 쓰세요. ②필터·발룬 선정 시 <b>S21(삽입손실)과 S11을 함께</b> 확인. ③측정 지그를 만들면 <b>기준면 정의를 문서화</b>하세요 — 양산 테스트의 보정값(오프셋)과 직결됩니다(→ <a href='#prod-rftest'>양산 RF 테스트</a>)." },
+            { t: "note", kind: "info", title: "더 깊이 보기", html: "'Port의 정확한 의미', 'S파라미터를 쓰는 이유'의 일반 이론은 <a href='https://rfdh.com/' target='_blank' rel='noopener'>rfdh.com</a> STUDY > 원초적 기초 시리즈를 참고하세요. 이 섹션은 그 문제의식을 모듈 측정·양산 실무로 연결한 것입니다." },
           ]
         },
         {
@@ -2505,6 +2670,11 @@ window.KB_CONTENT = {
               ["Balun", "Balanced-Unbalanced 변환기"],
               ["VSWR", "Voltage Standing Wave Ratio (정재파비)"],
               ["S11 / S21", "반사계수 / 전달계수 (S-파라미터)"],
+              ["SRF", "Self-Resonant Frequency (자기공진주파수) — 부품의 기생성분이 만드는 공진점. 이 위에선 부품이 반대 성질(C→L)로 동작"],
+              ["Reference Plane", "기준면 — S파라미터가 정의·측정되는 위치. VNA 교정(cal)으로 설정하며, de-embedding으로 이동"],
+              ["P1dB", "이득 1dB 압축점 — 선형(소신호) 영역이 끝나는 대신호 지표. 실사용 출력은 여기서 back-off"],
+              ["OIP3 / IMD3", "3차 혼변조 절편점 / 3차 혼변조 왜곡 — 비선형성 척도. 경험칙 OIP3 ≈ P1dB + 9~10dB"],
+              ["소신호 / 대신호", "선형 근사가 성립하는 영역(LNA·S파라미터·NF) / 압축·왜곡이 지배하는 영역(PA·P1dB·EVM)"],
               ["VNA", "Vector Network Analyzer"],
               ["EVM", "Error Vector Magnitude (변조품질)"],
               ["EIRP", "Equivalent Isotropically Radiated Power (등가등방복사전력) = 도전출력 − 손실 + 안테나이득. 규제 기준"],
