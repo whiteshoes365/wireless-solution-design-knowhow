@@ -1328,6 +1328,50 @@ window.KB_CONTENT = {
           ]
         },
         {
+          id: "proc-core-arch",
+          title: "딥다이브 — RF SoC 코어 아키텍처: ARM vs ARM China vs RISC-V",
+          blocks: [
+            { t: "p", html: "RF SoC 안에는 무선 스택과 (호스트리스라면) 애플리케이션을 돌리는 <b>CPU 코어</b>가 들어 있습니다. 이 코어의 아키텍처(ARM / ARM China / RISC-V 등)는 RF 성능 자체보다 <b>SDK·툴체인·단가·보안·공급망 리스크</b>를 좌우합니다 — 즉 <b>선정·수배·이원화 단계의 판단 축</b>입니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "코어 아키텍처는 <b>프랜차이즈 계약</b>과 같습니다. <b>ARM</b>은 글로벌 프랜차이즈 — 로열티를 내는 대신 검증된 레시피(ISA)와 방대한 본사 지원(툴·미들웨어 생태계)을 받습니다. <b>ARM China</b>는 같은 레시피의 <b>중국 내 별도 법인 운영판</b>입니다. <b>RISC-V</b>는 <b>공개 레시피</b> — 누구나 로열티 없이 쓸 수 있지만, 요리의 완성도(코어 구현·SDK)는 만든 회사가 좌우합니다." },
+            { t: "table",
+              head: ["구분", "ARM (글로벌)", "ARM China (安谋科技)", "RISC-V (오픈 ISA)"],
+              rows: [
+                ["정체", "영국 Arm社 라이선스 IP (Cortex-M0+/M4/M33 등)", "Arm의 중국 합작법인. ARMv8-M 호환 자체 코어(STAR-MC1 등)를 중국 시장에 라이선스", "로열티 없는 공개 명령어 집합. 구현 코어는 자체 개발 또는 IP 구매(SiFive·Andes·T-Head 등)"],
+                ["무선 SoC 채택 예", "Nordic nRF52(M4)/nRF54(M33), Silicon Labs EFR32(M33), TI CC26xx(M4) 등 — 주류", "중국계 MCU에서 확산(예: GigaDevice GD32E5의 STAR-MC1). 무선 SoC 채택은 벤더별 확인 필요", "Espressif ESP32-C3/C6, Telink TLSR9, Bouffalo BL602/BL616, WCH CH57x(BLE) 등 급성장"],
+                ["툴체인·생태계", "압도적 성숙 — Keil/IAR/GCC, CMSIS, RTOS·미들웨어·디버거(J-Link) 광범위", "ARMv8-M 호환이라 <b>기존 ARM 툴체인 대부분 그대로</b>", "GCC/LLVM 안정화. 단 디버거·트레이스·상용 미들웨어는 벤더 의존도↑"],
+                ["라이선스·단가", "칩사가 로열티 부담 → 칩 원가에 반영", "중국 내 라이선스 체계 — 중국 벤더의 접근성 확보 목적", "ISA 무료 → <b>저가 칩 가격 경쟁력</b>의 한 요인 (구현 IP 구매 시 비용은 존재)"],
+                ["보안", "TrustZone-M(M33), PSA Certified 생태계 성숙", "ARMv8-M 보안 기능 동등(TrustZone 포함)", "PMP/ePMP 기반. 보안 인증 생태계는 상대적으로 초기"],
+                ["지정학·공급망", "미·중 규제 국면에서 중국 벤더의 장기 접근성 불확실", "그 불확실성의 완충 장치. 단 <b>법인 거버넌스 이력(2020~22 분쟁)</b> → 장기 로드맵 점검 필요", "오픈 ISA라 <b>수출규제 내성↑</b> — 중국 벤더의 RISC-V 전환 가속 배경"],
+              ]
+            },
+            { t: "note", kind: "why", title: "왜 모듈 HW 개발자가 코어까지 봐야 하나", html: "모듈에 애플리케이션을 올리는 <b>호스트리스(hostless)</b> 구조라면 코어가 곧 개발 환경입니다 — SDK 품질, RTOS 포팅, 디버거 확보, 사내 SW 자산 재사용성이 전부 코어에 묶입니다. 반대로 가전 주기판 MCU가 따로 있고 모듈은 통신만 하는 <b>호스티드(hosted, AT/SDIO/SPI)</b> 구조라면 코어 종속이 작아 <b>이원화가 쉬워집니다</b>. 즉 코어 아키텍처 판단은 <b>모듈 아키텍처(hosted/hostless) 결정과 한 몸</b>입니다." },
+            { t: "fig",
+              caption: "코어 아키텍처가 선정에 미치는 영향은 모듈 구조에 따라 다르다. hosted면 코어 종속이 작아 이원화 자유도가 높고, hostless면 SDK·툴체인·포팅 비용이 선정의 핵심 변수가 된다.",
+              svg: '<svg viewBox="0 0 620 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="hosted와 hostless 구조에서 코어 아키텍처 영향 비교">'
+                + '<defs><marker id="caF" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L5.5,3 L0,6 Z" fill="#4aa3ff"/></marker></defs>'
+                + '<rect x="30" y="30" width="270" height="180" rx="10" fill="#2ea043" fill-opacity="0.07" stroke="#2ea043" stroke-opacity="0.5"/>'
+                + '<text x="165" y="54" text-anchor="middle" class="fig-label" style="fill:#2ea043">Hosted (호스트 MCU 별도)</text>'
+                + '<rect x="50" y="70" width="90" height="40" rx="6" fill="#9aa7b4" fill-opacity="0.15" stroke="#9aa7b4" stroke-opacity="0.6"/><text x="95" y="94" text-anchor="middle" class="fig-sub">세트 MCU</text>'
+                + '<rect x="185" y="70" width="90" height="40" rx="6" fill="#4aa3ff" fill-opacity="0.15" stroke="#4aa3ff" stroke-opacity="0.6"/><text x="230" y="88" text-anchor="middle" class="fig-sub" fill="#4aa3ff">RF SoC</text><text x="230" y="102" text-anchor="middle" class="fig-sub" fill="#4aa3ff">(코어 = 블랙박스)</text>'
+                + '<line class="kb-flow" x1="142" y1="90" x2="182" y2="90" stroke="#4aa3ff" stroke-width="2.5" marker-end="url(#caF)"/>'
+                + '<text x="163" y="128" text-anchor="middle" class="fig-sub">AT / SDIO / SPI</text>'
+                + '<text x="165" y="165" text-anchor="middle" class="fig-sub" fill="#2ea043">코어 종속 작음</text>'
+                + '<text x="165" y="185" text-anchor="middle" class="fig-sub" fill="#2ea043">→ 이원화 자유도 ↑</text>'
+                + '<rect x="320" y="30" width="270" height="180" rx="10" fill="#e3b341" fill-opacity="0.07" stroke="#e3b341" stroke-opacity="0.5"/>'
+                + '<text x="455" y="54" text-anchor="middle" class="fig-label" style="fill:#e3b341">Hostless (모듈에 앱 탑재)</text>'
+                + '<rect x="380" y="70" width="150" height="52" rx="6" fill="#4aa3ff" fill-opacity="0.15" stroke="#4aa3ff" stroke-opacity="0.6"/>'
+                + '<text x="455" y="90" text-anchor="middle" class="fig-sub" fill="#4aa3ff">RF SoC 코어에</text><text x="455" y="106" text-anchor="middle" class="fig-sub" fill="#4aa3ff">앱 + 무선스택</text>'
+                + '<text x="455" y="150" text-anchor="middle" class="fig-sub" fill="#e3b341">SDK·툴체인·포팅 비용이</text>'
+                + '<text x="455" y="170" text-anchor="middle" class="fig-sub" fill="#e3b341">선정의 핵심 변수</text>'
+                + '<text x="455" y="190" text-anchor="middle" class="fig-sub" fill="#e5534b">교체 = SW 재포팅 (이원화 부담 ↑)</text>'
+                + '</svg>'
+            },
+            { t: "note", kind: "warn", title: "흔한 오해 — \"코어가 뭐든 RF 성능과는 무관하다?\"", html: "절반만 맞습니다. 감도·출력 같은 <b>순수 RF 성능은 코어와 거의 무관</b>하지만, 실사용 성능은 얽힙니다: ①무선 <b>스택 성숙도</b>(재전송·로밍·공존 처리)는 SDK 품질 = 벤더의 SW 역량 ②<b>저전력 모드 진입/복귀 타이밍</b>은 코어·전력 아키텍처가 좌우 → 평균 전류 차이 ③<b>공존(PTA) 중재</b> 같은 타이밍 크리티컬 처리도 마찬가지. 반대 방향 오해도 금물: <b>\"RISC-V라서 성능이 낮다\"는 틀렸습니다</b> — ISA와 구현 품질은 별개입니다(ESP32-C6는 WiFi6+BLE+802.15.4를 RISC-V로 처리)." },
+            { t: "note", kind: "tip", title: "현장 노하우 — 선정 체크 (수배·이원화 관점)", html: "①<b>hosted/hostless 먼저 확정</b> — hosted면 코어 가중치를 낮춰도 됨 ②hostless면 <b>SDK 실물 평가</b>: 예제 빌드, 디버거(J-Link 등 범용 지원 여부), OTA·보안부팅 성숙도 ③<b>지정학 시나리오</b>: 중국 벤더 채택 시 코어 라이선스 경로(ARM 글로벌/ARM China/RISC-V)를 확인하고 규제 변화 시 로드맵 지속성을 FAE에 질의 ④<b>이원화 짝 구성</b>: 주력(ARM 생태계)+대안(RISC-V 저가) 조합이면 단가 협상 지렛대와 규제 헤지를 동시에 확보(→ <a href='#prod-secondsource'>이원화</a>) ⑤보안 요구(가전 사이버보안 규제 대응)가 있으면 TrustZone/PSA 인증 여부를 초기에 확인." },
+            { t: "note", kind: "info", title: "더 깊이 보기", html: "아키텍처별 공식 자료: <a href='https://www.arm.com/' target='_blank' rel='noopener'>arm.com</a>(Cortex-M·TrustZone·PSA), <a href='https://riscv.org/' target='_blank' rel='noopener'>riscv.org</a>(ISA 스펙·멤버 현황). 선정 전체 흐름은 <a href='#proc-selection'>2단계 SoC/모듈 선정</a>, 공급 리스크는 <a href='#prod-secondsource'>이원화·EOL 대응</a>과 함께 보세요." },
+          ]
+        },
+        {
           id: "proc-benchmark",
           title: "경쟁사 모듈 벤치마킹(BM) — 분석에서 인사이트로",
           blocks: [
@@ -3101,6 +3145,10 @@ window.KB_CONTENT = {
               ["OIP3 / IMD3", "3차 혼변조 절편점 / 3차 혼변조 왜곡 — 비선형성 척도. 경험칙 OIP3 ≈ P1dB + 9~10dB"],
               ["소신호 / 대신호", "선형 근사가 성립하는 영역(LNA·S파라미터·NF) / 압축·왜곡이 지배하는 영역(PA·P1dB·EVM)"],
               ["K-factor (Rollett)", "증폭기 무조건 안정 판별 계수 — K>1(그리고 |Δ|<1)이면 어떤 소스/부하에서도 발진하지 않음"],
+              ["RISC-V", "로열티 없는 오픈 명령어 집합(ISA). 저가 무선 SoC(ESP32-C 등)에서 채택 확대 — 수출규제 내성이 커 중국 벤더 전환 가속"],
+              ["ARM China (安谋科技)", "Arm의 중국 합작법인 — ARMv8-M 호환 자체 코어(STAR-MC1 등)를 중국 시장에 라이선스"],
+              ["TrustZone-M / PMP", "코어 보안 격리 기능 — ARM(Cortex-M33)의 보안 영역 분리 / RISC-V의 물리 메모리 보호"],
+              ["Hosted / Hostless", "모듈 사용 구조 — 세트 MCU가 따로 있고 모듈은 통신만(AT·SDIO·SPI) / 모듈 코어에 앱까지 탑재. 이원화 난이도를 가르는 결정"],
               ["Barkhausen 조건", "발진의 2조건: 루프 이득 ≥ 1 & 루프 위상 360°. 이를 만족하는 주파수에서 증폭기는 발진기가 됨"],
               ["VNA", "Vector Network Analyzer"],
               ["EVM", "Error Vector Magnitude (변조품질)"],
