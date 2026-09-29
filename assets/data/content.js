@@ -141,7 +141,7 @@ window.KB_CONTENT = {
             { t: "kv", rows: [
               ["주파수(f)", "초당 진동 수. 2.4GHz = 초당 24억 번. 높을수록 직진성↑, 회절·투과↓"],
               ["파장(λ)", "λ = c/f (c=빛의 속도 3×10⁸ m/s). <b>2.4GHz ≈ 12.5cm, 5GHz ≈ 6cm</b>. 안테나 효율=파장의 1/4(λ/4) 또는 1/2(λ/2) 길이로 설계"],
-              ["안테나 크기와 주파수", "<b>안테나 길이 ∝ λ ∝ 1/f</b>. 주파수↑면 파장↓→안테나 작아짐. 예: 900MHz Sub-G(λ≈33cm)는 안테나 8cm 이상 필요, 5GHz는 3cm 이상. 같은 크기 PCB 안테나면 고주파 효율이 높음"],
+              ["안테나 크기와 주파수", "<b>안테나 길이 ∝ λ ∝ 1/f</b>. 주파수↑면 파장↓→안테나 작아짐. 예: 900MHz Sub-G(λ≈33cm)는 안테나 8cm 이상 필요, 5GHz는 3cm 이상. 같은 크기 PCB 안테나면 고주파 효율이 높음. 왜 길이가 파장에 묶이는지는 6장 <a href='#ant-principle'>방사 원리</a>"],
               ["라인 손실(주파수 의존성)", "<b>손실 ∝ √f</b>. 고주파일수록 ①스킨 효과로 도체 저항↑ ②절연재 유전체 손실↑ ③PCB 패턴도 미세 방사 안테나화→에너지 누수↑. 예: 50Ω 마이크로스트립선 1m, 2.4GHz에서 0.3dB, 5GHz에서 0.6dB 손실 (약 2배)"],
               ["임피던스(Z₀)", "RF 표준은 50Ω. 소스·전송선·부하가 모두 50Ω이어야 반사 최소"],
               ["반사계수(Γ)", "임피던스 불일치로 되돌아오는 비율. 0이 이상적"],
@@ -2003,6 +2003,218 @@ window.KB_CONTENT = {
       title: "6. 안테나 설계·배치",
       sections: [
         {
+          id: "ant-principle",
+          title: "방사 원리 — 전류는 어떻게 전파가 되나",
+          blocks: [
+            { t: "p", html: "안테나는 <b>도선 속 교류 전류를 공간으로 스스로 퍼져 나가는 전자기파로 바꾸는 변환기</b>이고, 거꾸로 날아온 전파를 다시 전류로 되돌리는 수신기이기도 합니다. 원리는 세 문장으로 요약됩니다: <b>①전하를 흔들면 파가 생긴다 ②전기장과 자기장이 서로를 낳으며 안테나를 떠난다 ③안테나 길이를 파장에 맞춰 공진시키면 적은 전력으로 크게 흔들 수 있다.</b> 이 절은 이 세 문장을 그림 4장으로 풀고, 다음 절 <a href='#ant-fields'>근거리장·패턴·이득</a>이 '떠난 전파가 어떻게 퍼지는가'를 이어 받습니다." },
+            { t: "note", kind: "info", title: "임원 30초 답변 (그대로 말해도 되는 버전)", html: "\"안테나는 전기를 전파로 바꾸는 변환기입니다. 칩이 안테나 속 전자를 <b>1초에 24억 번(2.4GHz)</b> 앞뒤로 흔들면 주변의 전기장과 자기장이 함께 출렁입니다. 이 출렁임은 <b>'전기장의 변화가 자기장을 만들고, 자기장의 변화가 다시 전기장을 만드는' 연쇄</b>로 스스로를 이어 가며 빛의 속도로 안테나를 떠납니다. 안테나 길이를 파장의 절반(2.4GHz에서 약 6cm)이나 1/4에 맞추는 이유는, 그네를 박자에 맞춰 밀 듯 <b>공진</b>시켜야 적은 전력으로 크게 흔들 수 있기 때문입니다.\" — 그림은 아래 ②→③→④ 순서로 보여 주면 됩니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "<b>연못에 막대를 담근 모습</b>을 떠올리세요. 막대를 가만히 두면(직류) 물결이 없고, 한 방향으로 일정하게 밀기만 해도(등속) 물결은 거의 안 생깁니다. <b>위아래로 흔들어야(교류, 가속)</b> 물결이 사방으로 퍼집니다. 그리고 막대를 멈춰도 <b>이미 떠난 물결은 계속 갑니다</b> — 전파도 안테나에 매달린 것이 아니라 안테나에서 '떨어져 나간' 존재입니다. 날아가는 것은 물(전자)이 아니라 <b>물결(에너지)</b>이라는 점도 같습니다." },
+
+            { t: "h", text: "① 왜 '흔들어야' 방사되나 — 맥스웰의 사슬" },
+            { t: "note", kind: "why", title: "원리 — 수식 없이 보는 맥스웰 방정식", html: "네 가지 사실이 이어집니다. <b>(1)</b> 전하는 주변에 전기장을 만든다. <b>(2)</b> 움직이는 전하(전류)는 자기장을 만든다. <b>(3)</b> 변하는 자기장은 전기장을 만든다(패러데이 법칙 — 발전기·변압기의 원리). <b>(4)</b> 변하는 전기장은 자기장을 만든다(맥스웰이 추가한 <b>변위전류</b>). (3)과 (4)가 서로를 낳는 사슬은 <b>도선이 없어도 빈 공간에서 이어지고</b>, 이것이 전자기파입니다. 이 사슬이 전해지는 속도를 계산하면 c = 1/√(μ₀ε₀) ≈ 3×10⁸ m/s — 맥스웰은 이 값이 빛의 속도와 같다는 것을 보고 <b>빛도 전자기파</b>임을 밝혔습니다.<br><br>그래서 <b>직류나 일정한 전류는 방사하지 않습니다</b> — 장이 변하지 않으니 사슬이 시작되지 않습니다. 방사는 전하가 <b>가속</b>될 때, 즉 교류 전류에서 생기며, 같은 전류라도 <b>파장에 비해 긴 도선</b>일수록 강합니다(짧은 안테나의 방사 전력 ∝ (전류 × 길이/λ)²). 안테나가 파장 크기여야 하는 첫 번째 이유입니다." },
+
+            { t: "h", text: "② 전송선을 벌리면 안테나가 된다" },
+            { t: "p", html: "RF 라인(전송선)과 안테나는 사실 같은 도체입니다. 차이는 <b>가는 전류와 돌아오는 전류가 붙어 있느냐, 벌어져 있느냐</b>뿐입니다." },
+            { t: "fig",
+              caption: "① 신호선과 리턴이 붙어 있으면 반대 방향 전류가 만든 장이 서로 상쇄돼 에너지가 선을 따라 갇혀 간다. ② 끝을 벌리면 상쇄가 깨지며 에너지가 새기 시작하고, ③ 완전히 펼치면 두 팔의 전류가 같은 방향이 되어 장이 합쳐지고 공간으로 방사된다 — 안테나는 '벌려진 전송선'이다.",
+              svg: '<svg viewBox="0 0 620 255" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="평행 전송선을 벌려 다이폴 안테나가 되는 과정">'
+                + '<defs>'
+                + '<marker id="apB" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L5.5,3 L0,6 Z" fill="#4aa3ff"/></marker>'
+                + '<marker id="apR" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L5.5,3 L0,6 Z" fill="#e5534b"/></marker>'
+                + '</defs>'
+                + '<text x="110" y="24" text-anchor="middle" class="fig-label">① 평행 전송선</text>'
+                + '<text x="310" y="24" text-anchor="middle" class="fig-label">② 벌리기 시작</text>'
+                + '<text x="510" y="24" text-anchor="middle" class="fig-label" style="fill:#2ea043">③ 다이폴 = 안테나</text>'
+                + '<line x1="210" y1="36" x2="210" y2="225" stroke="#7a8694" stroke-dasharray="4 4" opacity="0.35"/>'
+                + '<line x1="410" y1="36" x2="410" y2="225" stroke="#7a8694" stroke-dasharray="4 4" opacity="0.35"/>'
+                + (function(){
+                    var o='';
+                    [110,310,510].forEach(function(cx){
+                      o+='<circle cx="'+cx+'" cy="212" r="9" fill="none" stroke="#e3b341" stroke-width="2"/><text x="'+cx+'" y="217" text-anchor="middle" class="fig-sub" fill="#e3b341">~</text>';
+                    });
+                    return o;
+                  })()
+                + '<line x1="102" y1="204" x2="102" y2="60" stroke="#4aa3ff" stroke-width="3"/><line x1="118" y1="204" x2="118" y2="60" stroke="#4aa3ff" stroke-width="3"/>'
+                + '<line class="kb-flow" x1="90" y1="160" x2="90" y2="115" stroke="#4aa3ff" stroke-width="2" marker-end="url(#apB)"/>'
+                + '<line class="kb-flow" x1="130" y1="115" x2="130" y2="160" stroke="#e5534b" stroke-width="2" marker-end="url(#apR)"/>'
+                + '<text x="110" y="246" text-anchor="middle" class="fig-sub">반대 전류 → 장 상쇄 → 방사 ≈ 0</text>'
+                + '<path d="M302,204 L302,140 L262,62" stroke="#4aa3ff" stroke-width="3" fill="none"/><path d="M318,204 L318,140 L358,62" stroke="#4aa3ff" stroke-width="3" fill="none"/>'
+                + '<path class="kb-pulse" d="M268,52 Q310,34 352,52" stroke="#4aa3ff" stroke-width="2" fill="none" opacity="0.5"/>'
+                + '<text x="310" y="246" text-anchor="middle" class="fig-sub">상쇄가 깨짐 → 에너지가 새기 시작</text>'
+                + '<path d="M502,204 L502,112 L428,112" stroke="#4aa3ff" stroke-width="3" fill="none"/><path d="M518,204 L518,112 L592,112" stroke="#4aa3ff" stroke-width="3" fill="none"/>'
+                + '<line class="kb-flow" x1="490" y1="99" x2="446" y2="99" stroke="#4aa3ff" stroke-width="2" marker-end="url(#apB)"/>'
+                + '<line class="kb-flow" x1="580" y1="99" x2="536" y2="99" stroke="#4aa3ff" stroke-width="2" marker-end="url(#apB)"/>'
+                + '<path class="kb-pulse" d="M466,86 Q510,66 554,86" stroke="#2ea043" stroke-width="2.5" fill="none"/>'
+                + '<path class="kb-pulse kb-d2" d="M450,72 Q510,46 570,72" stroke="#2ea043" stroke-width="2.5" fill="none"/>'
+                + '<path class="kb-pulse kb-d4" d="M436,58 Q510,28 584,58" stroke="#2ea043" stroke-width="2.5" fill="none"/>'
+                + '<text x="510" y="246" text-anchor="middle" class="fig-sub" fill="#2ea043">같은 방향 전류 → 장이 합쳐져 방사</text>'
+                + '</svg>'
+            },
+            { t: "note", kind: "tip", title: "이 그림이 설계 규칙 두 개를 설명한다", html: "①<b>RF 라인은 리턴(GND)을 바로 밑에 붙여라</b> — 벌어지는 순간 라인이 안테나가 됩니다(→ <a href='#pcb-ground'>그라운드·리턴 패스</a>, <a href='#pcb-emi-loop'>우회 리턴전류의 EMI 방사</a>). ②<b>안테나 근처에선 GND를 치워라(클리어런스)</b> — 안테나 밑에 GND가 붙으면 다시 ①번 전송선으로 돌아가 방사가 죽습니다(→ <a href='#ant-placement'>배치</a>). 같은 물리가 한쪽에선 '새지 마라', 다른 쪽에선 '새어 나가라'로 쓰입니다." },
+
+            { t: "h", text: "③ 전기력선이 떨어져 나가는 순간" },
+            { t: "fig",
+              caption: "안테나 한 주기의 전기력선 변화. t=0에 +와 −를 잇던 전기력선은, 전류가 흐르며 전하가 줄어들 때 부풀어 목이 조여지고(T/4), 극성이 뒤집히는 순간 원래 전하로 돌아갈 곳을 잃어 닫힌 고리로 끊어진다(T/2). 끊어진 고리는 빛의 속도로 떠나고 그 자리에서 다음 고리가 자란다(3T/4). 한 주기 동안 고리가 이동한 거리가 파장 λ다.",
+              svg: '<svg viewBox="0 0 620 245" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="다이폴 안테나에서 전기력선 고리가 분리되어 전파되는 과정">'
+                + '<defs><marker id="apP" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L5.5,3 L0,6 Z" fill="#a371f7"/></marker></defs>'
+                + (function(){
+                    var o='';var xs=[40,190,340,490];var ts=['t = 0','t = T/4','t = T/2','t = 3T/4'];
+                    xs.forEach(function(x,i){
+                      o+='<text x="'+(x+45)+'" y="26" text-anchor="middle" class="fig-label">'+ts[i]+'</text>';
+                      o+='<line x1="'+x+'" y1="82" x2="'+x+'" y2="158" stroke="#7a8694" stroke-width="4"/>';
+                      if(i>0) o+='<line x1="'+(x-25)+'" y1="40" x2="'+(x-25)+'" y2="215" stroke="#7a8694" stroke-dasharray="3 5" opacity="0.3"/>';
+                    });
+                    return o;
+                  })()
+                + '<circle cx="40" cy="78" r="8" fill="#e5534b" fill-opacity="0.25" stroke="#e5534b"/><text x="40" y="82" text-anchor="middle" class="fig-sub" fill="#e5534b">+</text>'
+                + '<circle cx="40" cy="162" r="8" fill="#4aa3ff" fill-opacity="0.25" stroke="#4aa3ff"/><text x="40" y="166" text-anchor="middle" class="fig-sub" fill="#4aa3ff">−</text>'
+                + '<path d="M44,86 Q88,120 44,154" stroke="#a371f7" stroke-width="2" fill="none"/><path d="M46,82 Q125,120 46,158" stroke="#a371f7" stroke-width="2" fill="none"/>'
+                + '<text x="85" y="200" text-anchor="middle" class="fig-sub">전하 최대</text><text x="85" y="216" text-anchor="middle" class="fig-sub">+→− 전기력선</text>'
+                + '<line class="kb-flow" x1="180" y1="140" x2="180" y2="100" stroke="#4aa3ff" stroke-width="2"/>'
+                + '<path d="M194,112 C208,66 275,66 275,120 C275,174 208,174 194,128" stroke="#a371f7" stroke-width="2" fill="none"/>'
+                + '<path d="M194,114 C202,92 238,92 238,120 C238,148 202,148 194,126" stroke="#a371f7" stroke-width="2" fill="none" opacity="0.6"/>'
+                + '<text x="235" y="200" text-anchor="middle" class="fig-sub">전류 최대</text><text x="235" y="216" text-anchor="middle" class="fig-sub">부풀며 목이 조여짐</text>'
+                + '<circle cx="340" cy="78" r="8" fill="#4aa3ff" fill-opacity="0.25" stroke="#4aa3ff"/><text x="340" y="82" text-anchor="middle" class="fig-sub" fill="#4aa3ff">−</text>'
+                + '<circle cx="340" cy="162" r="8" fill="#e5534b" fill-opacity="0.25" stroke="#e5534b"/><text x="340" y="166" text-anchor="middle" class="fig-sub" fill="#e5534b">+</text>'
+                + '<ellipse class="kb-pulse" cx="402" cy="120" rx="30" ry="42" stroke="#a371f7" stroke-width="2.5" fill="#a371f7" fill-opacity="0.08"/>'
+                + '<text x="402" y="68" text-anchor="middle" class="fig-sub" fill="#e5534b">끊어짐!</text>'
+                + '<path d="M344,88 Q360,120 344,152" stroke="#a371f7" stroke-width="1.5" fill="none" stroke-dasharray="4 3"/>'
+                + '<text x="385" y="200" text-anchor="middle" class="fig-sub">극성 반전</text><text x="385" y="216" text-anchor="middle" class="fig-sub" fill="#e5534b">닫힌 고리로 독립</text>'
+                + '<ellipse class="kb-pulse kb-d2" cx="572" cy="120" rx="24" ry="46" stroke="#a371f7" stroke-width="2.5" fill="#a371f7" fill-opacity="0.08"/>'
+                + '<line class="kb-flow" x1="560" y1="180" x2="608" y2="180" stroke="#a371f7" stroke-width="2" marker-end="url(#apP)"/>'
+                + '<path d="M494,112 C504,86 534,86 534,120 C534,154 504,154 494,128" stroke="#a371f7" stroke-width="2" fill="none" opacity="0.7"/>'
+                + '<text x="535" y="200" text-anchor="middle" class="fig-sub">빛의 속도로 떠남</text><text x="535" y="216" text-anchor="middle" class="fig-sub">다음 고리 형성</text>'
+                + '<text x="310" y="240" text-anchor="middle" class="fig-sub">반주기마다 고리 하나가 떨어져 나간다 · 한 주기 이동 거리 = 파장 λ</text>'
+                + '</svg>'
+            },
+            { t: "note", kind: "why", title: "왜 고리가 '끊어지나'", html: "전기장의 변화는 공간을 <b>빛의 속도로만</b> 전해집니다. 전하의 극성이 반주기 만에 뒤집힐 때, 조금 멀리 나가 있던 전기력선은 그 변화를 아직 '전달받지 못해' 원래의 +−에 되돌아 붙을 수 없습니다. 결국 양 끝이 서로 이어져 <b>전하 없이 스스로 닫힌 고리</b>가 되고, 이 고리를 유지하는 것이 ①의 맥스웰 사슬(자기장이 함께 감싸며 돕니다)입니다. 2.4GHz에서 한 주기는 약 0.42ns, 그 사이 빛이 가는 거리가 12.5cm — <b>이것이 파장의 물리적 의미</b>입니다(→ <a href='#rf-fundamentals'>파장·주파수</a>)." },
+
+            { t: "h", text: "④ 왜 길이가 λ/2(또는 λ/4)인가 — 정재파와 공진" },
+            { t: "fig",
+              caption: "왼쪽: λ/2 다이폴 위의 전류(파랑)와 전압(보라) 분포. 도선 끝은 전류가 갈 곳이 없어 0이고 전압이 최대, 중앙 급전점은 전류 최대 — 이때 급전 임피던스가 약 73Ω의 순저항이 되어 매칭이 쉽고 방사가 최대다. 오른쪽: λ/4 모노폴은 그라운드 플레인이 거울처럼 나머지 반쪽(이미지)을 만들어 가상의 다이폴을 완성한다(약 36Ω). 그라운드가 작으면 거울이 깨져 효율이 떨어진다.",
+              svg: '<svg viewBox="0 0 620 245" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="반파장 다이폴의 정재파 전류 전압 분포와 모노폴 그라운드 이미지">'
+                + '<text x="170" y="24" text-anchor="middle" class="fig-label">λ/2 다이폴 — 정재파 분포</text>'
+                + '<path d="M60,120 Q170,20 280,120 Z" fill="#4aa3ff" fill-opacity="0.12" stroke="none"/>'
+                + '<path class="kb-pulse" d="M60,120 Q170,20 280,120" stroke="#4aa3ff" stroke-width="2.5" fill="none"/>'
+                + '<text x="170" y="56" text-anchor="middle" class="fig-sub" fill="#4aa3ff">전류 I — 중앙 최대 · 끝 0</text>'
+                + '<path d="M60,185 Q170,65 280,185" stroke="#a371f7" stroke-width="2" stroke-dasharray="5 4" fill="none"/>'
+                + '<text x="288" y="200" text-anchor="end" class="fig-sub" fill="#a371f7">전압 V — 끝 최대</text>'
+                + '<line x1="60" y1="120" x2="162" y2="120" stroke="#7a8694" stroke-width="4"/><line x1="178" y1="120" x2="280" y2="120" stroke="#7a8694" stroke-width="4"/>'
+                + '<circle cx="170" cy="120" r="5" fill="#e3b341"/>'
+                + '<text x="170" y="146" text-anchor="middle" class="fig-sub" fill="#e3b341">급전 ≈ 73Ω</text>'
+                + '<line x1="60" y1="216" x2="280" y2="216" stroke="#7a8694" stroke-width="1"/><line x1="60" y1="210" x2="60" y2="222" stroke="#7a8694"/><line x1="280" y1="210" x2="280" y2="222" stroke="#7a8694"/>'
+                + '<text x="170" y="236" text-anchor="middle" class="fig-sub">λ/2 ≈ 6.2cm @2.4GHz (자유공간)</text>'
+                + '<line x1="330" y1="36" x2="330" y2="225" stroke="#7a8694" stroke-dasharray="4 4" opacity="0.35"/>'
+                + '<text x="470" y="24" text-anchor="middle" class="fig-label">λ/4 모노폴 + 그라운드 거울</text>'
+                + '<text x="470" y="44" text-anchor="middle" class="fig-sub" fill="#e5534b">작은 그라운드 = 깨진 거울 → 효율↓</text>'
+                + '<rect x="370" y="130" width="200" height="8" rx="2" fill="#2ea043" fill-opacity="0.4" stroke="#2ea043" stroke-opacity="0.7"/>'
+                + '<text x="372" y="156" class="fig-sub" fill="#2ea043">그라운드 플레인</text>'
+                + '<line x1="470" y1="130" x2="470" y2="58" stroke="#7a8694" stroke-width="4"/>'
+                + '<path class="kb-pulse" d="M470,58 Q505,100 498,130" stroke="#4aa3ff" stroke-width="2" fill="none"/>'
+                + '<text x="408" y="92" text-anchor="middle" class="fig-sub">λ/4 ≈ 3.1cm</text>'
+                + '<circle cx="470" cy="134" r="4" fill="#e3b341"/>'
+                + '<line x1="470" y1="138" x2="470" y2="210" stroke="#a371f7" stroke-width="3" stroke-dasharray="5 4" opacity="0.8"/>'
+                + '<text x="480" y="182" class="fig-sub" fill="#a371f7">이미지(거울 속 반쪽)</text>'
+                + '<text x="470" y="236" text-anchor="middle" class="fig-sub">실물 반쪽 + 거울 반쪽 = 가상 다이폴 · ≈36Ω</text>'
+                + '</svg>'
+            },
+            { t: "note", kind: "why", title: "원리 — 끝에서 되돌아온 파가 만든 '서 있는 파동'", html: "급전점에서 출발한 전류는 도선 끝에서 갈 곳이 없어 반사돼 되돌아옵니다. 가는 파와 오는 파가 겹쳐 <b>제자리에서 출렁이는 정재파</b>가 생기고, 끝은 항상 전류 0·전압 최대입니다. 길이가 <b>λ/2</b>이면 중앙(급전점)이 정확히 전류 최대·전압 최소가 되어 <b>급전 임피던스가 작고 리액턴스가 0인 순저항(≈73Ω)</b> — 이것이 안테나의 <b>공진</b>입니다(→ <a href='#rf-resonance'>공진의 이해</a>). 길이가 어긋나면 리액턴스가 남아 반사가 생기고, 그 잔여 리액턴스를 L·C로 지우는 작업이 <a href='#rf-impedance-matching'>매칭</a>입니다.<br><br><b>모노폴</b>은 그라운드 플레인이 거울처럼 전류의 반사상(이미지)을 만들어 주므로 실물은 λ/4면 충분하고 임피던스는 다이폴의 절반(≈36Ω)입니다. 그래서 모노폴·IFA·칩 안테나에선 <b>그라운드가 안테나의 절반</b>입니다(→ <a href='#ant-gallery'>그라운드가 커야 하는 이유</a>, <a href='#ant-types-deep'>PCB 패턴 안테나</a>). PCB 위의 구불구불한 안테나 패턴은 이 λ/4 길이를 좁은 공간에 접어 넣은 것입니다." },
+            { t: "note", kind: "warn", title: "흔한 오해 — \"전파는 안테나 '안에서' 만들어져 뿜어져 나온다?\"", html: "전파는 도선 <b>속</b>이 아니라 도선 <b>주변 공간의 장</b>입니다. 금속 안테나는 전류가 흐를 '틀'을 제공할 뿐, 에너지는 처음부터 공간에 있습니다. 그래서 ①<b>안테나 주변의 물질</b>(플라스틱 케이스·손·금속)이 장을 바꾸면 안테나 성능이 바뀌고 ②금속 케이스로 감싸면 장이 갇히거나 케이스 표면에 전류가 유도돼 '틀' 자체가 달라집니다. 또 하나의 오해 — <b>전자가 날아가는 것이 아닙니다</b>. 전자는 도선 안에서 제자리 근처로 미세하게 진동할 뿐이고, 떠나는 것은 에너지(장)입니다." },
+            { t: "note", kind: "tip", title: "현장 노하우 — 임원 설명 순서", html: "①30초 답변 → ②<b>그림②</b>(\"RF 선을 벌리면 안테나\") → ③<b>그림③</b>(\"고리가 떨어져 나가는 게 전파\") → ④<b>그림④</b>(\"길이를 파장에 맞추는 이유 = 공진\") → ⑤다음 절 <b>도넛 패턴</b>(\"사방으로 똑같이 가지 않는다\"). 실물이 있다면 모듈의 PCB 안테나를 가리키며 <b>\"이 구불구불한 선이 3cm짜리 λ/4를 접어 넣은 것이고, 옆의 넓은 동박(그라운드)이 나머지 반쪽입니다\"</b>라고 하면 한 번에 연결됩니다. 예상 후속 질문은 다음 절 끝의 Q&A 표를 참고하세요." },
+            { t: "note", kind: "info", title: "더 깊이 보기", html: "다음 절 <a href='#ant-fields'>근거리장·원거리장·패턴·이득·편파</a>로 이어집니다. 종류별 설계는 <a href='#ant-types'>안테나 종류</a>·<a href='#ant-types-deep'>PCB 패턴 안테나</a>, 의도치 않은 방사(EMI)는 <a href='#pcb-emi-loop'>우회 리턴전류의 방사</a>와 같은 원리입니다." },
+          ]
+        },
+        {
+          id: "ant-fields",
+          title: "근거리장·원거리장·방사 패턴·이득·편파 — 안테나 성능을 말하는 언어",
+          blocks: [
+            { t: "p", html: "앞 절이 '전파가 어떻게 생기나'였다면, 이 절은 <b>'떠난 전파가 어떻게 퍼지고, 그 성능을 무엇으로 말하나'</b>입니다. 임원 질문의 후속(\"왜 손대면 약해지나\", \"이득 높은 안테나면 멀리 가나\")은 대부분 여기서 답이 나옵니다." },
+            { t: "note", kind: "info", title: "비유로 먼저", html: "안테나 주변 에너지는 두 종류입니다. <b>손에 쥐고 있는 에너지(근거리장)</b>는 안테나 곁에서 들락날락할 뿐 떠나지 않고, <b>던져 보낸 에너지(원거리장)</b>만 멀리 갑니다. 그리고 던지는 방향은 <b>전구 vs 손전등</b>과 같습니다 — 같은 전력이어도 반사경으로 모으면 한쪽이 밝아지는 대신 다른 쪽은 어두워집니다. 안테나 '이득'은 전력을 만드는 것이 아니라 <b>나눠 주는 방향을 바꾸는 것</b>입니다." },
+
+            { t: "h", text: "근거리장 vs 원거리장 — 떠나지 않는 에너지와 떠나는 에너지" },
+            { t: "fig",
+              caption: "① 리액티브 근거리장: 안테나 곁에 에너지가 저장되어 한 주기마다 오가며 방사하지 않는다. 손·금속이 여기 들어오면 공진이 틀어진다. ② 방사 근거리장(Fresnel): 방사는 하지만 패턴이 거리에 따라 변한다. ③ 원거리장(Fraunhofer): 구면파가 평면파처럼 펴지고, 패턴이 거리와 무관해진다 — TRP·이득·링크버짓이 정의되는 영역.",
+              svg: '<svg viewBox="0 0 620 250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="안테나 근거리장과 원거리장 영역">'
+                + '<circle cx="70" cy="125" r="120" fill="#a371f7" fill-opacity="0.06" stroke="#a371f7" stroke-opacity="0.5" stroke-dasharray="6 4"/>'
+                + '<circle cx="70" cy="125" r="42" fill="#e3b341" fill-opacity="0.14" stroke="#e3b341" stroke-opacity="0.8"/>'
+                + '<line x1="70" y1="105" x2="70" y2="145" stroke="#4aa3ff" stroke-width="4"/>'
+                + '<text x="48" y="130" text-anchor="middle" class="fig-sub" fill="#e3b341">①</text>'
+                + '<text x="70" y="182" text-anchor="middle" class="fig-sub" fill="#e3b341">저장·왕복</text>'
+                + '<text x="150" y="70" text-anchor="middle" class="fig-sub" fill="#a371f7">②</text>'
+                + '<path class="kb-pulse" d="M212,62 Q240,125 212,188" stroke="#4aa3ff" stroke-width="2" fill="none"/>'
+                + '<path class="kb-pulse kb-d1" d="M258,52 Q280,125 258,198" stroke="#4aa3ff" stroke-width="2" fill="none"/>'
+                + (function(){var o='';[330,380,430,480,530].forEach(function(x,i){o+='<line class="kb-pulse kb-d'+(i+2)+'" x1="'+x+'" y1="44" x2="'+x+'" y2="206" stroke="#4aa3ff" stroke-width="2"/>';});return o;})()
+                + '<text x="430" y="32" text-anchor="middle" class="fig-sub" fill="#4aa3ff">③ 원거리장 — 평면파, 패턴 고정</text>'
+                + '<text x="245" y="222" text-anchor="middle" class="fig-sub">구면파 → 평면파</text>'
+                + '<text x="310" y="244" text-anchor="middle" class="fig-sub">① r &lt; λ/2π (2.4GHz ≈ 2cm) · ② 방사 근거리장 · ③ r &gt; 2D²/λ (그리고 r ≫ λ)</text>'
+                + '</svg>'
+            },
+            { t: "table",
+              head: ["영역", "경계(대략)", "성질", "실무 의미"],
+              rows: [
+                ["① 리액티브 근거리장", "r &lt; λ/2π<br>(2.4GHz ≈ 2cm · 5GHz ≈ 1cm · 900MHz ≈ 5.3cm)", "에너지가 안테나와 공간 사이를 오가며 <b>저장</b>될 뿐 방사하지 않음", "<b>손·케이스·금속·부품이 이 안에 들어오면 공진 주파수가 틀어짐(detune)</b> → 케이스 조립 후 재튜닝하는 이유(→ <a href='#ant-tuning'>튜닝</a>)"],
+                ["② 방사 근거리장 (Fresnel)", "λ/2π ~ 2D²/λ", "방사는 하지만 패턴이 거리에 따라 변함", "근거리 스캐너·근접 프로브가 보는 영역, far-field로 변환해 패턴 산출(→ <a href='#ant-ota'>OTA</a>)"],
+                ["③ 원거리장 (Fraunhofer)", "r &gt; 2D²/λ 이고 r ≫ λ<br>(D = 방사체 최대 크기)", "평면파. 전계 ∝ 1/r, 전력밀도 ∝ 1/r². 패턴이 거리와 무관", "TRP·이득·방사 패턴·링크버짓·규제 EIRP가 전부 이 영역 기준"],
+              ]
+            },
+            { t: "note", kind: "warn", title: "흔한 오해 — \"원거리장은 모듈 크기로만 정해진다?\"", html: "공식의 D는 <b>실제로 전류가 흐르며 방사에 참여하는 전체 크기</b>입니다. 모듈만 방사하면 D가 수 cm라 수십 cm면 원거리장이지만, 가전 샤시·케이블에 전류가 유도되어 함께 방사하면 D가 샤시 크기로 커지고 원거리장 경계도 멀어집니다. 모듈 단품 OTA와 세트 장착 OTA 결과가 다른 이유 중 하나이며, 세트 방사가 샤시로 번지는 현상 자체가 <a href='#ver-emc'>EMC·공존</a> 문제의 신호일 수 있습니다." },
+
+            { t: "h", text: "방사 패턴·지향성·이득 — '사방으로 똑같이' 가지 않는다" },
+            { t: "fig",
+              caption: "왼쪽: 등방성 안테나(모든 방향으로 균일, 0dBi) — 현실에 없는 비교 기준이다. 오른쪽: λ/2 다이폴의 단면 패턴. 옆 방향으로 등방성보다 2.15dB 강하게 보내는 대신, 안테나 축 방향(위·아래)은 0(널)이다. 3차원으로는 도넛 모양. 에너지를 증폭한 것이 아니라 재분배한 것이다.",
+              svg: '<svg viewBox="0 0 620 235" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="등방성 안테나와 다이폴 안테나의 방사 패턴 비교">'
+                + '<text x="160" y="24" text-anchor="middle" class="fig-label">등방성 — 0dBi (가상의 기준)</text>'
+                + '<circle class="kb-pulse" cx="160" cy="122" r="70" fill="#4aa3ff" fill-opacity="0.12" stroke="#4aa3ff" stroke-width="2"/>'
+                + '<circle cx="160" cy="122" r="4" fill="#e3b341"/>'
+                + '<text x="160" y="218" text-anchor="middle" class="fig-sub">모든 방향 똑같이 — 비교용 기준</text>'
+                + '<line x1="310" y1="36" x2="310" y2="210" stroke="#7a8694" stroke-dasharray="4 4" opacity="0.35"/>'
+                + '<text x="460" y="24" text-anchor="middle" class="fig-label">λ/2 다이폴 단면 — 2.15dBi</text>'
+                + '<circle cx="460" cy="122" r="62" fill="none" stroke="#7a8694" stroke-dasharray="4 4" opacity="0.6"/>'
+                + '<circle class="kb-pulse" cx="420" cy="122" r="40" fill="#a371f7" fill-opacity="0.15" stroke="#a371f7" stroke-width="2"/>'
+                + '<circle class="kb-pulse" cx="500" cy="122" r="40" fill="#a371f7" fill-opacity="0.15" stroke="#a371f7" stroke-width="2"/>'
+                + '<line x1="460" y1="92" x2="460" y2="152" stroke="#4aa3ff" stroke-width="4"/>'
+                + '<text x="460" y="52" text-anchor="middle" class="fig-sub" fill="#e5534b">축 방향 = 널(0)</text>'
+                + '<text x="545" y="112" class="fig-sub" fill="#a371f7">최대 +2.15dBi</text>'
+                + '<text x="378" y="186" class="fig-sub" fill="#7a8694">점선 = 등방성</text>'
+                + '<text x="460" y="218" text-anchor="middle" class="fig-sub">옆으로 몰아준 만큼 위·아래가 빈다 = 재분배</text>'
+                + '</svg>'
+            },
+            { t: "kv", rows: [
+              ["등방성 안테나 (isotropic)", "모든 방향으로 똑같이 방사하는 가상의 점 안테나. <b>0dBi의 기준</b>. 실제로는 만들 수 없음"],
+              ["방사 패턴", "방향별 방사 세기의 지도. 수평면·수직면 단면(E-plane/H-plane)이나 3D로 표현"],
+              ["지향성 (Directivity)", "가장 강한 방향이 평균 대비 몇 배인가 — <b>모양만</b> 본 값(손실 무시)"],
+              ["이득 (Gain, dBi)", "<b>이득 = 효율 × 지향성</b>. 손실까지 반영한 실제 값. dBi = 등방성 대비, dBd = 다이폴 대비(dBd = dBi − 2.15)"],
+              ["널 (null)", "방사가 거의 0인 방향. 다이폴·모노폴은 <b>안테나 축 방향</b>이 널 — 설치 방향에 따라 특정 위치에서 끊기는 원인"],
+            ]},
+            { t: "note", kind: "warn", title: "흔한 오해 — \"이득 높은 안테나 = 좋은 안테나 · 멀리 간다?\"", html: "이득은 <b>증폭이 아닙니다</b>. 한 방향으로 모은 만큼 다른 방향은 약해지고, 총 방사 전력(TRP)은 그대로이거나 효율만큼 줄어듭니다. 가전은 사용자·공유기가 어느 방향에 있을지 모르므로 <b>고르게 퍼지는 옴니(무지향)</b>가 대개 유리하고, 고이득은 오히려 널 방향 '음영'을 만듭니다. 또한 규제는 <b>EIRP(도전 출력 + 안테나 이득)</b>로 걸리므로 고이득 안테나로 바꾸면 출력을 낮춰야 할 수도 있습니다(→ <a href='#proc-targets'>Target 정의</a>, <a href='#ver-cal'>타겟파워</a>)." },
+
+            { t: "h", text: "방사저항과 효율 — 들어간 전력은 어디로 가나" },
+            { t: "note", kind: "why", title: "원리 — 떠나는 에너지가 회로에는 '저항'으로 보인다", html: "안테나에 들어간 전력은 두 갈래로 나갑니다: <b>전파로 떠나는 몫</b>과 <b>도체·유전체·주변 부품에서 열로 사라지는 몫</b>. 회로 입장에서 전파로 떠나는 에너지는 마치 저항에서 소모되는 것처럼 보이므로 이를 <b>방사저항 R<sub>rad</sub></b>이라 부르고, 열 손실을 <b>손실저항 R<sub>loss</sub></b>라 합니다. <b>방사 효율 η = R<sub>rad</sub> / (R<sub>rad</sub> + R<sub>loss</sub>)</b>.<br><br>짧은 안테나의 방사저항은 <b>R<sub>rad</sub> ≈ 80π²(l/λ)²</b> — 길이가 λ/10이면 약 8Ω, λ/50이면 약 0.3Ω까지 떨어집니다. 도체·부품 손실이 수 Ω이면 λ/50급 안테나는 입력 전력의 대부분을 열로 태웁니다. <b>소형 안테나가 효율이 낮은 근본 이유</b>이며, 크기를 줄일수록 대역폭도 좁아지는 물리적 한계(Chu 한계)가 함께 따라옵니다(→ <a href='#ant-subg'>Sub-GHz 안테나의 난점</a>)." },
+            { t: "note", kind: "tip", title: "현장 노하우", html: "①매칭(S11)이 좋아도 R<sub>loss</sub>가 크면 효율은 나쁩니다 — 반사가 없다는 것과 방사한다는 것은 다른 이야기입니다(→ <a href='#rf-port-sparam'>'S11만 좋으면 OK?'</a>). 효율은 반드시 <b>OTA로</b> 확인하세요(→ <a href='#ant-ota'>OTA 측정</a>). ②칩 안테나 데이터시트의 효율·이득은 <b>벤더 평가보드(특정 그라운드 크기)</b> 기준입니다 — 우리 보드의 그라운드가 작으면 그 값은 나오지 않습니다." },
+
+            { t: "h", text: "편파와 상반성 — 방향과 대칭" },
+            { t: "kv", rows: [
+              ["편파 (Polarization)", "전기장이 진동하는 방향. 수직으로 선 모노폴은 수직 편파. 송·수신 편파가 90° 어긋나면 이론상 크게 손실(교차 편파). 실내에선 반사로 편파가 섞여 완화되지만, <b>같은 모듈이 제품 설치 방향(벽걸이 vs 스탠드)에 따라 성능이 달라지는 원인</b> 중 하나"],
+              ["상반성 (Reciprocity)", "안테나의 송신 패턴 = 수신 패턴. <b>잘 보내는 방향이 잘 듣는 방향</b>. 그래서 TRP(송신)와 TIS(수신)가 보통 함께 움직임. 단 세트 자체 잡음이 수신을 막는 <b>desense</b>는 안테나 밖의 문제라 별개(→ <a href='#ver-emc'>EMC·공존</a>)"],
+            ]},
+
+            { t: "h", text: "임원이 이어서 물을 질문 — 예상 Q&A" },
+            { t: "table",
+              head: ["질문", "짧은 답", "근거"],
+              rows: [
+                ["왜 2.4GHz 안테나는 몇 cm인가?", "파장 12.5cm의 1/4~1/2에서 공진하기 때문. 구불구불한 PCB 패턴은 그 길이를 접어 넣은 것", "<a href='#ant-principle'>방사 원리 ④</a>, <a href='#ant-types-deep'>PCB 안테나</a>"],
+                ["금속 제품 안에 넣으면 왜 안 되나?", "금속은 전파를 반사·차단하고, 근거리장에 들어오면 공진을 틀어버림 → 비금속 창·배치 위치가 핵심", "<a href='#ant-placement'>배치</a>"],
+                ["손으로 잡으면 왜 약해지나?", "손이 리액티브 근거리장(수 cm)에 들어와 detune + 인체가 에너지를 흡수", "근거리장 표, <a href='#ant-tuning'>튜닝</a>"],
+                ["이득 높은 안테나로 바꾸면 멀리 가나?", "한 방향은 멀리, 다른 방향은 약해짐. 총 전력은 그대로. 규제(EIRP)로 출력을 낮춰야 할 수도", "패턴·이득 절"],
+                ["같은 모듈인데 제품마다 성능이 다른 이유?", "그라운드(거울)·케이스·주변 금속이 안테나의 일부로 동작하기 때문 — 세트 장착 후 OTA가 최종 판정", "<a href='#ant-ota'>OTA</a>, <a href='#ant-gallery'>그라운드</a>"],
+                ["안테나를 더 작게 만들 수는 없나?", "가능하지만 방사저항·효율·대역폭이 함께 떨어지는 물리 한계. 크기·원가·성능의 트레이드오프", "방사저항 절, <a href='#ant-subg'>Sub-G</a>"],
+                ["전파는 몸에 해롭지 않나?", "무선모듈 전파는 전리 방사선이 아니며, 국가별 인체 노출 기준(SAR/MPE)을 만족해야 인증 가능", "<a href='#ver-cert'>규제 인증</a>"],
+              ]
+            },
+            { t: "note", kind: "info", title: "더 깊이 보기", html: "측정으로 이 개념들을 확인하는 방법은 <a href='#ant-ota'>OTA 측정(TRP/TIS/효율·패턴)</a>, 실제 제품에서 성능을 좌우하는 요인은 <a href='#ant-placement'>배치</a>를 보세요. 용어는 10장 <a href='#gloss-main'>용어집</a>에 정리돼 있습니다." },
+          ]
+        },
+        {
           id: "ant-types",
           title: "안테나 종류 선택",
           blocks: [
@@ -2786,6 +2998,15 @@ window.KB_CONTENT = {
               ["Sensitivity", "수신 감도 — 통신 가능한 최소 수신전력(dBm), 낮을수록 좋음"],
               ["Duty Cycle / LBT", "송신 점유율 제한 / Listen-Before-Talk (Sub-G·유럽 규제)"],
               ["TRP / TIS", "Total Radiated Power / Total Isotropic Sensitivity"],
+              ["변위전류 (displacement current)", "변하는 전기장이 전류처럼 자기장을 만드는 효과(맥스웰). 도선 없는 공간에서 전자기파가 스스로 이어지는 근거"],
+              ["방사저항 (R<sub>rad</sub>)", "전파로 떠나는 전력을 회로 입장에서 본 등가 저항. λ/2 다이폴 ≈73Ω, λ/4 모노폴 ≈36Ω. 짧은 안테나는 ≈80π²(l/λ)²로 급감"],
+              ["방사 효율 (η)", "R<sub>rad</sub> / (R<sub>rad</sub> + R<sub>loss</sub>) — 입력 전력 중 실제로 방사된 비율. OTA로 측정"],
+              ["근거리장 / 원거리장", "안테나 곁에 저장되어 오가는 에너지 영역(r &lt; λ/2π, 2.4GHz ≈2cm) / 평면파로 떠나는 영역(r &gt; 2D²/λ). 성능 지표는 원거리장 기준"],
+              ["등방성 안테나 (isotropic)", "모든 방향으로 균일하게 방사하는 가상의 기준 안테나 — 0dBi"],
+              ["지향성 / 이득 (dBi·dBd)", "최대 방향 세기 ÷ 평균 / 지향성 × 효율. dBi=등방성 대비, dBd=다이폴 대비(dBd = dBi − 2.15)"],
+              ["편파 (Polarization)", "전기장이 진동하는 방향. 송수신 편파가 어긋나면 손실(교차 편파)"],
+              ["상반성 (Reciprocity)", "안테나의 송신 특성과 수신 특성이 같다는 성질 — 잘 보내는 방향이 잘 듣는 방향"],
+              ["이미지 이론 (image)", "그라운드 플레인이 거울처럼 전류의 반사상을 만든다는 해석 — λ/4 모노폴이 λ/2 다이폴처럼 동작하는 이유"],
               ["OTA", "Over-The-Air (무선 방사 측정)"],
               ["DFS", "Dynamic Frequency Selection (5GHz 레이더 회피)"],
               ["AFC", "Automated Frequency Coordination (6GHz)"],
