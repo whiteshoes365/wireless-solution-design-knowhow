@@ -227,7 +227,7 @@
     main.appendChild(buildChapterNav(chapId));
 
     const f = el("div", "footer",
-      `${esc(KB.meta.title)} · v${KB.meta.version} · 최종 업데이트 ${KB.meta.updated}<br>` +
+      `${esc(KB.meta.title)} · ${esc(verLabel())}<br>` +
       `콘텐츠는 <code>assets/data/content.js</code>에서 계층적으로 관리·확장됩니다.`);
     main.appendChild(f);
 
@@ -392,7 +392,7 @@
     const head = el("div", "page-head");
     head.appendChild(el("h2", null, esc(KB.meta.title)));
     head.appendChild(el("div", "crumb", esc(KB.meta.subtitle) +
-      ` · v${KB.meta.version} · ${KB.meta.updated}`));
+      ` · ${esc(verLabel())}`));
     main.appendChild(head);
     TABS.forEach(t => {
       main.appendChild(el("h1", "print-tab", (t.icon ? t.icon + " " : "") + esc(t.label)));
@@ -415,11 +415,19 @@
     }, 300);
   }
 
+  /* ---- version label (build-info.js 가 있으면 빌드 시각·커밋, 없으면 content.js 의 고정값) ---- */
+  function verLabel() {
+    const b = window.KB_BUILD;
+    if (!b) return "v" + KB.meta.version + " · " + KB.meta.updated;
+    return "v" + KB.meta.version + " · 빌드 " + b.built + " · " + b.commit + (b.dirty ? "+" : "");
+  }
+
   /* ---- init ---- */
   function init() {
     $("#brandTitle").textContent = KB.meta.title;
     $("#brandSub").textContent = KB.meta.subtitle;
-    $("#brandVer").textContent = "v" + KB.meta.version + " · " + KB.meta.updated;
+    $("#brandVer").textContent = verLabel();
+    $("#brandVer").title = "빌드 시각(한국시간) · 기준 커밋. 회사 파일과 공개 사이트의 표기가 같으면 같은 버전입니다. '+'는 그 커밋 이후의 미커밋 수정분이 포함된 빌드라는 뜻입니다.";
     $("#topTitle").textContent = KB.meta.title;
     document.title = KB.meta.title;
 

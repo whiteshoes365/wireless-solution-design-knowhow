@@ -8,8 +8,31 @@
  */
 const fs = require("fs");
 const path = require("path");
+const { execFileSync } = require("child_process");
 const root = __dirname;
 const read = (p) => fs.readFileSync(path.join(root, p), "utf8");
+
+// 빌드 표식: 빌드 시각(한국시간) + 기준 커밋. 공개 사이트와 단일본이 같은 파일을 읽으므로
+// 두 곳의 표기가 같으면 같은 버전이다. 자기 자신이 들어갈 커밋 번호는 미리 알 수 없어서
+// "빌드 시점의 HEAD"를 기록한다 → 콘텐츠를 먼저 커밋한 뒤 빌드해야 표기가 정확하다.
+const BUILD_INFO = "assets/data/build-info.js";
+function git(args) {
+  try {
+    return execFileSync("git", args, { cwd: root, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
+  } catch (e) {
+    return null;
+  }
+}
+const commit = git(["rev-parse", "--short", "HEAD"]) || "unknown";
+const dirtyOut = git(["status", "--porcelain", "--", "assets", "index.html", ":(exclude)" + BUILD_INFO]);
+const dirty = dirtyOut === null ? false : dirtyOut.length > 0;
+const built = new Date().toLocaleString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 16);
+fs.writeFileSync(
+  path.join(root, BUILD_INFO),
+  "/* 자동 생성 — build-standalone.js 가 빌드할 때마다 덮어쓴다. 직접 수정하지 말 것 */\n" +
+    "window.KB_BUILD = " + JSON.stringify({ commit, dirty, built }) + ";\n",
+  "utf8"
+);
 
 const css = read("assets/css/styles.css");
 const scripts = [
@@ -17,6 +40,7 @@ const scripts = [
   "assets/data/content-wifi.js",
   "assets/data/content-bluetooth.js",
   "assets/data/content-zigbee.js",
+  BUILD_INFO,
   "assets/js/app.js",
 ].map(read).join("\n");
 
@@ -73,4 +97,8 @@ html = html.replace(
 const out = "wireless-kb-standalone.html";
 fs.writeFileSync(path.join(root, out), html, "utf8");
 const kb = (Buffer.byteLength(html, "utf8") / 1024).toFixed(0);
-console.log("생성 완료: " + out + " (" + kb + " KB)");
+console.log("생성 완료: " + out + " (" + kb + " KB) · 빌드 " + built + " · 기준 커밋 " + commit + (dirty ? "+" : ""));
+if (dirty) {
+  console.warn("⚠ 커밋되지 않은 소스 변경이 있어 표기에 '+'가 붙었습니다 (" + commit + " 이후 수정분 포함).\n" +
+    "  콘텐츠를 먼저 커밋한 뒤 다시 빌드하면 정확한 커밋 번호가 찍힙니다.");
+}
