@@ -34,6 +34,23 @@ node build-standalone.js
 ```
 
 > 온라인이면 웹폰트(Pretendard)까지 적용되고, 오프라인이면 시스템 폰트로 대체됩니다.
+
+### 버전 표기 (빌드 시각 · 기준 커밋)
+
+빌드할 때마다 `assets/data/build-info.js`가 생성되고, 사이드바·하단·인쇄 표지에
+`v0.1 · 빌드 2026-10-02 07:04 · ebb48ce` 처럼 찍힙니다. 공개 사이트와 단일본이 같은 파일을 읽으므로
+**사내로 반입한 단일본의 표기가 공개 사이트 표기와 같으면 최신본**입니다.
+
+단일본은 자기가 들어갈 커밋 번호를 미리 알 수 없어서 "빌드 시점의 HEAD"를 기록합니다. 그래서 갱신 순서는:
+
+```bash
+git add <수정한 소스> && git commit -m "..."   # 1) 콘텐츠 먼저 커밋
+node build-standalone.js                      # 2) 빌드 → 방금 커밋 번호가 찍힘
+git add assets/data/build-info.js wireless-kb-standalone.html && git commit -m "chore: 단일본 재생성" && git push
+```
+
+커밋하지 않은 소스 변경이 있는 상태에서 빌드하면 표기 끝에 `+`가 붙고 경고가 나옵니다
+("그 커밋 이후 수정분 포함"이라는 뜻).
 > 공개 배포본에서는 같은 파일을 아래에서도 받을 수 있습니다:
 > `https://whiteshoes365.github.io/wireless-solution-design-knowhow/wireless-kb-standalone.html`
 
