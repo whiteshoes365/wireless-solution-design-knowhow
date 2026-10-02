@@ -80,7 +80,7 @@ gh repo create wireless-module-kb --public --source=. --remote=origin --push
 index.html              진입점
 assets/
   data/content.js       ← 모든 콘텐츠(지식)가 트리 구조로 집중
-  data/content-wifi.js · content-bluetooth.js · content-zigbee.js · content-nfc.js  ← 규격별 탭
+  data/content-wifi.js · content-bluetooth.js · content-zigbee.js · content-nfc.js · content-halow.js  ← 규격별 탭
   data/build-info.js    ← 빌드 시각·커밋 (빌드 때 자동 생성)
   js/app.js             렌더링 · 검색 · 라우팅 · 인쇄 · 테마
   css/styles.css        스타일 · 반응형 · 인쇄용 CSS

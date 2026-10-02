@@ -377,6 +377,7 @@
                 ]
               },
               { t: "note", kind: "info", title: "왜 6GHz가 '깨끗한가'", html: "6GHz는 최근 Wi-Fi에 개방되어 <b>레거시(11b/g/n) 기기가 없습니다</b>. 넓은 채널(80/160/320MHz)을 간섭 없이 여러 개 쓸 수 있어 고속·저지연에 유리합니다. 단 주파수가 높아 <b>도달거리·투과가 짧고</b>, 지역별 개방 범위가 다릅니다." },
+              { t: "note", kind: "info", title: "1 GHz 아래의 Wi-Fi — HaLow", html: "2.4/5/6 GHz 외에 <b>Sub-1 GHz(지역별 750~930 MHz)</b>를 쓰는 Wi-Fi도 있습니다. 802.11ah, 즉 Wi-Fi HaLow로, 거리·벽 투과·저전력이 강점이고 속도는 낮습니다. 기존 공유기로는 받을 수 없어 전용 AP가 필요합니다. 상세는 <a href='#halow-overview'>Wi-Fi HaLow 탭</a>을 보세요." },
             ]
           },
           {

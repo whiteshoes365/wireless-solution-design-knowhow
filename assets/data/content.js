@@ -784,6 +784,7 @@ window.KB_CONTENT = {
           blocks: [
             { t: "p", html: "Wi-Fi HaLow(802.11ah)는 900MHz대를 써서 <b>장거리·저전력·다수 노드</b>에 강합니다. 가전·IoT 확장에 주목받습니다." },
             { t: "note", kind: "warn", title: "Sub-GHz 주의", html: "주파수가 낮아 <b>파장이 길고 안테나가 큽니다</b>(λ≈33cm@900M). 소형 제품에선 안테나 효율 확보가 어렵고, <b>지역별 허용 주파수(미국 902–928, 유럽 863–868 등)가 달라</b> 안테나·매칭을 지역별로 분리해야 할 수 있습니다." },
+            { t: "note", kind: "info", title: "HaLow 탭 상세", html: "PHY·MCS 장표(1~16 MHz, MCS10), 지역별 대역·출력, 2.4 GHz 대비 링크 버짓, TWT·RAW MAC, HW 설계 포인트는 <b>Wi-Fi HaLow 탭</b>의 <a href='#halow-overview'>H0 개요</a>와 <a href='#halow-spec-sheet'>H1 상세 장표</a>에 있습니다." },
           ]
         }
       ]
@@ -2987,6 +2988,13 @@ window.KB_CONTENT = {
               ["Hosted / Hostless", "모듈 사용 구조 — 세트 MCU가 따로 있고 모듈은 통신만(AT·SDIO·SPI) / 모듈 코어에 앱까지 탑재. 이원화 난이도를 가르는 결정"],
               ["Barkhausen 조건", "발진의 2조건: 루프 이득 ≥ 1 & 루프 위상 360°. 이를 만족하는 주파수에서 증폭기는 발진기가 됨"],
               ["VNA", "Vector Network Analyzer"],
+              ["Wi-Fi HaLow (802.11ah)", "Sub-1 GHz Wi-Fi — 11ac PHY를 시계 ÷10으로 돌려 1~16 MHz 채널 사용. 장거리·벽 투과·수천 대·저전력, IP 네이티브"],
+              ["S1G", "Sub-1 GHz — 802.11ah의 PHY 명칭(S1G PPDU 등). 계측기 옵션 이름에도 쓰임"],
+              ["MCS10 (HaLow)", "1 MHz 전용 — MCS0(BPSK 1/2)을 2번 반복해 150 kbps로 약 3 dB 더 버티는 최대 거리 모드"],
+              ["TWT (Target Wake Time)", "AP와 단말이 다음 깨어날 시각을 협상해 그 사이 휴면 — 802.11ah에서 도입, Wi-Fi 6로 확산"],
+              ["RAW (Restricted Access Window)", "HaLow AP가 비콘 간격을 시간 창으로 나눠 단말 그룹별로 접근을 허용 — 대규모 단말 충돌 감소"],
+              ["NDP (Null Data Packet)", "데이터 없이 PHY 헤더만으로 보내는 짧은 제어 프레임 — HaLow에서 ACK 등에 사용해 공중 시간 절감"],
+              ["숨은 노드 (hidden node)", "서로의 신호를 듣지 못하는 두 단말이 동시에 보내 AP에서 충돌하는 문제 — 범위가 넓을수록 심해짐"],
               ["NFC-A / B / F / V", "NFC Forum의 네 가지 13.56 MHz 기술 — ISO 14443 A / 14443 B / FeliCa(JIS X 6319-4) / ISO 15693 기반"],
               ["ASK (100% · 10%)", "반송파 진폭을 바꿔 보내는 변조. NFC-A 리더는 반송파를 짧게 끄고(100%), NFC-B는 약 10%만 낮춤"],
               ["부하 변조 (Load modulation)", "태그가 자기 부하를 켰다 꺼서 리더 코일 전류를 흔드는 응답 방식 — 태그는 스스로 전파를 내지 않음"],
