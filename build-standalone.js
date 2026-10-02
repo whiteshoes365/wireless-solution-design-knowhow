@@ -40,6 +40,7 @@ const scripts = [
   "assets/data/content-wifi.js",
   "assets/data/content-bluetooth.js",
   "assets/data/content-zigbee.js",
+  "assets/data/content-nfc.js",
   BUILD_INFO,
   "assets/js/app.js",
 ].map(read).join("\n");
