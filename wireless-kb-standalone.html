@@ -2928,6 +2928,8 @@ window.KB_CONTENT = {
               ["스펙트럼 분석기", "출력·스퓨리어스·하모닉·점유대역폭"],
               ["신호분석기(VSA)", "EVM, 변조품질, 마스크"],
               ["챔버(OTA)", "방사효율, TRP(송신)/TIS(수신), 방사패턴"],
+              ["감쇠기 + 차폐 박스 (RvR)", "프로그래머블 감쇠기로 손실을 더해 거리별 처리량·RSSI·MCS 측정 — 방법과 해석은 Wi-Fi 탭 <a href='#wifi-rvr'>감쇠 시험(RvR)</a>"],
+              ["트래픽 생성기 (iperf 등)", "TCP/UDP 처리량 측정 — 윈도우·병렬 수·측정 시간이 결과를 바꿈 (→ <a href='#wifi-tput-factors'>처리량 결정 요인</a>)"],
               ["전류 측정", "Tx/Rx/Sleep 소비전류, 피크 전류"],
             ]},
             { t: "note", kind: "warn", title: "지그·교정이 결과를 바꾼다", html: "RF 측정은 케이블 손실·커넥터·교정(calibration)에 매우 민감합니다. 교정을 안 하거나 지그가 나쁘면 '문제 없는데 문제 있게' 나옵니다. 측정 전 교정·de-embedding 필수." },
@@ -3366,6 +3368,14 @@ window.KB_CONTENT = {
               ["Hosted / Hostless", "모듈 사용 구조 — 세트 MCU가 따로 있고 모듈은 통신만(AT·SDIO·SPI) / 모듈 코어에 앱까지 탑재. 이원화 난이도를 가르는 결정"],
               ["Barkhausen 조건", "발진의 2조건: 루프 이득 ≥ 1 & 루프 위상 360°. 이를 만족하는 주파수에서 증폭기는 발진기가 됨"],
               ["VNA", "Vector Network Analyzer"],
+              ["RSSI", "Received Signal Strength Indicator — 칩이 수신 패킷에서 추정한 수신 전력(dBm). 신호+잡음+간섭 전체 세기이며 처리량은 SNR이 결정"],
+              ["RCPI", "Received Channel Power Indicator — 802.11k가 정의한 표준화된 수신 전력 지표(±5 dB 정확도 요구)"],
+              ["SNR", "Signal-to-Noise Ratio — 신호 ÷ (잡음 + 간섭). 쓸 수 있는 MCS를 결정하는 실질 지표"],
+              ["RvR (Rate vs Range)", "감쇠기로 손실을 단계적으로 더하며 처리량을 재는 시험 — 거리별 성능 곡선"],
+              ["프로그래머블 감쇠기", "제어 PC로 감쇠량을 단계 조절하는 RF 감쇠기 — 삽입 손실·평탄도를 대역별로 교정해 사용"],
+              ["대역폭-지연 곱 (BDP)", "목표 속도 × RTT — 그 속도를 내는 데 필요한 TCP 윈도우 크기. TCP 처리량 ≤ 윈도우 ÷ RTT"],
+              ["A-MPDU / BA 윈도우", "여러 MAC 프레임을 묶어 보내는 집성 / 한 번에 블록 ACK로 확인받을 수 있는 프레임 수(HT·VHT 64, HE 256)"],
+              ["iperf", "TCP·UDP 처리량 측정 도구 — 윈도우(-w)·병렬 스트림(-P)·측정 시간 설정에 따라 결과가 크게 달라짐"],
               ["Wi-Fi HaLow (802.11ah)", "Sub-1 GHz Wi-Fi — 11ac PHY를 시계 ÷10으로 돌려 1~16 MHz 채널 사용. 장거리·벽 투과·수천 대·저전력, IP 네이티브"],
               ["S1G", "Sub-1 GHz — 802.11ah의 PHY 명칭(S1G PPDU 등). 계측기 옵션 이름에도 쓰임"],
               ["MCS10 (HaLow)", "1 MHz 전용 — MCS0(BPSK 1/2)을 2번 반복해 150 kbps로 약 3 dB 더 버티는 최대 거리 모드"],
@@ -3671,7 +3681,7 @@ window.KB_CONTENT = {
               },
               { t: "note", kind: "info", title: "계산 예시 3개", html: "①<b>11a 54Mbps</b> = 1 × 48 × 6 × 3/4 ÷ (3.2 + 0.8)µs = <b>54 Mbps</b><br>②<b>가전 1×1 Wi-Fi 6, 20MHz, MCS7</b> = 1 × 234 × 6 × 5/6 ÷ (12.8 + 0.8)µs = <b>86.0 Mbps</b><br>③<b>스마트폰 2×2 Wi-Fi 6, 80MHz, MCS11</b> = 2 × 980 × 10 × 5/6 ÷ 13.6µs = <b>1,201 Mbps</b> — 흔히 보는 'AX1800 공유기의 5GHz 1,201Mbps'가 이 값입니다." },
               { t: "note", kind: "why", title: "가드 인터벌(GI)이란", html: "벽에 반사된 신호는 직진 신호보다 늦게 도착해 <b>다음 심볼과 겹칩니다(심볼 간 간섭, ISI)</b>. GI는 심볼 사이에 두는 빈 시간 — 반사파가 다 도착할 때까지 기다리는 차간 거리입니다. 짧으면 빠르지만(11n/ac의 0.4µs Short GI는 약 11% 속도 증가), 반사 지연이 긴 넓은 공간·실외에선 깨집니다. Wi-Fi 6가 3.2µs GI를 둔 것은 실외·대형 공간을 위해서입니다." },
-              { t: "note", kind: "warn", title: "흔한 오해 — \"PHY 속도 = 실제 전송 속도?\"", html: "식이 주는 값은 <b>공중에서 비트가 흐르는 속도(PHY rate)</b>입니다. 실제 TCP 처리량은 프리앰블·ACK·경합 대기·재전송 같은 MAC 오버헤드 때문에 대략 PHY의 절반에서 2/3 수준이고, 같은 채널을 다른 기기와 나눠 쓰면 더 줄어듭니다. 86Mbps 링크라면 실측은 수십 Mbps가 정상입니다." },
+              { t: "note", kind: "warn", title: "흔한 오해 — \"PHY 속도 = 실제 전송 속도?\"", html: "식이 주는 값은 <b>공중에서 비트가 흐르는 속도(PHY rate)</b>입니다. 실제 TCP 처리량은 프리앰블·ACK·경합 대기·재전송 같은 MAC 오버헤드 때문에 대략 PHY의 절반에서 2/3 수준이고, 같은 채널을 다른 기기와 나눠 쓰면 더 줄어듭니다. 86Mbps 링크라면 실측은 수십 Mbps가 정상입니다. 병목 찾기와 RvR 시험 해석은 <a href='#wifi-tput-factors'>W6 처리량 결정 요인</a>을 보세요." },
               { t: "note", kind: "tip", title: "속도를 2배로 만드는 세 가지 길 — HW 대가", html: "<b>채널폭 2배</b>: 매칭·필터가 더 넓은 대역에서 평탄해야 하고 감도는 3dB 나빠짐(→ <a href='#rf-smith'>Q와 대역폭</a>). <b>스트림 2배</b>: RF 체인·안테나 2배, 안테나 격리·체인별 캘리브레이션 필요. <b>변조 한 단계↑</b>: EVM이 엄격해져 위상잡음·PA 선형성·전원 노이즈 요구가 오르고 출력은 back-off(→ <a href='#ckt-pdn'>PDN</a>, <a href='#ckt-clock'>클럭</a>). 가전 모듈은 보통 어느 것도 끝까지 밀지 않고, 원가와 안정성의 균형점에서 멈춥니다." },
             ]
           },
@@ -4043,6 +4053,197 @@ window.KB_CONTENT = {
               },
               { t: "note", kind: "tip", title: "가전 Wi-Fi 모듈 설계 출발점", html: "대부분의 가전은 <b>2.4GHz(또는 2.4/5 듀얼) · 1 스트림 · 20/40MHz · Wi-Fi 4/5/6</b>면 충분합니다. 목표는 최고속이 아니라 <b>저원가·안정 연결·넓은 지역 인증</b>입니다. 세대는 칩 공급성·SW 지원·전류로 고르고, 고차 QAM 풀성능은 요구하지 않는 경우가 많습니다." },
               { t: "note", kind: "info", title: "HW 설계 과정으로", html: "구체 설계는 <b>HW 설계 과정</b> 탭을 보세요: 전원(<a href='#ckt-pdn'>PDN</a>), 클럭/위상잡음(<a href='#ckt-clock'>클럭</a>), 출력목표(<a href='#proc-targets'>Target</a>), 기판/매칭(<a href='#pcb-stackup'>스택업</a>·<a href='#rf-smith'>스미스</a>), 안테나(<a href='#ant-types'>안테나</a>), 인증(<a href='#ver-cert'>인증</a>)." },
+            ]
+          }
+        ]
+      },
+
+      /* ───────────── W6. 성능 시험 딥다이브 ───────────── */
+      {
+        id: "wifi-test",
+        icon: "🧪",
+        title: "W6. 성능 시험 딥다이브 — RSSI·감쇠(RvR)·처리량",
+        sections: [
+          {
+            id: "wifi-rssi",
+            title: "RSSI란 무엇인가 — '칩이 느끼는 수신 세기'와 그 한계",
+            blocks: [
+              { t: "p", html: "<b>RSSI(Received Signal Strength Indicator)는 칩이 수신한 패킷에서 추정한 수신 전력(dBm)</b>입니다. '칩이 느끼는 Rx 값'이라는 이해가 맞습니다. 다만 두 가지를 함께 알아야 합니다. ①RSSI는 원하는 신호만이 아니라 <b>신호 + 잡음 + 간섭을 합친 전체 세기</b>이고, ②처리량을 정하는 것은 RSSI가 아니라 <b>SNR(신호 대 잡음비)</b>입니다. RSSI는 'SNR을 짐작하는 출발점'일 뿐입니다." },
+              { t: "note", kind: "info", title: "비유로 먼저", html: "RSSI는 <b>소음계로 잰 방 안의 소리 크기</b>입니다. 음악이 크게 들려도(RSSI 높음) 옆에서 공사 소음(간섭)이 함께 크다면 가사는 안 들립니다. 가사가 들리는지를 정하는 것은 소리 크기가 아니라 <b>음악이 소음보다 얼마나 큰가(SNR)</b>입니다. 그리고 소음계는 아주 작은 소리에선 바늘이 바닥(잡음)에 붙고, 너무 큰 소리에선 바늘이 끝에 붙습니다(포화)." },
+              { t: "fig",
+                caption: "실제 입력 전력과 칩이 보고하는 RSSI의 관계(개념도). 중간 구간에서는 1:1로 따라가지만 보정 오차로 수 dB 어긋날 수 있다. 아주 약한 신호에서는 RSSI가 잡음 바닥에 붙어 더 내려가지 않는데(SNR은 0으로 감), 아주 강한 신호에서는 수신기가 포화되어 RSSI가 멈추고 EVM·처리량이 오히려 나빠진다.",
+                svg: '<svg viewBox="0 0 620 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="입력 전력 대비 보고 RSSI의 선형 구간 잡음 바닥과 포화">'
+                  + '<line x1="70" y1="200" x2="590" y2="200" stroke="#7a8694" stroke-width="1.5"/><line x1="70" y1="200" x2="70" y2="24" stroke="#7a8694" stroke-width="1.5"/>'
+                  + '<text x="586" y="220" text-anchor="end" class="fig-sub">실제 입력 전력 (dBm) →</text><text x="64" y="34" text-anchor="end" class="fig-sub">RSSI</text>'
+                  + '<path d="M90,190 L560,40" stroke="#7a8694" stroke-width="1.5" stroke-dasharray="5 5" fill="none"/>'
+                  + '<text x="508" y="70" text-anchor="end" class="fig-sub" fill="#7a8694">이상적 1:1</text>'
+                  + '<path d="M150,140 L470,68" stroke="#4aa3ff" stroke-width="14" stroke-opacity="0.12" fill="none"/>'
+                  + '<path class="kb-flow-slow" d="M90,176 L140,174 Q160,172 180,163 L470,70 Q500,62 530,60 L570,60" stroke="#4aa3ff" stroke-width="3" fill="none"/>'
+                  + '<text x="110" y="166" class="fig-sub" fill="#e5534b">잡음 바닥</text>'
+                  + '<text x="300" y="138" class="fig-sub" fill="#4aa3ff">선형 구간 (± 보정 오차)</text>'
+                  + '<text x="560" y="50" text-anchor="end" class="fig-sub" fill="#e3b341">포화 (약 −20 dBm 이상, 칩별)</text>'
+                  + '<rect class="kb-pulse" x="80" y="150" width="90" height="40" rx="4" fill="#e5534b" fill-opacity="0.08" stroke="#e5534b" stroke-opacity="0.4" stroke-dasharray="3 3"/>'
+                  + '<rect class="kb-pulse kb-d3" x="490" y="40" width="90" height="40" rx="4" fill="#e3b341" fill-opacity="0.08" stroke="#e3b341" stroke-opacity="0.4" stroke-dasharray="3 3"/>'
+                  + '<text x="330" y="234" text-anchor="middle" class="fig-sub">처리량은 RSSI가 아니라 SNR = 신호 ÷ (잡음 + 간섭)이 결정</text>'
+                  + '</svg>'
+              },
+              { t: "kv", rows: [
+                ["어디서 재나", "칩이 패킷 앞부분(프리앰블)에서 AGC 이득과 디지털 전력 측정으로 역산한 값을, 보정 테이블로 <b>기준면(칩 핀 또는 모듈 안테나 포트)</b>의 dBm으로 환산해 보고"],
+                ["무엇을 포함하나", "채널 안의 <b>신호 + 잡음 + 간섭</b> 전체. 간섭이 크면 RSSI는 좋아 보이는데 SNR은 나쁨"],
+                ["정확도", "보정 상태에 따라 수 dB 오차가 흔함. 802.11k의 RCPI(수신 채널 전력 지표)도 ±5 dB 정확도를 요구하는 수준 — '절대값'보다 '같은 기기 안의 상대 변화'에 강함"],
+                ["체인별 값", "MIMO 칩은 수신 체인(안테나)마다 RSSI가 다름 — <b>체인 간 차이</b>는 안테나 불균형·케이블 불량 진단에 유용"],
+                ["보고 방식", "드라이버가 비콘·데이터 프레임의 값을 평균해 보여 줌. 측정 시각·평균 방식이 도구마다 다름"],
+                ["함께 볼 지표", "잡음 바닥(noise floor), SNR(대략 RSSI − 잡음 바닥, 신호가 잡음보다 충분히 클 때), 수신 EVM, PER·재전송률, 협상된 MCS·NSS·BW"],
+              ]},
+              { t: "note", kind: "why", title: "왜 RSSI 하나로 처리량을 예측할 수 없나", html: "같은 −65 dBm이라도 잡음+간섭이 −95 dBm인 챔버와 −75 dBm인 혼잡한 사무실은 SNR이 30 dB와 10 dB로, 쓸 수 있는 MCS가 여러 단계 차이 납니다(→ <a href='#wifi-mcs-table'>MCS별 요구 감도</a>). 또 RSSI는 채널 전체의 평균 세기라, 일부 부반송파만 깎이는 주파수 선택성 페이딩이나 송신 쪽 EVM 불량은 반영하지 못합니다. 그래서 시험에서는 <b>RSSI와 함께 SNR·MCS·재전송률</b>을 반드시 같이 기록합니다. 감도와 잡음 바닥의 원리는 1장 <a href='#rf-rx'>수신 체인·감도·NF</a>에 있습니다." },
+              { t: "note", kind: "warn", title: "흔한 오해 — \"RSSI가 높을수록 무조건 좋다? 칩끼리 RSSI를 바로 비교할 수 있다?\"", html: "①챔버에서 감쇠를 0 dB 근처로 두면 수신기가 <b>포화</b>되어 RSSI는 멈추고 EVM이 무너져 처리량이 오히려 떨어질 수 있습니다. RvR 곡선의 맨 왼쪽이 오목하게 꺼지는 이유입니다. ②칩마다 기준면(칩 핀인지, 외장 FEM 앞인지)과 보정 방식이 달라, <b>A사 −60 dBm과 B사 −60 dBm은 같은 세기가 아닐 수 있습니다</b>. 칩 간 비교는 같은 지그에서 기준 계측기(파워미터·스펙트럼 분석기)로 교차 확인한 경로 손실을 기준으로 해야 합니다." },
+              { t: "note", kind: "tip", title: "현장 노하우 — RSSI를 시험에 쓰는 법", html: "①감쇠기 눈금 대신 <b>DUT가 보고한 RSSI(또는 계산한 총 경로 손실)를 x축</b>으로 그리면 2.4 GHz와 5 GHz를 같은 잣대로 비교할 수 있습니다. ②RSSI 보정 오차를 줄이려면 시험 초반에 신호 발생기로 알려진 레벨을 넣어 <b>RSSI 오프셋을 한 번 측정</b>해 두세요. ③MIMO는 체인별 RSSI 차이가 3~4 dB 이상 계속 나면 안테나·케이블·매칭을 의심합니다." },
+            ]
+          },
+          {
+            id: "wifi-tput-factors",
+            title: "처리량을 정하는 것들 — 안테나 수·MCS·대역폭·윈도우 크기",
+            blocks: [
+              { t: "p", html: "실측 처리량은 'PHY 속도'에서 출발해 여러 단계에서 깎이고, 마지막에는 <b>가장 좁은 병목</b>에서 결정됩니다. 공중 링크가 아무리 빨라도 TCP 윈도우나 호스트 인터페이스가 좁으면 그 값에서 막힙니다." },
+              { t: "fig",
+                caption: "PHY 속도에서 실측 TCP 처리량까지의 깔때기(예: 2×2 · 80 MHz · MCS11). PHY 1,201 Mbps는 MAC 효율(집성 시 대략 60~70%)과 재전송으로 줄고, 최종값은 TCP 윈도우 ÷ RTT, 호스트 인터페이스, CPU 중 가장 작은 값에서 막힌다. 윈도우 64 KB · RTT 5 ms라면 링크가 아무리 좋아도 약 105 Mbps가 상한이다.",
+                svg: '<svg viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="PHY 속도에서 실측 처리량까지의 병목 깔때기">'
+                  + (function(){
+                      var o='';
+                      var s=[['PHY 속도 (MCS·NSS·BW·GI)','1,201 Mbps',520,'#4aa3ff'],['× MAC 효율 (프리앰블·ACK·경합)','약 780 Mbps',340,'#2ea043'],['× (1 − 재전송 비율)','약 700 Mbps',305,'#e3b341'],['min(윈도우÷RTT, 호스트 IF, CPU)','예: 64 KB ÷ 5 ms ≈ 105 Mbps',46,'#e5534b']];
+                      s.forEach(function(r,i){
+                        var y=24+i*48;
+                        o+='<rect class="kb-grow kb-d'+(i*2+1)+'" x="40" y="'+y+'" width="'+r[2]+'" height="30" rx="5" fill="'+r[3]+'" fill-opacity="0.25" stroke="'+r[3]+'" stroke-opacity="0.8"/>';
+                        o+='<text x="'+(i===3?100:50)+'" y="'+(y+20)+'" class="fig-sub" fill="'+r[3]+'">'+r[0]+'</text>';
+                        o+='<text x="590" y="'+(y+20)+'" text-anchor="end" class="fig-label" style="fill:'+r[3]+'">'+r[1]+'</text>';
+                      });
+                      o+='<text x="310" y="222" text-anchor="middle" class="fig-sub">측정값이 마지막 줄에 붙어 있으면 무선이 아니라 병목을 재고 있는 것</text>';
+                      return o;
+                    })()
+                  + '</svg>'
+              },
+              { t: "table",
+                head: ["요인", "처리량에 주는 영향", "대가 · 조건", "시험에서 볼 것"],
+                rows: [
+                  ["<b>안테나 수 · 공간 스트림 (NSS)</b>", "PHY 속도 × NSS (2×2:2면 2배)", "스트림마다 더 높은 SNR이 필요하고, 서로 다른 반사 경로가 있어야 분리됨 — 반사가 적은 쉴드 박스에서는 2스트림이 일찍 1스트림으로 떨어짐", "협상 NSS 로그, 체인별 RSSI"],
+                  ["<b>수신 다이버시티 (1SS + 2Rx)</b>", "속도는 같고 감도·안정성 향상 (배열 이득 약 3 dB + 페이딩 완화)", "안테나 2개 · 격리 필요", "같은 감쇠에서 1Rx 대비 MCS 유지 거리"],
+                  ["<b>MCS</b>", "변조·부호율로 속도 결정 (→ <a href='#wifi-mcs-table'>MCS 표</a>)", "한 단계 오를 때마다 요구 SNR 1~5 dB 증가", "MCS 로그 — 곡선의 계단 위치"],
+                  ["<b>대역폭 (BW)</b>", "2배마다 PHY 약 2.1배 (데이터 부반송파 52 → 108 → 234)", "잡음 +3 dB/2배, MHz당 전력 −3 dB → <b>먼 거리에선 좁은 채널이 더 빠를 수 있음</b>", "협상 BW, 동적 BW 강등(80→40→20)"],
+                  ["<b>가드 인터벌 (GI)</b>", "짧은 GI 약 +11% (11n/ac)", "반사 지연이 긴 환경에서 오류 증가", "GI 설정"],
+                  ["<b>TCP 윈도우 크기</b>", "처리량 ≤ 윈도우 ÷ RTT", "감쇠가 커져 재전송이 늘면 RTT가 늘어 <b>윈도우 한계가 더 낮아짐</b>", "iperf 윈도우(-w)·병렬 스트림(-P), RTT"],
+                  ["<b>MAC 집성 · BA 윈도우</b>", "A-MPDU로 프레임을 묶어 오버헤드 감소 — 블록 ACK 윈도우 64 (HT/VHT) / 256 (HE) MPDU", "집성이 꺼져 있거나 작으면 고속 링크 효율 급락", "A-MPDU 크기·BA 윈도우 설정"],
+                  ["<b>호스트 인터페이스 · CPU</b>", "모듈↔호스트 경로(SPI·SDIO·USB·PCIe)와 CPU가 상한", "가전 모듈의 <b>가장 흔한 천장</b> — SPI는 수십 Mbps급", "UDP로도 같은 천장인지, CPU 사용률"],
+                ]
+              },
+              { t: "h", text: "TCP 윈도우가 만드는 천장 — 처리량 ≤ 윈도우 ÷ RTT" },
+              { t: "table",
+                head: ["TCP 윈도우", "RTT", "이론 상한", "의미"],
+                rows: [
+                  ["64 KB", "2 ms", "약 262 Mbps", "깨끗한 근거리 링크"],
+                  ["64 KB", "5 ms", "약 105 Mbps", "2×2 · 80 MHz 링크를 다 못 채움"],
+                  ["64 KB", "20 ms", "약 26 Mbps", "재전송이 늘어 RTT가 커진 원거리 — 무선 품질과 별개로 급락"],
+                  ["256 KB", "5 ms", "약 419 Mbps", ""],
+                  ["1 MB", "5 ms", "약 1.68 Gbps", "고속 링크 시험에 필요한 수준"],
+                ]
+              },
+              { t: "note", kind: "why", title: "두 가지 '윈도우'를 구분하자", html: "①<b>TCP 윈도우</b>: 송신자가 ACK를 받기 전 보낼 수 있는 데이터 양(전송층). 처리량 상한 = 윈도우 ÷ RTT, 필요한 윈도우 = 목표 속도 × RTT(대역폭-지연 곱). 예: 600 Mbps × 5 ms ≈ 366 KB. ②<b>블록 ACK(BA) 윈도우</b>: Wi-Fi MAC이 한 번에 묶어 확인받을 수 있는 프레임 수. 앞의 것은 iperf·OS 설정이고, 뒤의 것은 칩·드라이버 설정입니다. 둘 중 하나라도 작으면 빠른 링크를 채우지 못합니다." },
+              { t: "note", kind: "tip", title: "현장 노하우 — 병목을 먼저 찾는 순서", html: "①<b>UDP로 측정</b>해 TCP 윈도우 영향을 뺀다 ②UDP도 같은 값에서 막히면 호스트 인터페이스·CPU·iperf 실행 기기 성능을 의심 ③TCP만 낮으면 윈도우(-w)를 키우거나 병렬 스트림(-P)으로 다시 측정 ④그다음에야 무선 쪽(MCS·NSS·BW·재전송)을 본다. 이 순서를 지키면 '안테나 문제인 줄 알았는데 iperf 설정이었다'는 시행착오를 줄일 수 있습니다." },
+            ]
+          },
+          {
+            id: "wifi-rvr",
+            title: "감쇠 시험(RvR) — 왜 5 GHz가 감쇠에 더 민감해 보이나",
+            blocks: [
+              { t: "p", html: "RvR(Rate vs Range)은 DUT와 AP 사이에 <b>프로그래머블 감쇠기</b>로 손실을 단계적으로 더하며 처리량을 재는 시험입니다. 실제 거리를 늘리는 대신 dB를 더해 '멀어지는 상황'을 재현합니다. 결론부터 말하면, <b>감쇠기는 두 대역에 같은 dB를 더하지만 5 GHz는 출발선의 여유가 더 작고, 최고 속도를 내는 데 더 높은 SNR이 필요해서</b> 같은 감쇠에서 먼저 떨어집니다." },
+              { t: "fig",
+                caption: "전형적인 RvR 시험 구성. AP와 DUT를 각각 차폐 박스에 넣고, 그 사이를 RF 케이블과 프로그래머블 감쇠기로 잇는다. DUT 쪽 박스 안은 커플링 안테나로 방사 결합한다. 총 경로 손실 = 케이블 + 감쇠기 삽입 손실 + 감쇠 설정값 + 박스 내부 결합 손실이며, 앞의 세 가지와 결합 손실은 주파수가 높을수록 크다.",
+                svg: '<svg viewBox="0 0 620 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="RvR 시험 구성 차폐 박스와 프로그래머블 감쇠기">'
+                  + '<defs><marker id="rvA" markerWidth="8" markerHeight="8" refX="5.5" refY="3" orient="auto"><path d="M0,0 L5.5,3 L0,6 Z" fill="#7a8694"/></marker></defs>'
+                  + '<rect x="20" y="50" width="130" height="100" rx="8" fill="#9aa7b4" fill-opacity="0.08" stroke="#9aa7b4" stroke-dasharray="5 4"/>'
+                  + '<text x="85" y="42" text-anchor="middle" class="fig-sub">차폐 박스 1</text>'
+                  + '<rect x="45" y="80" width="80" height="40" rx="6" fill="#4aa3ff" fill-opacity="0.18" stroke="#4aa3ff"/><text x="85" y="105" text-anchor="middle" class="fig-label" style="fill:#4aa3ff">AP</text>'
+                  + '<line class="kb-flow" x1="150" y1="100" x2="230" y2="100" stroke="#7a8694" stroke-width="2.5"/>'
+                  + '<text x="190" y="90" text-anchor="middle" class="fig-sub">케이블</text>'
+                  + '<rect x="232" y="70" width="156" height="60" rx="8" fill="#e3b341" fill-opacity="0.18" stroke="#e3b341"/>'
+                  + '<text x="310" y="96" text-anchor="middle" class="fig-label" style="fill:#e3b341">감쇠기</text><text x="310" y="116" text-anchor="middle" class="fig-sub">0 → 90 dB, 1~2 dB 단계</text>'
+                  + '<line class="kb-flow" x1="388" y1="100" x2="468" y2="100" stroke="#7a8694" stroke-width="2.5"/>'
+                  + '<text x="428" y="90" text-anchor="middle" class="fig-sub">케이블</text>'
+                  + '<rect x="470" y="50" width="130" height="100" rx="8" fill="#9aa7b4" fill-opacity="0.08" stroke="#9aa7b4" stroke-dasharray="5 4"/>'
+                  + '<text x="535" y="42" text-anchor="middle" class="fig-sub">차폐 박스 2</text>'
+                  + '<line x1="485" y1="100" x2="485" y2="78" stroke="#2ea043" stroke-width="2.5"/><text x="490" y="74" class="fig-sub" fill="#2ea043">결합</text>'
+                  + '<path class="kb-pulse" d="M495,92 Q505,100 495,108" stroke="#2ea043" fill="none" stroke-width="2"/><path class="kb-pulse kb-d2" d="M503,86 Q517,100 503,114" stroke="#2ea043" fill="none" stroke-width="2"/>'
+                  + '<rect x="525" y="80" width="62" height="40" rx="6" fill="#a371f7" fill-opacity="0.18" stroke="#a371f7"/><text x="556" y="105" text-anchor="middle" class="fig-label" style="fill:#a371f7">DUT</text>'
+                  + '<rect x="232" y="164" width="156" height="34" rx="6" fill="#7a8694" fill-opacity="0.1" stroke="#7a8694"/>'
+                  + '<text x="310" y="186" text-anchor="middle" class="fig-sub">제어 PC — 감쇠 설정 · iperf · 로그</text>'
+                  + '<line x1="310" y1="164" x2="310" y2="132" stroke="#7a8694" stroke-dasharray="3 3" marker-end="url(#rvA)"/>'
+                  + '<text x="310" y="214" text-anchor="middle" class="fig-sub">감쇠기 dB는 두 대역에 같지만, 케이블·삽입 손실·박스 내부 결합은 5 GHz에서 더 크다</text>'
+                  + '</svg>'
+              },
+              { t: "table",
+                head: ["같은 감쇠값에서 5 GHz가 불리한 이유", "전형적 크기", "확인 방법"],
+                rows: [
+                  ["박스 내부 공간 결합 손실 (커플링 안테나 ↔ DUT)", "자유공간 기준 +6.5 ~ +7.5 dB (5.2~5.8 GHz vs 2.44 GHz, 같은 거리)", "박스 구간만 따로 결합 손실 측정"],
+                  ["케이블 · 커넥터 · 감쇠기 삽입 손실", "주파수가 높을수록 커짐 — 수 dB (구성마다 다름)", "VNA 또는 신호 발생기+파워미터로 경로 전체를 대역별 교정"],
+                  ["채널폭 차이 (흔히 5 GHz 80 MHz vs 2.4 GHz 20 MHz)", "잡음 +6 dB (40 MHz면 +3 dB)", "두 대역을 <b>같은 20 MHz</b>로 맞춰 재측정"],
+                  ["송신 출력", "5 GHz PA 출력과 고MCS back-off로 대개 수 dB 낮음", "칩 타겟파워 테이블 비교 (→ <a href='#ver-cal'>타겟파워</a>)"],
+                  ["수신 잡음지수(NF)", "5 GHz 프론트엔드 손실·LNA NF가 대개 더 큼", "데이터시트 감도를 같은 MCS·BW로 비교"],
+                  ["안테나 효율", "5 GHz가 소형 안테나·근접 금속 영향에 더 민감", "OTA 효율·TIS (→ <a href='#ant-ota'>OTA</a>)"],
+                  ["최고 속도에 필요한 SNR", "5 GHz에서 쓰는 256/1024-QAM·2 스트림은 요구 SNR이 높음", "같은 MCS로 고정해 비교"],
+                  ["TCP 윈도우 · RTT", "속도가 높을수록 윈도우 한계와 재전송에 의한 RTT 증가 영향이 큼", "UDP 병행 측정"],
+                ]
+              },
+              { t: "fig",
+                caption: "전형적인 RvR 곡선(개념도). 5 GHz(80 MHz)는 최고 처리량이 훨씬 높지만 출발 여유가 작고 고차 MCS·2스트림에 필요한 SNR이 높아 계단이 더 일찍, 더 크게 내려온다. 일정 감쇠 이후에는 2.4 GHz(20 MHz)가 더 빠른 교차점이 생긴다. 맨 왼쪽의 오목한 구간은 수신기 포화다.",
+                svg: '<svg viewBox="0 0 620 240" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="2.4GHz와 5GHz의 감쇠 대비 처리량 RvR 곡선">'
+                  + '<line x1="70" y1="200" x2="590" y2="200" stroke="#7a8694" stroke-width="1.5"/><line x1="70" y1="200" x2="70" y2="20" stroke="#7a8694" stroke-width="1.5"/>'
+                  + '<text x="586" y="220" text-anchor="end" class="fig-sub">감쇠 (dB) → 멀어짐</text><text x="64" y="30" text-anchor="end" class="fig-sub">처리량</text>'
+                  + '<path class="kb-flow-slow" d="M80,48 L95,40 H170 V62 H215 V96 H240 V120 H275 V150 H300 V172 H335 V188 H360 V200" stroke="#4aa3ff" stroke-width="3" fill="none"/>'
+                  + '<text x="125" y="34" class="fig-sub" fill="#4aa3ff">5 GHz · 80 MHz</text>'
+                  + '<text x="222" y="90" class="fig-sub" fill="#4aa3ff">2SS → 1SS</text>'
+                  + '<path class="kb-flow-slow" d="M80,152 H310 V160 H360 V168 H400 V178 H440 V188 H480 V196 H520 V200" stroke="#2ea043" stroke-width="3" fill="none"/>'
+                  + '<text x="150" y="146" class="fig-sub" fill="#2ea043">2.4 GHz · 20 MHz</text>'
+                  + '<circle class="kb-pulse" cx="304" cy="160" r="8" fill="none" stroke="#e5534b" stroke-width="2"/>'
+                  + '<text x="318" y="140" class="fig-sub" fill="#e5534b">교차점 — 이후엔 2.4 GHz가 더 빠름</text>'
+                  + '<text x="86" y="62" class="fig-sub" fill="#e3b341">포화</text>'
+                  + '<text x="330" y="234" text-anchor="middle" class="fig-sub">계단 하나 = MCS 한 단계 · 큰 낙차 = 스트림·채널폭 강등</text>'
+                  + '</svg>'
+              },
+              { t: "note", kind: "why", title: "'더 민감해 보이는' 현상의 정체", html: "감쇠 1 dB는 두 대역 모두 SNR을 1 dB 깎습니다. 그런데도 5 GHz가 더 민감해 보이는 이유는 셋입니다. ①<b>출발선이 왼쪽에 있다</b>: 위 표의 손실·잡음·출력·NF 차이가 쌓여 같은 감쇠값에서 5 GHz의 SNR이 처음부터 10 dB 이상 낮을 수 있습니다. ②<b>떨어질 높이가 크다</b>: 최고 처리량이 몇 배 높으니 MCS 한 계단의 낙차(Mbps)도 몇 배 크고, 2스트림→1스트림·80→40 MHz 강등처럼 한 번에 절반으로 떨어지는 계단이 있습니다. ③<b>TCP가 증폭한다</b>: 속도가 높을수록 재전송으로 RTT가 늘 때 윈도우 한계가 먼저 걸립니다. 그래서 <b>Mbps가 아니라 '최고값 대비 비율'이나 'MCS'로 그리면</b> 두 대역의 기울기는 훨씬 비슷해 보이는 경우가 많습니다." },
+              { t: "note", kind: "warn", title: "흔한 오해 — \"감쇠기 눈금이 같으면 두 대역의 수신 세기도 같다?\"", html: "감쇠기 눈금은 '추가로 더한 손실'일 뿐, 총 경로 손실이 아닙니다. 케이블·커넥터·감쇠기 자체의 삽입 손실과 박스 내부 결합 손실은 대역마다 다르고, 감쇠기의 평탄도도 6 GHz 부근에서 나빠질 수 있습니다. 두 대역을 비교하려면 <b>대역별로 경로를 교정한 '총 경로 손실'이나 DUT RSSI를 x축</b>으로 써야 합니다. 또 2.4 GHz는 같은 챔버라도 주변 기기 간섭이 섞이기 쉬워, 낮은 감쇠 구간 결과가 흔들릴 수 있습니다." },
+              { t: "note", kind: "tip", title: "현장 노하우 — 공정한 2.4 / 5 GHz 비교 절차", html: "①시험 전 <b>대역별 경로 교정</b>(케이블+감쇠기+커넥터, 가능하면 박스 결합 손실 포함). ②첫 비교는 <b>두 대역 모두 20 MHz · 같은 NSS</b>로 맞춰 대역 자체의 차이만 보기. ③감쇠는 1~2 dB 단계, 단계마다 충분한 시간(예: 수십 초) 측정 후 평균. ④단계마다 <b>RSSI · 잡음 바닥/SNR · MCS · NSS · BW · 재전송률 · TCP와 UDP 처리량 · DL/UL</b>을 함께 기록. ⑤결과는 x축을 '총 경로 손실 또는 RSSI', y축을 '처리량'과 'MCS' 두 장으로 그리기. 이렇게 하면 '5 GHz가 민감하다'는 인상이 출발선 차이인지, 실제로 기울기가 다른 것인지 분리됩니다." },
+            ]
+          },
+          {
+            id: "wifi-tput-interpret",
+            title: "이론치와 실측치 해석 — 기대 처리량 계산과 증상별 원인",
+            blocks: [
+              { t: "p", html: "실측 처리량을 평가하려면 먼저 <b>그 조건에서 기대할 수 있는 값</b>을 계산하고, 실측과의 차이를 단계별로 설명해야 합니다. 기대치는 아래 식의 가장 작은 항입니다." },
+              { t: "note", kind: "info", title: "기대 처리량 식", html: "<b>기대 TCP ≈ min( PHY 속도 × MAC 효율 × (1 − 재전송 비율),  TCP 윈도우 ÷ RTT,  호스트 인터페이스 실효 속도,  CPU 처리 한계 )</b><br>PHY 속도는 MCS·NSS·BW·GI로 계산하고(→ <a href='#wifi-datarate'>데이터율 계산식</a>), MAC 효율은 집성(A-MPDU)이 켜진 Wi-Fi 4~6에서 대략 60~70%로 잡습니다. UDP는 TCP보다 약간 높게 나옵니다." },
+              { t: "table",
+                head: ["조건", "PHY 속도", "× MAC 효율 0.65", "다른 천장의 예", "해석"],
+                rows: [
+                  ["가전 1×1 · 2.4 GHz · 20 MHz · Wi-Fi 4 MCS7 (짧은 GI)", "72.2 Mbps", "약 47 Mbps", "SPI 호스트면 그보다 낮을 수 있음", "실측 40 Mbps대면 정상 범위"],
+                  ["가전 1×1 · 20 MHz · Wi-Fi 6 MCS7", "86.0 Mbps", "약 56 Mbps", "—", ""],
+                  ["가전 1×1 · 20 MHz · Wi-Fi 6 MCS11", "143.4 Mbps", "약 93 Mbps", "—", "가까운 거리 · 높은 SNR에서만"],
+                  ["스마트폰 2×2 · 80 MHz · Wi-Fi 6 MCS11", "1,201 Mbps", "약 780 Mbps", "TCP 64 KB · RTT 5 ms → 약 105 Mbps", "105 Mbps 근처에 붙으면 무선이 아니라 윈도우 한계"],
+                ]
+              },
+              { t: "table",
+                head: ["증상 (RvR 곡선 모양)", "원인 후보", "확인 방법"],
+                rows: [
+                  ["감쇠가 가장 작은(가장 강한) 구간에서 오히려 낮음", "수신기 포화 (RSSI가 약 −20~−30 dBm 이상, 칩별)", "RSSI 확인, 감쇠를 더해 최고점이 어디서 나오는지"],
+                  ["낮은 감쇠 구간이 '평평한 천장'", "TCP 윈도우 · 호스트 인터페이스 · CPU · iperf 설정", "UDP 비교, 윈도우(-w)·병렬(-P) 증가, 호스트 IF 이론 속도와 비교"],
+                  ["일정 간격의 계단식 하락", "MCS 단계 전환 — 정상 동작", "MCS 로그와 계단 위치 대조"],
+                  ["한 번에 절반 가까이 급락", "2스트림 → 1스트림, 또는 채널폭 강등(80 → 40 → 20)", "NSS·BW 로그"],
+                  ["같은 감쇠에서 값이 들쭉날쭉", "rate adaptation 흔들림, 간섭(차폐 불량·주변 AP), 측정 시간 부족", "반복 측정·측정 시간 증가, 스펙트럼으로 간섭 확인"],
+                  ["DL과 UL이 크게 다름", "DUT 송신 출력(UL)과 수신 감도(DL)의 비대칭, AP 쪽 성능", "방향별로 따로 해석, DUT 타겟파워·감도 확인"],
+                  ["RSSI는 좋은데 처리량이 낮음", "간섭·자체 잡음(desense)으로 SNR 낮음, EVM 불량, 재전송 과다", "SNR·재전송률·EVM, 같은 보드의 노이즈원 확인 (→ <a href='#ver-debug-cases'>디버깅 사례</a>)"],
+                  ["특정 감쇠에서 갑자기 0", "연결 끊김 — 감도 한계, 비콘 손실, 재접속", "연결 로그, 그 지점의 RSSI와 MCS0 감도 비교"],
+                ]
+              },
+              { t: "note", kind: "warn", title: "흔한 오해 — \"실측이 PHY 속도의 절반이면 모듈 성능이 나쁘다?\"", html: "PHY 속도는 공중에서 비트가 흐르는 속도이고, Wi-Fi는 원래 프리앰블·ACK·경합 대기 때문에 그만큼 다 쓰지 못합니다. 집성이 켜진 상태에서 PHY의 60~70%가 나오면 정상 범위이고, 그보다 크게 낮을 때 원인을 찾는 것이 맞습니다. 반대로 <b>실측이 이론보다 높게 나왔다면</b> 측정 단위(MB/s와 Mbps 혼동), 협상 조건(실제로는 더 넓은 채널·더 많은 스트림), 압축·캐시 효과를 의심하세요." },
+              { t: "note", kind: "tip", title: "현장 노하우 — 시험 보고서에 남길 것", html: "①시험 구성(박스·케이블·감쇠기 모델)과 <b>대역별 경로 교정값</b> ②DUT·AP 설정(대역·채널·BW·NSS·GI·보안·국가 코드) ③iperf 명령 전체(프로토콜·윈도우·병렬 수·측정 시간) ④단계별 RSSI·SNR·MCS·NSS·BW·재전송률·처리량(DL/UL) 표 ⑤기대 처리량 계산과 실측 비율. 이 다섯 가지가 있으면 다른 사람이 같은 시험을 재현하고, 칩·안테나를 바꾼 뒤의 결과와 공정하게 비교할 수 있습니다." },
+              { t: "note", kind: "info", title: "연결", html: "감도와 잡음 바닥의 원리는 <a href='#rf-rx'>수신 체인·감도·NF</a>, OTA로 보는 수신 성능은 <a href='#ant-ota'>TIS</a>, MCS별 요구 감도는 <a href='#wifi-mcs-table'>MCS 상세</a>, 채널폭과 잡음은 <a href='#wifi-channel-bonding'>본딩 상세</a>를 보세요." },
             ]
           }
         ]
@@ -5514,7 +5715,7 @@ window.KB_CONTENT = {
 })();
 
 /* 자동 생성 — build-standalone.js 가 빌드할 때마다 덮어쓴다. 직접 수정하지 말 것 */
-window.KB_BUILD = {"commit":"717c973","dirty":false,"built":"2026-10-03 01:18"};
+window.KB_BUILD = {"commit":"342bf20","dirty":false,"built":"2026-10-16 18:47"};
 
 /* ============ 무선모듈 HW 지식 베이스 — 렌더러/라우터/검색 ============ */
 (function () {
