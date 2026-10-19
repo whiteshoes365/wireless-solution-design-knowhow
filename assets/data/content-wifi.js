@@ -525,7 +525,93 @@
                   + '<text x="310" y="206" text-anchor="middle" class="fig-sub">RU 분할 → IoT·다수 단말 환경에서 효율↑·지연↓</text>'
                   + '</svg>'
               },
-              { t: "note", kind: "tip", title: "가전·IoT에 OFDMA가 좋은 이유", html: "집 안에 Wi-Fi 기기가 수십 개일 때, OFDMA는 작은 데이터를 보내는 가전들을 <b>한 전송에 묶어</b> 처리해 채널 점유 시간을 줄입니다. 작은 패킷을 자주 보내는 IoT에 특히 유리합니다." },
+              { t: "note", kind: "tip", title: "가전·IoT에 OFDMA가 좋은 이유", html: "집 안에 Wi-Fi 기기가 수십 개일 때, OFDMA는 작은 데이터를 보내는 가전들을 <b>한 전송에 묶어</b> 처리해 채널 점유 시간을 줄입니다. 작은 패킷을 자주 보내는 IoT에 특히 유리합니다. RU 크기·개수·속도와 상향 OFDMA의 HW 요구는 다음 절 <a href='#wifi-ru'>RU 딥다이브</a>에 있습니다." },
+            ]
+          },
+          {
+            id: "wifi-ru",
+            title: "딥다이브 — RU(Resource Unit): 크기·개수·속도·상향 OFDMA와 HW 요구",
+            blocks: [
+              { t: "p", html: "<b>RU(Resource Unit)</b>는 Wi-Fi 6 이후 OFDMA에서 채널을 나누는 단위로, <b>연속된 부반송파(톤) 묶음</b>입니다. 크기는 26·52·106·242·484·996톤으로 정해져 있고, AP는 매 전송마다 어떤 단말에 어떤 RU를 줄지 정합니다. RU를 알면 OFDMA가 왜 IoT에 유리한지, 그리고 <b>상향 OFDMA가 단말 HW에 무엇을 요구하는지</b>(출력 정확도·주파수 정렬)가 보입니다." },
+              { t: "note", kind: "info", title: "비유로 먼저", html: "20 MHz 채널을 <b>242칸짜리 주차장</b>이라고 하면, OFDM은 차 한 대가 주차장 전체를 빌리는 방식이고 OFDMA는 칸을 <b>소형(26칸)·중형(52칸)·대형(106칸) 구역</b>으로 나눠 여러 차를 동시에 세우는 방식입니다. 택배 한 상자를 실은 경차(센서의 작은 패킷)에게 주차장 전체를 내줄 필요가 없으니, 같은 시간에 훨씬 많은 차가 들고 날 수 있습니다." },
+              { t: "fig",
+                caption: "20 MHz 채널(242톤)을 RU로 나누는 방법. 26톤 RU는 최대 9개, 52톤은 4개, 106톤은 2개다. 52톤·106톤으로 나눌 때는 가운데 26톤 RU 하나가 남아 함께 쓸 수 있다. AP는 전송마다 이 중 하나의 조합을 골라 단말들에게 배정한다.",
+                svg: '<svg viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="20MHz 채널의 RU 분할 26 52 106 242톤">'
+                  + (function(){
+                      var o='';var X0=110,W=460;var u=W/9;
+                      function blk(x,w,y,col,lbl,cls){o+='<rect class="'+(cls||'')+'" x="'+x.toFixed(1)+'" y="'+y+'" width="'+(w-3).toFixed(1)+'" height="30" rx="4" fill="'+col+'" fill-opacity="0.22" stroke="'+col+'" stroke-opacity="0.8"/>';if(lbl)o+='<text x="'+(x+(w-3)/2).toFixed(1)+'" y="'+(y+20)+'" text-anchor="middle" class="fig-sub" fill="'+col+'">'+lbl+'</text>';}
+                      var rows=[['242톤 ×1',36],['106톤 ×2',76],['52톤 ×4',116],['26톤 ×9',156]];
+                      rows.forEach(function(r){o+='<text x="100" y="'+(r[1]+20)+'" text-anchor="end" class="fig-label">'+r[0]+'</text>';});
+                      blk(X0,W,36,'#a371f7','RU242 = 20 MHz 전체');
+                      blk(X0,4*u,76,'#4aa3ff','RU106');blk(X0+4*u,u,76,'#e3b341','26','kb-pulse');blk(X0+5*u,4*u,76,'#4aa3ff','RU106');
+                      [0,2].forEach(function(i){blk(X0+i*u,2*u,116,'#2ea043','RU52');});blk(X0+4*u,u,116,'#e3b341','26','kb-pulse');[5,7].forEach(function(i){blk(X0+i*u,2*u,116,'#2ea043','RU52');});
+                      for(var i=0;i<9;i++){blk(X0+i*u,u,156,'#e3b341','26',i===4?'kb-pulse':'');}
+                      o+='<text x="'+(X0+4.5*u).toFixed(1)+'" y="206" text-anchor="middle" class="fig-sub" fill="#e3b341">가운데 26톤 RU는 52·106 분할에서도 남는다</text>';
+                      o+='<text x="'+X0+'" y="24" class="fig-sub">← 낮은 주파수</text><text x="'+(X0+W)+'" y="24" text-anchor="end" class="fig-sub">높은 주파수 →</text>';
+                      o+='<text x="310" y="226" text-anchor="middle" class="fig-sub">26톤 RU 하나 ≈ 2 MHz (26 × 78.125 kHz)</text>';
+                      return o;
+                    })()
+                  + '</svg>'
+              },
+              { t: "table",
+                head: ["RU 크기", "데이터 부반송파", "대략 폭", "20 MHz", "40 MHz", "80 MHz", "160 MHz"],
+                rows: [
+                  ["26톤", "24", "약 2 MHz", "9", "18", "37", "74"],
+                  ["52톤", "48", "약 4 MHz", "4", "8", "16", "32"],
+                  ["106톤", "102", "약 8 MHz", "2", "4", "8", "16"],
+                  ["242톤", "234", "20 MHz", "1", "2", "4", "8"],
+                  ["484톤", "468", "40 MHz", "—", "1", "2", "4"],
+                  ["996톤", "980", "80 MHz", "—", "—", "1", "2"],
+                  ["2×996톤", "1,960", "160 MHz", "—", "—", "—", "1"],
+                ]
+              },
+              { t: "p", html: "<b>표 기준</b>: 채널폭별 칸의 숫자는 그 크기 RU만으로 나눌 때의 최대 개수입니다. 한 전송 안에서 서로 다른 크기를 섞어 배정할 수 있습니다(예: 20 MHz를 106 + 26 + 52 + 52로). 한 채널에 동시에 서비스할 수 있는 단말 수의 상한은 26톤 RU 개수(20 MHz에서 9대)입니다." },
+              { t: "h", text: "RU 하나로 낼 수 있는 속도 (1 스트림 · GI 0.8 µs)" },
+              { t: "table",
+                head: ["RU", "MCS0 (BPSK 1/2)", "MCS7 (64-QAM 5/6)", "MCS11 (1024-QAM 5/6)", "같은 총 출력일 때 Hz당 전력 (242톤 대비)"],
+                rows: [
+                  ["26톤", "0.9 Mbps", "8.8 Mbps", "14.7 Mbps", "<b>+9.7 dB</b>"],
+                  ["52톤", "1.8 Mbps", "17.6 Mbps", "29.4 Mbps", "+6.7 dB"],
+                  ["106톤", "3.8 Mbps", "37.5 Mbps", "62.5 Mbps", "+3.6 dB"],
+                  ["242톤 (= 20 MHz)", "8.6 Mbps", "86.0 Mbps", "143.4 Mbps", "기준"],
+                ]
+              },
+              { t: "p", html: "속도는 데이터 부반송파 × 부반송파당 비트 × 부호율 ÷ 13.6 µs로 계산했습니다(→ <a href='#wifi-datarate'>데이터율 계산식</a>). 242톤 행은 <a href='#wifi-mcs-table'>MCS 표</a>의 20 MHz 열과 같습니다. 작은 RU에는 같은 데이터를 두 부반송파에 나눠 실어 잡음에 더 강하게 만드는 <b>DCM(Dual Carrier Modulation)</b>을 쓸 수 있습니다(속도는 절반, 26톤 MCS0 + DCM은 약 0.44 Mbps)." },
+              { t: "note", kind: "why", title: "작은 RU가 상향 링크의 거리를 늘리는 이유", html: "단말이 같은 총 출력을 20 MHz 전체가 아니라 26톤 RU(약 2 MHz)에만 실으면, <b>Hz당 전력이 약 9.7 dB 높아지고</b> AP가 그 RU에서 받는 잡음 대역도 그만큼 좁습니다. 출력이 약한 단말(배터리 센서, 금속 함체 속 가전 모듈)이 셀 가장자리에서 <b>상향 링크를 유지</b>하기 쉬워지는 이유입니다. 다만 전력 밀도(dBm/MHz)로 출력을 제한하는 규제가 있는 대역에서는 이 이점이 그 한도에 막힐 수 있습니다(→ <a href='#wifi-channel-bonding'>총량 vs 밀도 규제</a>)." },
+              { t: "h", text: "상향(UL) OFDMA — AP가 지휘하는 동시 송신" },
+              { t: "fig",
+                caption: "상향 OFDMA의 한 사이클. AP가 트리거 프레임으로 각 단말의 RU·MCS·목표 수신 세기를 지정하면, 단말들은 정해진 짧은 간격(SIFS) 뒤에 동시에 각자의 RU로 송신한다(HE TB PPDU). AP는 여러 단말의 확인 응답을 한 번에 돌려준다(Multi-STA BlockAck). 여러 신호가 AP에서 한 패킷처럼 맞물려야 하므로, 단말은 시간·주파수·출력을 AP에 맞춰 보정해야 한다.",
+                svg: '<svg viewBox="0 0 620 230" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="상향 OFDMA 트리거 프레임과 동시 송신 시퀀스">'
+                  + '<line x1="40" y1="195" x2="590" y2="195" stroke="#7a8694" stroke-width="1.5"/><text x="586" y="214" text-anchor="end" class="fig-sub">시간 →</text>'
+                  + '<line x1="40" y1="195" x2="40" y2="30" stroke="#7a8694" stroke-width="1.5"/><text x="34" y="40" text-anchor="end" class="fig-sub">주파수</text>'
+                  + '<rect class="kb-pulse" x="55" y="50" width="110" height="130" rx="5" fill="#e3b341" fill-opacity="0.22" stroke="#e3b341"/>'
+                  + '<text x="110" y="108" text-anchor="middle" class="fig-label" style="fill:#e3b341">트리거</text><text x="110" y="128" text-anchor="middle" class="fig-sub">AP → 전체</text>'
+                  + '<text x="110" y="148" text-anchor="middle" class="fig-sub">RU·MCS·목표 RSSI</text>'
+                  + '<text x="193" y="44" text-anchor="middle" class="fig-sub">SIFS 16 µs</text>'
+                  + (function(){
+                      var o='';var s=[['단말 A · RU106','#4aa3ff',50,52],['단말 B · RU26','#2ea043',106,22],['단말 C · RU52','#a371f7',132,48]];
+                      s.forEach(function(r,i){o+='<rect class="kb-pulse kb-d'+(i*2+1)+'" x="220" y="'+r[2]+'" width="210" height="'+(r[3]-4)+'" rx="4" fill="'+r[1]+'" fill-opacity="0.25" stroke="'+r[1]+'"/><text x="325" y="'+(r[2]+(r[3]-4)/2+4)+'" text-anchor="middle" class="fig-sub" fill="'+r[1]+'">'+r[0]+'</text>';});
+                      return o;
+                    })()
+                  + '<text x="325" y="44" text-anchor="middle" class="fig-sub">동시 송신 (HE TB PPDU)</text>'
+                  + '<rect x="455" y="50" width="120" height="130" rx="5" fill="#e5534b" fill-opacity="0.16" stroke="#e5534b"/>'
+                  + '<text x="515" y="108" text-anchor="middle" class="fig-label" style="fill:#e5534b">Multi-STA</text><text x="515" y="128" text-anchor="middle" class="fig-sub">BlockAck</text><text x="515" y="148" text-anchor="middle" class="fig-sub">AP → 전체</text>'
+                  + '<text x="315" y="224" text-anchor="middle" class="fig-sub">단말은 경합 없이 AP가 정해 준 시각·RU에서만 송신 — 다수 센서의 동시 보고에 유리</text>'
+                  + '</svg>'
+              },
+              { t: "table",
+                head: ["상향 OFDMA가 단말에 요구하는 것", "규격 요구 (802.11ax, 대표값)", "왜 필요한가", "관련 HW"],
+                rows: [
+                  ["주파수 정렬", "트리거 프레임 기준으로 보정한 뒤 잔류 주파수 오차 <b>350 Hz 이내</b>", "남의 RU와 부반송파가 겹치지 않으려면 — 350 Hz는 부반송파 간격(78.125 kHz)의 약 0.45%, 5.5 GHz에서 약 0.06 ppm", "크리스탈·PLL — 오차를 추정해 미리 보정(사전 보상)하는 능력과 패킷 중 드리프트 (→ <a href='#ckt-xtal-select'>XTAL</a>, <a href='#ckt-clock'>클럭</a>)"],
+                  ["시간 정렬", "트리거 수신 후 SIFS 뒤 송신 시작 오차 <b>±0.4 µs 이내</b>", "여러 단말의 심볼이 AP에서 같은 시각에 도착해야 한 패킷처럼 복조됨", "송수신 전환 시간·디지털 타이밍"],
+                  ["송신 출력 제어", "AP가 정한 목표 수신 세기에 맞춰 출력 설정 — 출력 정확도 등급 Class A ±3 dB / Class B ±9 dB", "가까운 단말이 너무 세면 그 누설이 먼 단말의 RU를 덮음(near-far)", "<b>출력 캘리브레이션</b>·PA 선형성 (→ <a href='#ver-cal'>타겟파워·캘리브레이션</a>)"],
+                  ["경로 손실 추정", "AP 송신 출력(트리거에 포함) − 단말이 측정한 RSSI = 경로 손실", "단말이 '얼마나 세게 보내야 AP에서 목표 세기가 되는지' 계산", "<b>RSSI 정확도</b> (→ <a href='#wifi-rssi'>RSSI란 무엇인가</a>)"],
+                ]
+              },
+              { t: "note", kind: "why", title: "near-far 문제 — 왜 출력 정확도가 OFDMA의 핵심인가", html: "OFDM에서는 한 번에 한 단말만 보내므로 세게 보내도 문제가 없었습니다. 상향 OFDMA는 여러 단말이 <b>같은 순간</b> 바로 옆 RU에서 보냅니다. AP 가까이 있는 단말이 −40 dBm으로, 먼 단말이 −75 dBm으로 도착하면 35 dB 차이가 나고, 센 단말의 스펙트럼 누설(인밴드 방출)이 약한 단말의 RU를 덮어 버립니다. 그래서 AP는 모든 단말이 비슷한 세기(목표 RSSI)로 도착하도록 출력을 지시하고, 단말은 <b>자기 RSSI 측정과 송신 출력이 정확해야</b> 그 지시를 지킬 수 있습니다. W6의 RSSI 정확도 문제가 여기서 처리량 문제로 바뀌는 것입니다." },
+              { t: "note", kind: "warn", title: "흔한 오해 — \"OFDMA를 켜면 내 기기의 처리량이 빨라진다?\"", html: "OFDMA는 <b>한 단말의 최고 속도를 올리는 기술이 아닙니다</b>. 오히려 RU를 나눠 받으면 그 단말이 쓰는 폭은 좁아집니다. 이득은 <b>여러 단말이 작은 패킷을 자주 보낼 때</b> 경합·대기 시간이 줄어 전체 효율과 지연이 좋아지는 것입니다. 그래서 단말 하나로 iperf를 돌리는 처리량 시험(→ <a href='#wifi-tput-factors'>처리량 시험</a>)에서는 보통 AP가 채널 전체를 한 단말에 주므로 OFDMA 효과가 나타나지 않습니다. OFDMA의 효과는 <b>다수 단말 · 작은 패킷 · 지연</b>으로 측정해야 보입니다." },
+              { t: "note", kind: "tip", title: "현장 노하우 — 가전 Wi-Fi 6 모듈에서 확인할 것", html: "①<b>20 MHz 전용 단말</b>: Wi-Fi 6는 IoT를 위해 20 MHz만 지원하는 단말을 허용합니다. AP는 이런 단말에 그 단말이 있는 20 MHz 안의 RU만 배정합니다. 가전 모듈의 대부분이 여기에 해당합니다. ②<b>하향·상향 OFDMA 지원 여부를 따로 확인</b>: 칩과 AP에 따라 하향만 지원하거나 상향은 기본으로 꺼져 있는 경우가 있습니다. ③상향 OFDMA를 쓴다면 <b>출력 캘리브레이션과 RSSI 보정</b>이 인증·양산 항목에 들어가야 합니다(트리거 기반 송신의 출력·주파수 오차 시험). ④Wi-Fi 7은 한 단말에 RU 여러 개를 묶어 주는 <b>MRU(Multi-RU)</b>와 막힌 20 MHz를 빼고 쓰는 <a href='#wifi-channel-bonding'>펑처링</a>을 함께 써서 넓은 채널을 더 유연하게 나눕니다." },
+              { t: "note", kind: "info", title: "연결", html: "OFDMA 개념은 바로 앞 절 <a href='#wifi-ofdma'>OFDM vs OFDMA</a>, 부반송파 간격 78.125 kHz의 의미는 <a href='#wifi-spec-sheet'>세대별 PHY 장표</a>, RSSI와 출력 정확도는 <a href='#wifi-rssi'>RSSI</a>와 <a href='#ver-cal'>타겟파워·캘리브레이션</a>을 보세요." },
             ]
           },
           {
