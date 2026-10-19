@@ -1,2 +1,2 @@
 /* 자동 생성 — build-standalone.js 가 빌드할 때마다 덮어쓴다. 직접 수정하지 말 것 */
-window.KB_BUILD = {"commit":"342bf20","dirty":false,"built":"2026-10-16 18:47"};
+window.KB_BUILD = {"commit":"6b3d504","dirty":false,"built":"2026-10-20 00:30"};
